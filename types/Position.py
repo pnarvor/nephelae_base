@@ -4,7 +4,6 @@ class Position(object):
 
     """Position
     Simple type for 4D space-time vector manipulation
-    (Check if better way)
     """
 
     def __init__(self, x=0.0, y=0.0, z=0.0, t=0.0):
