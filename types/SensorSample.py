@@ -18,7 +18,7 @@ class SensorSample:
     def __init__(self, variableName='noname', timeStamp=0,
                        position=Position(), data=[]):
 
-        self.variableName = name
+        self.variableName = variableName
         self.timeStamp    = timeStamp
         self.position     = position
         self.data         = data
