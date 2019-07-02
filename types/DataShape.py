@@ -43,7 +43,7 @@ class Shape4D:
 
     """Shape4D
 
-    Helper type to hold dimension of a (t,x,y,z) data cube)
+    Helper type to hold dimensions of a (t,x,y,z) data cube)
     """
 
     def __init__(self, t=DimensionShape(1,0.0,0.0),
