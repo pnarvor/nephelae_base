@@ -48,7 +48,7 @@ class Position(object):
             return self.data[2]
         if name == 'z':
             return self.data[3]
-        raise AttributeError("Position has no attribute '" + name + "'")
+        raise ValueError("Position has no attribute '" + name + "'")
 
     def __setattr__(self, name, value):
         if name == 't':
@@ -60,7 +60,7 @@ class Position(object):
         elif name == 'z':
             self.data[3] = value
         else:
-            raise AttributeError("'Position' object has no attribute '" + name + "'")
+            raise ValueError("'Position' object has no attribute '" + name + "'")
 
 
 
