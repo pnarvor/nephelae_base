@@ -15,20 +15,22 @@ class SensorSample:
         data          (undefined): Sample data type is undefined for now but an array of float is advised.
     """
 
-    def __init__(self, variableName='noname', timeStamp=0,
+    def __init__(self, variableName='noname', producer='unknown', timeStamp=0,
                        position=Position(), data=[]):
 
         self.variableName = variableName
+        self.producer     = producer
         self.timeStamp    = timeStamp
         self.position     = position
         self.data         = data
 
     def __str__(self):
         return ("SensorSample:"+
-                "\n  variable name : "  + str(self.variableName) +
-                "\n  timeStamp     : "  + str(self.timeStamp) +
-                "\n  position      : "  + str(self.position) +
-                "\n  data          :\n" + str(self.data) + "\n")
+                "\n  variable name : " + str(self.variableName) +
+                "\n  producer      : " + str(self.producer) +
+                "\n  timeStamp     : " + str(self.timeStamp) +
+                "\n  position      : " + str(self.position) +
+                "\n  data          : " + str(self.data) + "\n")
 
 
 
