@@ -18,8 +18,10 @@ class Position(object):
         else:
             super().__setattr__('data', np.array([float(t),float(x),float(y),float(z)]))
 
+
     def __repr__(self):
         return "Position (t,x,y,z)"
+
 
     def __str__(self):
         return ('(t: ' + str(self.t) +
@@ -27,17 +29,21 @@ class Position(object):
                ', y: ' + str(self.y) +
                ', z: ' + str(self.z) + ')')
 
+
     def __add__(self, other):
         return Position(self.data + other.data)
-    
+
+
     def __sub__(self, other):
         return Position(self.data - other.data)
+
 
     def __mul__(self, other):
         if type(other) == Position:
             return np.dot(self.data, other.data)
         else:
             return Position(self.data*other)
+
 
     def __getattr__(self, name):
         if name == 't':
@@ -49,6 +55,7 @@ class Position(object):
         if name == 'z':
             return self.data[3]
         raise ValueError("Position has no attribute '" + name + "'")
+
 
     def __setattr__(self, name, value):
         if name == 't':
@@ -62,6 +69,13 @@ class Position(object):
         else:
             raise ValueError("'Position' object has no attribute '" + name + "'")
 
+
+    def __getstate__(self):
+        return self.data
+
+
+    def __setstate__(self, data):
+        super().__setattr__('data', data)
 
 
 
