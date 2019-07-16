@@ -1,5 +1,7 @@
-from .Position     import Position
-from .SensorSample import SensorSample
+from .Position      import Position
+from .SensorSample  import SensorSample
+from .Gps           import Gps
+from .NavigationRef import NavigationRef
 
 from .DataShape    import DimensionShape
 from .DataShape    import Shape4D
