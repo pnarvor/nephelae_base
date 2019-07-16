@@ -3,9 +3,10 @@ from .NavigationRef import NavigationRef
 
 class Gps:
 
-    def __init__(self, position, mode=3, course=0.0, speed=0.0, climb=0.0,
-                       week=0, itow=0, utm_zone=31, gps_nb_err=0):
-
+    def __init__(self, uavId, position, mode=3, course=0.0, speed=0.0,
+                 climb=0.0, week=0, itow=0, utm_zone=31, gps_nb_err=0):
+        
+        self.uavId    = uavId
         self.position = position
 
         # For compatibility with nephelae_paparazzi.Gps type
@@ -17,6 +18,10 @@ class Gps:
         self.itow       = itow
         self.utm_zone   = utm_zone
         self.gps_nb_err = gps_nb_err
+
+
+    def __str__(self):
+        return "Gps " + self.uavId + " : " + str(self.position)
 
 
     def __getattr__(self, name):
