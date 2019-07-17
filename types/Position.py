@@ -45,6 +45,14 @@ class Position(object):
             return Position(self.data*other)
 
 
+    def __eq__(self, other):
+        return np.array_equal(self.data, other.data)
+
+
+    def __ne__(self, other):
+        return not np.array_equal(self.data, other.data)
+
+
     def __getattr__(self, name):
         if name == 't':
             return self.data[0]
