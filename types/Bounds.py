@@ -8,15 +8,15 @@ class Bounds:
     helper update member functions
     """
 
-    def __init__(self, value=None):
-        self.min = value
-        self.max = value
+    def __init__(self, minValue=None, maxValue=None):
+        self.min = minValue
+        self.max = maxValue
     
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
-        return "min: "+str(self.min) + ", max: "+str(self.max)
+        return "bounds : [min: "+str(self.min) + ", max: "+str(self.max)+"]"
 
     def update(self, value):
         if self.min is None:
