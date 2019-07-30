@@ -1,4 +1,4 @@
-
+import threading
 
 class ObserverSubject:
 
@@ -16,6 +16,7 @@ class ObserverSubject:
         self.observerCallbacks = {}
         setattr(self, notifyMethodName,
                 lambda *args, **kwargs: self.notify(*args, **kwargs))
+        self.lock = threading.Lock()
  
 
     def check_notifiable(self, other):
@@ -29,25 +30,28 @@ class ObserverSubject:
 
     def attach_observer(self, observer):
 
-        if not self.check_notifiable(observer):
-            raise AttributeError("Observer is not '" + self.notifyMethodName +
-                                 "' notifiable")
-        self.observerCallbacks[id(observer)] = getattr(observer,
-                                                       self.notifyMethodName)
+        with self.lock:
+            if not self.check_notifiable(observer):
+                raise AttributeError("Observer is not '" + self.notifyMethodName +
+                                     "' notifiable")
+            self.observerCallbacks[id(observer)] = getattr(observer,
+                                                           self.notifyMethodName)
 
 
     def detach_observer(self, observer):
 
-        try:
-            del self.observerCallbacks[id(observer)]
-        except KeyError as e:
-            raise KeyError("Observer not found :", e)
+        with self.lock:
+            try:
+                del self.observerCallbacks[id(observer)]
+            except KeyError as e:
+                raise KeyError("Observer not found :", e)
 
 
     def notify(self, *args, **kwargs):
 
-        for callback in self.observerCallbacks.values():
-            callback(*args, **kwargs)
+        with self.lock:
+            for callback in self.observerCallbacks.values():
+                callback(*args, **kwargs)
             
 
 class MultiObserverSubject:
