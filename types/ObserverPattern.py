@@ -65,23 +65,26 @@ class MultiObserverSubject:
     def __init__(self, notificationMethods=[]):
 
         self.observerSubjects = {}
+        self.lock = threading.Lock()
         for notifMethod in notificationMethods:
             self.add_notification_method(notifMethod)
 
 
     def add_notification_method(self, notifMethod):
 
-        if notifMethod in self.observerSubjects.keys():
-            return
-        self.observerSubjects[notifMethod] = ObserverSubject(notifMethod)
-        setattr(self, notifMethod,
-                lambda *args,**kwargs: self.observerSubjects[notifMethod].notify(*args,**kwargs))
+        with self.lock:
+            if notifMethod in self.observerSubjects.keys():
+                return
+            self.observerSubjects[notifMethod] = ObserverSubject(notifMethod)
+            setattr(self, notifMethod,
+                    lambda *args,**kwargs: self.observerSubjects[notifMethod].notify(*args,**kwargs))
 
 
     def attach_observer(self, observer, notifMethodName='notify'):
 
         if isinstance(notifMethodName, str):
-            self.observerSubjects[notifMethodName].attach_observer(observer)
+            with self.lock:
+                self.observerSubjects[notifMethodName].attach_observer(observer)
         elif isinstance(notifMethodName, list):
             for notifMethod in notifMethodName:
                 self.attach_observer(observer, notifMethod)
@@ -93,7 +96,8 @@ class MultiObserverSubject:
     def detach_observer(self, observer, notifMethodName=None):
 
         if isinstance(notifMethodName, str):
-            self.observerSubjects[notifMethodName].detach_observer(observer)
+            with self.lock:
+                self.observerSubjects[notifMethodName].detach_observer(observer)
         elif isinstance(notifMethodName, list):
             for notifMethod in notifMethodName:
                 self.detach_observer(observer, notifMethod)
