@@ -15,7 +15,7 @@ class ObserverSubject:
         self.notifyMethodName = notifyMethodName
         self.observerCallbacks = {}
         setattr(self, notifyMethodName,
-                lambda *args, **kwargs: self.notify(*args, **kwargs))
+                lambda *args, **kwargs: self.do_notify(*args, **kwargs))
         self.lock = threading.Lock()
  
 
@@ -47,7 +47,7 @@ class ObserverSubject:
                 raise KeyError("Observer not found :", e)
 
 
-    def notify(self, *args, **kwargs):
+    def do_notify(self, *args, **kwargs):
 
         with self.lock:
             for callback in self.observerCallbacks.values():
@@ -77,7 +77,7 @@ class MultiObserverSubject:
                 return
             self.observerSubjects[notifMethod] = ObserverSubject(notifMethod)
             setattr(self, notifMethod,
-                    lambda *args,**kwargs: self.observerSubjects[notifMethod].notify(*args,**kwargs))
+                    lambda *args,**kwargs: self.observerSubjects[notifMethod].do_notify(*args,**kwargs))
 
 
     def attach_observer(self, observer, notifMethodName='notify'):
