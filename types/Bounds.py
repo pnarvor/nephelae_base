@@ -8,6 +8,21 @@ class Bounds:
     helper update member functions
     """
 
+    def from_array(array):
+        if len(array.shape) == 0:
+            return None
+        elif len(array.shape) == 1:
+            res = Bounds()
+            for v in array:
+                res.update(v)
+            return res
+        else:
+            res = []
+            for l in array:
+                res.append(Bounds.from_array(l))
+            return res
+        
+
     def __init__(self, minValue=None, maxValue=None):
         self.min = minValue
         self.max = maxValue

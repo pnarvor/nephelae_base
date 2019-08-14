@@ -85,5 +85,7 @@ class Position(object):
     def __setstate__(self, data):
         super().__setattr__('data', data)
 
+    def to_list(self):
+        return list(self.data)
 
 
