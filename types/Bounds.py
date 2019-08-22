@@ -48,4 +48,8 @@ class Bounds:
         self.max = None
 
 
+    def span(self):
+        return self.max - self.min
+
+
 
