@@ -9,9 +9,9 @@ from   matplotlib import animation
 import time
 
 from netCDF4 import MFDataset
-from nephelae_simulation.mesonh_interface import MesoNHVariable
-from nephelae_base.types import Position
-from nephelae_base.types import Bounds
+from nephelae_mesonh import MesoNHVariable
+from nephelae.types import Position
+from nephelae.types import Bounds
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process import kernels as gpk
@@ -158,8 +158,8 @@ rctValues = rctValues + noise
 # fig, axes = plt.subplots(1,1)
 # axes.plot(p[:,0], np.array(rctValues))
 
-# profiling = False
-profiling = True
+profiling = False
+# profiling = True
 if not profiling:
     fig, axes = plt.subplots(3,1,sharex=True,sharey=True)
 simTime = p0.t

@@ -14,16 +14,16 @@ import time
 
 
 from netCDF4 import MFDataset
-from nephelae_simulation.mesonh_interface import MesoNHVariable
-from nephelae_base.types import Position
-from nephelae_base.types import Bounds
-from nephelae_base.types import Gps
-from nephelae_base.types import SensorSample
+from nephelae_mesonh import MesoNHVariable
+from nephelae.types  import Position
+from nephelae.types  import Bounds
+from nephelae.types  import Gps
+from nephelae.types  import SensorSample
 
-from nephelae_mapping.gprmapping import GprPredictor
-from nephelae_mapping.gprmapping import WindKernel
-from nephelae_mapping.gprmapping import WindMapConstant
-from nephelae_mapping.database   import NephelaeDataServer
+from nephelae.mapping  import GprPredictor
+from nephelae.mapping  import WindKernel
+from nephelae.mapping  import WindMapConstant
+from nephelae.database import NephelaeDataServer
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 
@@ -106,26 +106,26 @@ kernel0 = WindKernel(lengthScales, processVariance, noiseStddev**2, WindMapConst
 noise = noiseStddev*np.random.randn(p.shape[0])
 dtfile = 'output/wind_data03.neph'
 print("Getting mesonh values... ", end='')
-# dtbase = NephelaeDataServer()
-# sys.stdout.flush()
-# for pos,n in zip(p,noise):
-#     dtbase.add_gps(Gps("100", Position(pos[0],pos[1],pos[2],pos[3])))
-#     dtbase.add_sample(SensorSample('RCT', '100', pos[0],
-#         Position(pos[0],pos[1],pos[2],pos[3]),
-#         [rct[pos[0],pos[3],pos[2],pos[1] + n]]))
-#     dtbase.add_sample(SensorSample('Wind', '100', pos[0],
-#         Position(pos[0],pos[1],pos[2],pos[3]),
-#         [ut[pos[0],pos[3],pos[2],pos[1]], vt[pos[0],pos[3],pos[2],pos[1]]]))
-# dtbase.save(dtfile, force=True)
-dtbase = NephelaeDataServer.load(dtfile)
+dtbase = NephelaeDataServer()
+sys.stdout.flush()
+for pos,n in zip(p,noise):
+    dtbase.add_gps(Gps("100", Position(pos[0],pos[1],pos[2],pos[3])))
+    dtbase.add_sample(SensorSample('RCT', '100', pos[0],
+        Position(pos[0],pos[1],pos[2],pos[3]),
+        [rct[pos[0],pos[3],pos[2],pos[1] + n]]))
+    dtbase.add_sample(SensorSample('Wind', '100', pos[0],
+        Position(pos[0],pos[1],pos[2],pos[3]),
+        [ut[pos[0],pos[3],pos[2],pos[1]], vt[pos[0],pos[3],pos[2],pos[1]]]))
+dtbase.save(dtfile, force=True)
+# dtbase = NephelaeDataServer.load(dtfile)
 print("Done !")
 sys.stdout.flush()
 
 gprMap = GprPredictor('RCT', dtbase, ['RCT'], kernel0)
 
 
-# profiling = False
-profiling = True
+profiling = False
+# profiling = True
 if not profiling:
     fig, axes = plt.subplots(3,1,sharex=True,sharey=True)
 simTime = p0.t
