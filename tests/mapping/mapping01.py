@@ -1,13 +1,10 @@
 #! /usr/bin/python3
 
-import sys
-sys.path.append('../../')
 import numpy as np
 import matplotlib.pyplot as plt
 from   matplotlib import animation
 import time
 
-# from nephelae_mapping.gprmapping import GprPredictor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process import kernels as gpk
 
