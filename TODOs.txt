@@ -1,0 +1,1 @@
+Make proper unit tests for database and mapping which do not depend on mesonh and paparazzi (or make a example database before hand ?)
