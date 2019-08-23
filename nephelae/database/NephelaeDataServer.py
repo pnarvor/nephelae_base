@@ -1,15 +1,13 @@
 import threading
 import time
 
-from nephelae_base.types import NavigationRef
-from nephelae_base.types import Position
-from nephelae_base.types import SensorSample
-from nephelae_base.types import MultiObserverSubject
+from nephelae.types import NavigationRef
+from nephelae.types import Position
+from nephelae.types import SensorSample
+from nephelae.types import MultiObserverSubject
 
 from .SpatializedDatabase import SpatializedDatabase
 from .SpatializedDatabase import SpbEntry
-
-# from nephelae_base.types import ObserverSubject
 
 
 class NephelaeDataServer(SpatializedDatabase):

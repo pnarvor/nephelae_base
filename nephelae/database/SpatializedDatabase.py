@@ -9,7 +9,7 @@ import pickle
 import os
 import threading
 
-from nephelae_base.types import Bounds
+from nephelae.types import Bounds
 
 class SpbEntry:
 
