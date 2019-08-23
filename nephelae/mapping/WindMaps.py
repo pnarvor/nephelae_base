@@ -1,6 +1,6 @@
 import numpy as np
 
-from nephelae_base.types import Bounds
+from nephelae.types import Bounds
 
 from .MapInterface import MapInterface
 

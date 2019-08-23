@@ -2,8 +2,8 @@
 import abc
 import numpy as np
 
-from nephelae_simulation.mesonh_interface import ScaledArray
-from nephelae_simulation.mesonh_interface import DimensionHelper
+from nephelae.array import ScaledArray
+from nephelae.array import DimensionHelper
 
 class MapInterface(abc.ABC):
 

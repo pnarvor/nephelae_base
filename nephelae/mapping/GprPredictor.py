@@ -1,7 +1,7 @@
 import numpy as np
-
-from nephelae_base.types import Bounds
 from sklearn.gaussian_process import GaussianProcessRegressor
+
+from nephelae.types import Bounds
 
 from .MapInterface import MapInterface
 
