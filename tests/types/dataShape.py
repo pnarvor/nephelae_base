@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../../')
 
-import nephelae_base.types as ntype
+import nephelae.types as ntype
 
 shape = ntype.Shape4D(
     ntype.DimensionShape(2, 0.0, 1.0),

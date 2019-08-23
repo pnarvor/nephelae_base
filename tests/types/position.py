@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../../')
 
-import nephelae_base.types as ntype
+import nephelae.types as ntype
 
 pos0 = ntype.Position(0,1,2,3)
 print(pos0)

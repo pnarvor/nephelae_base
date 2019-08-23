@@ -3,8 +3,8 @@
 import sys
 sys.path.append('../../')
 
-from nephelae_base.types import ObserverSubject
-from nephelae_base.types import MultiObserverSubject
+from nephelae.types import ObserverSubject
+from nephelae.types import MultiObserverSubject
 
 class Observer1:
 

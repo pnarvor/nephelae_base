@@ -3,9 +3,9 @@
 import sys
 sys.path.append('../../')
 
-from nephelae_base.types import Position
-from nephelae_base.types import Gps
-from nephelae_base.types import NavigationRef
+from nephelae.types import Position
+from nephelae.types import Gps
+from nephelae.types import NavigationRef
 
 gps0 = Gps('100', Position(0,0,0,0))
 ref0 = NavigationRef(Position(1.0,1.0,1.0,1.0))
