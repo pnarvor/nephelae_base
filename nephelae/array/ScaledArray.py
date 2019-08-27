@@ -53,7 +53,8 @@ class ScaledArray:
 
         newDims = self.dimHelper.subarray_dimensions(keys)
         if not newDims.dims:
-            return float(newData) # newData contains a singleValue
+            # return float(newData) # newData contains a singleValue
+            return newData # check if no problems
         else:
             return ScaledArray(newData, newDims)
 
