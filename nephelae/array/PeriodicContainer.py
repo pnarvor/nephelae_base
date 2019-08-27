@@ -54,6 +54,13 @@ class PeriodicContainer:
 
     # private functions (for internal use only) #############################
     def __format_keys(self, keys):
+
+        # output of this function is a tuple of slices (no single index)
+
+        keys = list(keys)
+        while len(keys) < len(self.data.shape):
+            keys.append(slice(None))
+
         checkedKeys = []
         for i, key in enumerate(keys):
 
@@ -87,7 +94,7 @@ class PeriodicContainer:
                     if key < 0 or key > self.data.shape[i]:
                         raise Exception("Error : index not inside shape")
                 checkedKeys.append(slice(key, key + 1, None))
-
+        
         return tuple(checkedKeys)
 
     def __compute_read_write_tuples(self, keys):
