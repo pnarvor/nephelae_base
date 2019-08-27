@@ -16,8 +16,9 @@ class PeriodicContainer:
 
         self.data = data
         self.shape = self.data.shape # not used in this class, inly for convenience
-        self.periodicShape = list(self.data.shape) # -1 on periodic dimensions
+        self.periodicShape = list(self.data.shape)
         self.isPeriodic = np.array([False]*len(self.data.shape))
+        # Will set -1 on periodic dimensions
         for i in periodicDimension:
             self.isPeriodic[i] = True
             self.periodicShape[i] = -1
@@ -44,7 +45,11 @@ class PeriodicContainer:
 
         res = np.empty(outputShape)
         for readIndex, writeIndex in zip(readTuples, writeTuples):
-            res[writeIndex] = self.data[list(readIndex)]
+            # print("res shape :",  res[writeIndex].shape)
+            # print("data shape :", self.data[list(readIndex)].shape)
+            # print("read index  :", readIndex)
+            # print("write index :", writeIndex)
+            res[writeIndex] = self.data[readIndex]
         return res
 
     # private functions (for internal use only) #############################
@@ -113,8 +118,8 @@ class PeriodicContainer:
             readTuples.append(rtuples)
             writeTuples.append(wtuples)
         
-        self.readTuples  = PeriodicContainer.__expandTuples(readTuples)
-        self.writeTuples = PeriodicContainer.__expandTuples(writeTuples)
+        self.readTuples  = PeriodicContainer.__remove_unit_slices(PeriodicContainer.__expandTuples(readTuples))
+        self.writeTuples = PeriodicContainer.__remove_unit_slices(PeriodicContainer.__expandTuples(writeTuples))
         
     def __expandTuples(tuples):
         out = []
@@ -129,4 +134,14 @@ class PeriodicContainer:
         return out
 
 
-
+    def __remove_unit_slices(tuples):
+        out = []
+        for keys in tuples:
+            newKeys = []
+            for key in keys:
+                if key.stop - key.start == 1:
+                    newKeys.append(key.start)
+                else:
+                    newKeys.append(key)
+            out.append(tuple(newKeys))
+        return out
