@@ -9,7 +9,7 @@ from   matplotlib import animation
 import time
 
 from netCDF4 import MFDataset
-from nephelae_mesonh import MesoNHVariable
+from nephelae_mesonh import MesonhVariable
 from nephelae.types import Position
 from nephelae.types import Bounds
 
@@ -80,14 +80,14 @@ class WindKernel(gpk.Kernel):
 
 
 mesonhPath = '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
-rct = MesoNHVariable(MFDataset(mesonhPath), 'RCT')
+rct = MesonhVariable(MFDataset(mesonhPath), 'RCT')
 
 # Estimating advective wind
-ut = MesoNHVariable(MFDataset(mesonhPath), 'UT')[50.0, 1100.0,:,:].data.mean()
-vt = MesoNHVariable(MFDataset(mesonhPath), 'VT')[50.0, 1100.0,:,:].data.mean()
+ut = MesonhVariable(MFDataset(mesonhPath), 'UT')[50.0,:,:,1100.0].data.mean()
+vt = MesonhVariable(MFDataset(mesonhPath), 'VT')[50.0,:,:,1100.0].data.mean()
 print("Advective wind :", [ut, vt])
 
-rctSlice = rct[240,1100,:,:].data
+rctSlice = rct[240,:,:,1100].data
 print("Variance : ", (rctSlice**2).mean())
 
 t = np.linspace(0,300.0,300)
@@ -126,10 +126,11 @@ p[:,1:3] = p[:,1:3] + (t - tStart).reshape([len(t), 1]) @ v0.reshape([1,2])
 #     np.linspace(rct.bounds[2][0], rct.bounds[2][-1], rct.shape[2]))
 b = rct.bounds
 yBounds = [min(p[:,2]), max(p[:,2])]
-tmp = rct[p0.t,p0.z,yBounds[0]:yBounds[1],:]
+tmp = rct[p0.t,:,yBounds[0]:yBounds[1],p0.z]
 X0,Y0 = np.meshgrid(
+    np.linspace(tmp.bounds[0][0], tmp.bounds[0][-1], tmp.shape[0]),
     np.linspace(tmp.bounds[1][0], tmp.bounds[1][-1], tmp.shape[1]),
-    np.linspace(tmp.bounds[0][0], tmp.bounds[0][-1], tmp.shape[0]))
+    indexing='xy')
 xyLocations = np.array([[0]*X0.shape[0]*X0.shape[1], X0.ravel(), Y0.ravel()]).T
 b[2].min = yBounds[0]
 b[2].max = yBounds[1]
@@ -147,7 +148,7 @@ rctValues = []
 print("Getting rct values... ", end='')
 sys.stdout.flush()
 for pos in p:
-    rctValues.append(rct[pos[0],pos[3],pos[2],pos[1]])
+    rctValues.append(rct[pos[0],pos[1],pos[2],pos[3]])
 rctValues = np.array(rctValues)
 print("Done !")
 sys.stdout.flush()
@@ -193,8 +194,8 @@ def do_update(t):
     if not profiling:
         global axes
         axes[0].cla()
-        axes[0].imshow(rct[t,p0.z,yBounds[0]:yBounds[1],:].data, origin='lower',
-                       extent=[b[3].min, b[3].max, b[2].min, b[2].max])
+        axes[0].imshow(rct[t,:,yBounds[0]:yBounds[1],p0.z].data.T, origin='lower',
+                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
         axes[0].set_title("Ground truth")
 
@@ -205,13 +206,13 @@ def do_update(t):
 
         axes[1].cla()
         axes[1].imshow(map0, origin='lower',
-                       extent=[b[3].min, b[3].max, b[2].min, b[2].max])
+                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[1].grid()
         axes[1].set_title("MAP")
 
         axes[2].cla()
         axes[2].imshow(std0**2, origin='lower',
-                       extent=[b[3].min, b[3].max, b[2].min, b[2].max])
+                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[2].grid()
         axes[2].set_title("Variance AP")
 

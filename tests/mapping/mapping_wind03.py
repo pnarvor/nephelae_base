@@ -14,7 +14,7 @@ import time
 
 
 from netCDF4 import MFDataset
-from nephelae_mesonh import MesoNHVariable
+from nephelae_mesonh import MesonhVariable
 from nephelae.types  import Position
 from nephelae.types  import Bounds
 from nephelae.types  import Gps
@@ -68,16 +68,16 @@ def parameters(rct):
     # tmp = rct[p0.t,p0.z,yBounds[0]:yBounds[1],:]
     b[2].min = min(p[:,2])
     b[2].max = max(p[:,2])
-    tmp = rct[p0.t,p0.z,b[2].min:b[2].max,:]
-    b[2].min = tmp.bounds[0][0]
-    b[2].max = tmp.bounds[0][-1]
-    b[3].min = tmp.bounds[1][0]
-    b[3].max = tmp.bounds[1][-1]
+    tmp = rct[p0.t,:,b[2].min:b[2].max,p0.z]
+    b[1].min = tmp.bounds[0][0]
+    b[1].max = tmp.bounds[0][-1]
+    b[2].min = tmp.bounds[1][0]
+    b[2].max = tmp.bounds[1][-1]
     print("Bounds : ", b)
     X0,Y0 = np.meshgrid(
-        np.linspace(tmp.bounds[1][0], tmp.bounds[1][-1], tmp.shape[1]),
         np.linspace(tmp.bounds[0][0], tmp.bounds[0][-1], tmp.shape[0]),
-        copy=False)
+        np.linspace(tmp.bounds[1][0], tmp.bounds[1][-1], tmp.shape[1]),
+        indexing='xy', copy=False)
     # xyLocations = np.array([[0]*X0.shape[0]*X0.shape[1], X0.ravel(), Y0.ravel()]).T
     print(X0.ravel())
     xyLocations = np.array([[0]*X0.shape[0]*X0.shape[1],
@@ -89,9 +89,9 @@ def parameters(rct):
 #########################################################################
 
 mesonhPath = '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
-rct = MesoNHVariable(MFDataset(mesonhPath), 'RCT')
-ut  = MesoNHVariable(MFDataset(mesonhPath), 'UT')
-vt  = MesoNHVariable(MFDataset(mesonhPath), 'VT')
+rct = MesonhVariable(MFDataset(mesonhPath), 'RCT')
+ut  = MesonhVariable(MFDataset(mesonhPath), 'UT')
+vt  = MesonhVariable(MFDataset(mesonhPath), 'VT')
 
 t,p0,p,b,xyLocations,v0,mapShape,tStart,tEnd = parameters(rct)
 
@@ -106,18 +106,18 @@ kernel0 = WindKernel(lengthScales, processVariance, noiseStddev**2, WindMapConst
 noise = noiseStddev*np.random.randn(p.shape[0])
 dtfile = 'output/wind_data03.neph'
 print("Getting mesonh values... ", end='')
-dtbase = NephelaeDataServer()
-sys.stdout.flush()
-for pos,n in zip(p,noise):
-    dtbase.add_gps(Gps("100", Position(pos[0],pos[1],pos[2],pos[3])))
-    dtbase.add_sample(SensorSample('RCT', '100', pos[0],
-        Position(pos[0],pos[1],pos[2],pos[3]),
-        [rct[pos[0],pos[3],pos[2],pos[1] + n]]))
-    dtbase.add_sample(SensorSample('Wind', '100', pos[0],
-        Position(pos[0],pos[1],pos[2],pos[3]),
-        [ut[pos[0],pos[3],pos[2],pos[1]], vt[pos[0],pos[3],pos[2],pos[1]]]))
-dtbase.save(dtfile, force=True)
-# dtbase = NephelaeDataServer.load(dtfile)
+# dtbase = NephelaeDataServer()
+# sys.stdout.flush()
+# for pos,n in zip(p,noise):
+#     dtbase.add_gps(Gps("100", Position(pos[0],pos[1],pos[2],pos[3])))
+#     dtbase.add_sample(SensorSample('RCT', '100', pos[0],
+#         Position(pos[0],pos[1],pos[2],pos[3]),
+#         [rct[pos[0],pos[1],pos[2],pos[3] + n]]))
+#     dtbase.add_sample(SensorSample('Wind', '100', pos[0],
+#         Position(pos[0],pos[1],pos[2],pos[3]),
+#         [ut[pos[0],pos[1],pos[2],pos[3]], vt[pos[0],pos[1],pos[2],pos[3]]]))
+# dtbase.save(dtfile, force=True)
+dtbase = NephelaeDataServer.load(dtfile)
 print("Done !")
 sys.stdout.flush()
 
@@ -132,12 +132,14 @@ simTime = p0.t
 lastTime = time.time()
 simSpeed = 50.0
 
+# interp='nearest'
+interp='bicubic'
 def do_update(t):
 
     print("Sim time :", t)
     # prediction
 
-    map0, std0 = gprMap[t,b[3].min:b[3].max,b[2].min:b[2].max,p0.z]
+    map0, std0 = gprMap[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
     # map0 = gprMap[t,b[3].min:b[3].max,b[2].min:b[2].max,p0.z]
     map0.data[map0.data < 0.0] = 0.0
 
@@ -151,9 +153,9 @@ def do_update(t):
     if not profiling:
         global axes
         axes[0].cla()
-        axes[0].imshow(rct[t,p0.z,b[2].min:b[2].max,b[3].min:b[3].max].data, origin='lower',
-                       interpolation='bicubic',
-                       extent=[b[3].min, b[3].max, b[2].min, b[2].max])
+        axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data.T, origin='lower',
+                       interpolation=interp,
+                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
         axes[0].set_title("Ground truth")
 
@@ -163,14 +165,14 @@ def do_update(t):
             pass
 
         axes[1].cla()
-        axes[1].imshow(map0.data.T, origin='lower', interpolation='bicubic',
-                       extent=[b[3].min, b[3].max, b[2].min, b[2].max])
+        axes[1].imshow(map0.data.T, origin='lower', interpolation=interp,
+                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[1].grid()
         axes[1].set_title("MAP")
 
         axes[2].cla()
-        axes[2].imshow(std0.data.T**2, origin='lower', interpolation='bicubic',
-                       extent=[b[3].min, b[3].max, b[2].min, b[2].max])
+        axes[2].imshow(std0.data.T**2, origin='lower', interpolation=interp,
+                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         # axes[2].imshow(map1.T, origin='lower',
         #                extent=[b[3].min, b[3].max, b[2].min, b[2].max])
         axes[2].grid()
