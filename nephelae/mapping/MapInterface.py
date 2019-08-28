@@ -15,9 +15,9 @@ class MapInterface(abc.ABC):
 
     """
 
-    def __init__(self, variableName):
+    def __init__(self, name):
 
-        self.variableName = variableName
+        self.name = name
 
 
     @abc.abstractmethod
@@ -105,21 +105,21 @@ class MapInterface(abc.ABC):
         # pred = self.at_locations(locations[np.argsort(locations[:,0]),:])
         # pred = self.at_locations(locations, False)
         pred = self.at_locations(locations, True)
+        dims = DimensionHelper()
+        for param in params:
+            if np.array(param).shape:
+                dims.add_dimension(param, 'LUT')
         if isinstance(pred, (list, tuple)):
-            res = []
-            for p in pred:
-                # Building dimensions of output array
-                dims = DimensionHelper()
-                for param in params:
-                    if np.array(param).shape:
-                        dims.add_dimension(param, 'LUT')
-                res.append(ScaledArray(p.reshape(T.shape).squeeze(), dims))
+
+            outputShape = list(T.shape)
+            res = [ScaledArray(pred[1].reshape(outputShape).squeeze(), dims)]
+            if len(pred[0].shape) == 2:
+                outputShape.append(pred[0].shape[1])
+            res.insert(0,ScaledArray(pred[0].reshape(outputShape).squeeze(), dims))
             return res
         else:
-            # Building dimensions of output array
-            dims = DimensionHelper()
-            for param in params:
-                if np.array(param).shape:
-                    dims.add_dimension(param, 'LUT')
-            return ScaledArray(pred.reshape(T.shape).squeeze(), dims)
+            outputShape = list(T.shape)
+            if len(pred.shape) == 2:
+                outputShape.append(pred.shape[1])
+            return ScaledArray(pred.reshape(outputShape).squeeze(), dims)
 

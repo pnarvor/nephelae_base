@@ -15,7 +15,7 @@ class GprPredictor(MapInterface):
 
     """
 
-    def __init__(self, variableName, database, databaseTags, kernel):
+    def __init__(self, name, database, databaseTags, kernel):
 
         """
         variableName (str):
@@ -30,7 +30,7 @@ class GprPredictor(MapInterface):
         kernel (GprKernel): kernel to use for the prediction
                             (is compatiable with scikit-learn kernels)
         """
-        super().__init__(variableName)
+        super().__init__(name)
 
         self.database     = database
         self.databaseTags = databaseTags
@@ -75,8 +75,9 @@ class GprPredictor(MapInterface):
                        s.position.y,\
                        s.position.z]\
                        for s in samples])
-        trainValues = np.array([s.data for s in samples])
+        trainValues = np.array([s.data for s in samples]).squeeze()
         self.gprProc.fit(trainLocations, trainValues)
+
         return self.gprProc.predict(locations, return_std=returnStddev)
 
 
