@@ -90,8 +90,11 @@ class GprPredictor(MapInterface):
                 tmp = res
             Min = tmp.min(axis=0)
             Max = tmp.max(axis=0)
+            if np.isscalar(Min):
+                Min = [Min]
+                Max = [Max]
             if len(Min) != len(self.dataRange):
-                self.dataRange = [Bounds(m,M) for m,M in zip(Min,Max)]
+                self.dataRange = [Bounds(m, M) for m,M in zip(Min,Max)]
             else:
                 for b,m,M in zip(self.dataRange, Min, Max):
                     b.update(m)
