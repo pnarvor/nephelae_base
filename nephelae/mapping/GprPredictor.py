@@ -15,7 +15,8 @@ class GprPredictor(MapInterface):
 
     """
 
-    def __init__(self, name, database, databaseTags, kernel):
+    def __init__(self, name, database, databaseTags, kernel,
+                 computesStddev=True, updateRange=True):
 
         """
         variableName (str):
@@ -39,9 +40,12 @@ class GprPredictor(MapInterface):
                                                 alpha=0.0,
                                                 optimizer=None,
                                                 copy_X_train=False)
+        self.computesStddev = computesStddev
+        self.updateRange    = updateRange
+        self.dataRange      = []
 
 
-    def at_locations(self, locations, returnStddev=True):
+    def at_locations(self, locations):
 
         # ############## WRRRROOOOOOOOOOOOOOOOOOOOOOONNG #####################
         # # Must take all data otherwise prediction not possible because outside 
@@ -77,8 +81,24 @@ class GprPredictor(MapInterface):
                        for s in samples])
         trainValues = np.array([s.data for s in samples]).squeeze()
         self.gprProc.fit(trainLocations, trainValues)
-
-        return self.gprProc.predict(locations, return_std=returnStddev)
+        
+        if self.updateRange:
+            res = self.gprProc.predict(locations, return_std=self.computes_stddev())
+            if self.computes_stddev():
+                tmp = res[0]
+            else:
+                tmp = res
+            Min = tmp.min(axis=0)
+            Max = tmp.max(axis=0)
+            if len(Min) != len(self.dataRange):
+                self.dataRange = [Bounds(m,M) for m,M in zip(Min,Max)]
+            else:
+                for b,m,M in zip(self.dataRange, Min, Max):
+                    b.update(m)
+                    b.update(M)
+            return res
+        else:
+            return self.gprProc.predict(locations, return_std=self.computes_stddev())
 
 
     def shape(self):
@@ -95,6 +115,12 @@ class GprPredictor(MapInterface):
 
     def resolution(self):
         return self.kernel.resolution()
+   
+
+    def range(self):
+        return self.dataRange
 
 
+    def computes_stddev(self):
+        return self.computesStddev
 

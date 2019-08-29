@@ -38,3 +38,7 @@ class WindMapConstant(MapInterface):
 
     def resolution(self):
         return self.resol
+
+
+    def computes_stddev(self):
+        return False

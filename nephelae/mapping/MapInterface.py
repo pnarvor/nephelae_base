@@ -4,6 +4,7 @@ import numpy as np
 
 from nephelae.array import ScaledArray
 from nephelae.array import DimensionHelper
+from nephelae.types import Bounds
 
 class MapInterface(abc.ABC):
 
@@ -75,6 +76,33 @@ class MapInterface(abc.ABC):
         pass
 
 
+    @abc.abstractmethod
+    def computes_stddev(self):
+        """
+        Tells if a standard deviation is computed
+        """
+        pass
+    
+    
+    # # @abc.abstractmethod
+    # def sample_dims(self):
+    #     """
+    #     Returns the number of scalars in a single sample
+    #     (Usually 1)
+    #     """
+    #     pass
+
+    
+    def range(self):
+        """
+        Returns bounds of values inside the map (mostly for display)
+        Can be None if not computed
+
+        Must be a list of instances of nephelae.types.Bounds
+        """
+        return None
+
+
     def __getitem__(self, keys):
         """
         return a slice of space filled with variable values.
@@ -104,13 +132,14 @@ class MapInterface(abc.ABC):
         # check this (sorting ?)
         # pred = self.at_locations(locations[np.argsort(locations[:,0]),:])
         # pred = self.at_locations(locations, False)
-        pred = self.at_locations(locations, True)
+        # pred = self.at_locations(locations, True)
+        pred = self.at_locations(locations)
         dims = DimensionHelper()
         for param in params:
             if np.array(param).shape:
                 dims.add_dimension(param, 'LUT')
-        if isinstance(pred, (list, tuple)):
-
+        # if isinstance(pred, (list, tuple)):
+        if self.computes_stddev():
             outputShape = list(T.shape)
             res = [ScaledArray(pred[1].reshape(outputShape).squeeze(), dims)]
             if len(pred[0].shape) == 2:

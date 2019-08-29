@@ -139,6 +139,7 @@ def do_update(t):
     print("Sim time :", t)
     # prediction
 
+    print(gprMap.range())
     map0, std0 = gprMap[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
     # map0 = gprMap[t,b[3].min:b[3].max,b[2].min:b[2].max,p0.z]
     # map0.data[map0.data < 0.0] = 0.0
@@ -155,7 +156,7 @@ def do_update(t):
     if not profiling:
         global axes
         axes[0].cla()
-        axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data[:,:,1].T, origin='lower',
+        axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data[:,:,0].T, origin='lower',
                        interpolation=interp,
                        extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
@@ -167,7 +168,7 @@ def do_update(t):
             pass
 
         axes[1].cla()
-        axes[1].imshow(map0.data[:,:,1].T, origin='lower', interpolation=interp,
+        axes[1].imshow(map0.data[:,:,0].T, origin='lower', interpolation=interp,
                        extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[1].grid()
         axes[1].set_title("MAP")
