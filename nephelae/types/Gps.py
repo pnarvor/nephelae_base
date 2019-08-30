@@ -40,7 +40,9 @@ class Gps:
 
     def __sub__(self, other):
         if type(other) == NavigationRef:
-            return self.position - other.position
+            res = self.position - other.position
+            res.z = self.position.z
+            return res
         else:
             raise ValueError("Invalid operand type")
 
