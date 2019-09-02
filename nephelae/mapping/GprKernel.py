@@ -4,6 +4,7 @@ import numpy.fft as npfft
 import pickle
 import sklearn.gaussian_process.kernels as gpk
 from   scipy.spatial.distance import cdist
+from   copy import deepcopy
 
 class NephKernel(gpk.Kernel):
 
@@ -60,10 +61,12 @@ class NephKernel(gpk.Kernel):
         # Resolution is then computed as the inverse of twice the frequency
         # where the spectrum falls below -60db (shannon's theorem)
         return 0.84 * np.array(self.lengthScales)
+        # return 0.5*0.84 * np.array(self.lengthScales)
 
 
     def span(self):
         # Distance from which a sample is deemed negligible
+        # return 3.0 * np.array(self.lengthScales)
         return 3.0 * np.array(self.lengthScales)
 
 
@@ -91,8 +94,16 @@ class WindKernel(NephKernel):
 
         # print("X shape: ", X.shape)
         # print("Y shape: ", X.shape, end="\n\n")
-
+        
         wind = self.windMap.at_locations(Y)
+
+        # print("Horizontal wind :", wind)
+        # print(Y)
+        # if self.windMap.name == 'H_Wind':
+        #     print("X shape:\n", X)
+        #     print("Y shape:\n", Y) 
+        #     print("Mean horizontal wind :", wind.mean(axis=0))
+        # print("self.variance :", self.variance)
 
         # Far from most efficient but efficiency requires C++ implementation 
         # (Or is it ? Yes. Yes it is. 40ns self time, cdist : 2ns, can be 6 times as fast)
@@ -100,19 +111,31 @@ class WindKernel(NephKernel):
         dt = t1 - t0
         distMat = (dt / self.lengthScales[0])**2
 
+        # if self.windMap.name == 'H_Wind':
+        #     print("distMat0 :\n", [np.min(distMat.ravel()), np.max(distMat.ravel())])
+
         x0,x1 = np.meshgrid(X[:,1],    Y[:,1], indexing='ij', copy=False)
         x0,w1 = np.meshgrid(X[:,1], wind[:,0], indexing='ij', copy=False)
         dx = x1 - (x0 + w1 * dt)
         distMat = distMat + (dx / self.lengthScales[1])**2
 
+        # if self.windMap.name == 'H_Wind':
+        #     print("distMat1 :\n", [np.min(distMat.ravel()), np.max(distMat.ravel())])
+
         x0,x1 = np.meshgrid(X[:,2],    Y[:,2], indexing='ij', copy=False)
         x0,w1 = np.meshgrid(X[:,2], wind[:,1], indexing='ij', copy=False)
         dx = x1 - (x0 + w1 * dt)
         distMat = distMat + (dx / self.lengthScales[2])**2
+
+        # if self.windMap.name == 'H_Wind':
+        #     print("distMat2 :\n", [np.min(distMat.ravel()), np.max(distMat.ravel())])
         
         distMat = distMat + cdist((X[:,3] / self.lengthScales[3]).reshape(-1,1),
                                   (Y[:,3] / self.lengthScales[3]).reshape(-1,1),
                                   metric='sqeuclidean')
+
+        # if self.windMap.name == 'H_Wind':
+        #     print("distMat3 :\n", [np.min(distMat.ravel()), np.max(distMat.ravel())])
 
         if Y is X:
             return self.variance*np.exp(-0.5*distMat)\
@@ -120,6 +143,33 @@ class WindKernel(NephKernel):
         else:
             return self.variance*np.exp(-0.5*distMat)
 
+        # print("Wind map :", self.windMap.name)
+        # if Y is X:
+        #     res = self.variance*np.exp(-0.5*distMat)\
+        #            + np.diag([self.noiseVariance]*X.shape[0])
+        #     # print("Y is X:\n", res)
+        # else:
+        #     res = self.variance*np.exp(-0.5*distMat)
+        #     # print("Y is no X:\n", res)
+
+        # if self.windMap.name == 'H_Wind':
+        #     print("res :\n", [np.min(res.ravel()), np.max(res.ravel())])
+
+        # if self.windMap.name == 'H_Wind':
+        #     print("Y is no X:\n", res)
+        # return res
+
+
+    def __deepcopy__(self, memo):
+        print("Deepcopy was called ################################################################################") 
+        # Forbidding deepcopy of self.windMap
+        # scikit-learn will deepcopy the kernel and if the windMap is a 
+        # GprPredictor it contains a reference to a databasei, which will
+        # be deep-copied alongside the kernel. We don't want that.
+        other = WindKernel(deepcopy(self.lengthScales, memo),
+                           deepcopy(self.variance, memo),
+                           deepcopy(self.noiseVariance, memo),
+                           self.windMap)
 
 
 
