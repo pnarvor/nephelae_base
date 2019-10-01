@@ -22,9 +22,10 @@ class ObserverSubject:
     notifyMethodName : str
         The name of the method to be called when notifyind an object.
 
-    observerCallbacks : dict
+    observerCallbacks : dict({int:function})
         Dictionary of methods to be called on notification. Keys are observer
-        objects ids and value are their notification callback methods.
+        objects ids (got if python id() function) and values are their
+        notification callback methods.
 
     lock : threading.Lock
         A mutex for thread safety (mostly for preventing notifications
@@ -177,13 +178,42 @@ class MultiObserverSubject:
 
     Attributes
     ----------
-
-    observerSubjects : dict(ObserverSubject)
+    observerSubjects : dict({str:ObserverSubject})
         Dictionary of ObserverSubject instances to be able to handle several
         notification methods, so several list of observers.
+
+    lock : threading.Lock
+        A mutex for thread safety (mostly for preventing notifications
+        happening at the same time as the insertion of a new notification method).
+
+
+    Methods
+    -------
+    add_notification_method(notifMethodName) -> None:
+        Creates a new notification method. Will do nothing if notifMethodName
+        already in self.observerSubjects.keys().
+
+    attach_observer(observer, notifMethodName) -> None:
+        Subscribes an observer to notifMethodName. notifMethodName can be a list
+        of notification method name. In this case the observer will be
+        subscribed to all these methods.
+        
+    detach_observer(observer, notifMethodName) -> None:
+        Removes an observer. If notifMethodName is None, the observer will be
+        removed from all ObserverSubjects. notifMethodName can also be a list
+        of names.
     """
 
     def __init__(self, notificationMethods=[]):
+
+        """
+        Parameters
+        ----------
+        notificationMethods : list(str)
+            list of nofication method names to be handled.
+            A new alias method for this instance will be created with each of
+            these names. See ObserverSubject.__init__() for details.
+        """
 
         self.observerSubjects = {}
         self.lock = threading.Lock()
@@ -192,6 +222,20 @@ class MultiObserverSubject:
 
 
     def add_notification_method(self, notifMethod):
+        """
+        Creates a new callable notification method, by creating a new
+        ObserverSubject instance in self.observerSubjects.
+
+        Will also creates a notification alias self.{notifMethod}.
+        See ObserverSubject.__init__() for details.
+
+        If notifMethod already exists in self.observerSubjects.keys(), does nothing.
+
+        Parameters
+        ----------
+        notifMethod : str
+            Notification method name to be created.
+        """
 
         with self.lock:
             if notifMethod in self.observerSubjects.keys():
@@ -202,6 +246,29 @@ class MultiObserverSubject:
 
 
     def attach_observer(self, observer, notifMethodName='notify'):
+
+        """Subscribe an observer to a notification method
+
+        Can be subscribed to several notification methods if notifMethodName
+        is a list of names.
+
+        /!\ If notifMethodName is a list of str, this method is called on each
+        element of the list. (Has a kind of recursion behavior).
+
+        Parameters
+        ----------
+        observer : object
+            Observer object to be subscribed.
+        notifMethodName : str or list(str)
+            Nofification method names to which the observer must subscribe.
+
+        Raises
+        ------
+        AttributeError
+            If observer is not notifiable.
+        ValueError
+            if notifMethodName is neither a str or a list of str.
+        """
 
         if isinstance(notifMethodName, str):
             with self.lock:
@@ -218,6 +285,27 @@ class MultiObserverSubject:
 
     def detach_observer(self, observer, notifMethodName=None):
 
+        """Remove an observer to a notification method
+
+        Can be removed from several notification methods if notifMethodName
+        is a list of names.
+
+        /!\ If notifMethodName is a list of str, this method is called on each
+        element of the list. (Has a kind of recursion behavior).
+
+        Parameters
+        ----------
+        observer : object
+            Observer object to be removed.
+        notifMethodName : str or list(str)
+            Nofification method names from which the observer must be removed.
+
+        Raises
+        ------
+        ValueError
+            if notifMethodName is neither a str or a list of str.
+        """
+
         if isinstance(notifMethodName, str):
             with self.lock:
                 self.observerSubjects[notifMethodName].detach_observer(observer)
@@ -225,11 +313,16 @@ class MultiObserverSubject:
             for notifMethod in notifMethodName:
                 self.detach_observer(observer, notifMethod)
         elif notifMethodName is None:
-            for subject in self.observerSubjects.values():
-                try:
-                    subject.detach_observer(observer)
-                except KeyError as e:
-                    continue
+            with self.lock:
+                for subject in self.observerSubjects.values():
+                    try:
+                        subject.detach_observer(observer)
+                    except KeyError as e:
+                        # Is raised if the observer was not subscribed
+                        # Seems ok to let this exception go because we try to
+                        # unsubcribe it anyway.
+                        print("Warning, observer not found while unsubscribing.")
+                        print("Exception feedback :", e)
         else:
             raise ValueError("notifMethodName must either a string or " +
                              "a list of strings.")
