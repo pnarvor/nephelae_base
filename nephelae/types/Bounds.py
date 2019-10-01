@@ -3,7 +3,6 @@
 class Bounds:
     
     """
-    
     Bounds
 
     Convenience class to store a min and a max value with
