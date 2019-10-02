@@ -111,7 +111,7 @@ class Bounds:
 
 
     def span(self):
-        """Returns difference between max and min atributes."""
+        """Returns difference between max and min attributes."""
         return self.max - self.min
 
 
