@@ -52,7 +52,7 @@ class ObserverSubject:
     {notifyMethodName}(*args, **kwargs) -> None:
         Alias for self.do_notify(). Is Dynamically created at object
         initialization.
-        For exemple : if self.notifyMethodName == 'notify_this', then the 
+        For example : if self.notifyMethodName == 'notify_this', then the 
         ObserverSubject instance has a new method called
         self.notify_this(*args, **kwargs) which simply calls
         self.do_notify(args, kwargs).
@@ -65,7 +65,7 @@ class ObserverSubject:
         Parameters
         ----------
         notifyMethodName : str
-            The name of the method to be called when notifyind an object.
+            The name of the method to be called when notifying an object.
             A new method called this name will be created for this object.
             For exemple : if self.notifyMethodName == 'notify_this', then the
             ObserverSubject instance has a new method called
@@ -320,7 +320,7 @@ class MultiObserverSubject:
                     except KeyError as e:
                         # Is raised if the observer was not subscribed
                         # Seems ok to let this exception go because we try to
-                        # unsubcribe it anyway.
+                        # unsubscribe it anyway.
                         print("Warning, observer not found while unsubscribing.")
                         print("Exception feedback :", e)
         else:
