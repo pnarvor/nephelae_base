@@ -2,17 +2,33 @@ from .Position import Position
 
 class SensorSample:
     
-    """SensorSample
+    """
+    SensorSample
 
-    Holds a single data sample (can be of any type) with its metadata
+    Holds a data sample with its metadata.
+    Mostly to be used in SpatializedDatabase.
 
-    Attributes:
+    Attributes
+    ----------
 
-        variableName     (string): Identifier for the sample (ex: 'temperature', 'windVector').
-        timeStamp           (int): Date of acquisition of the sample (in milliseconds)
-        position (types.Position): Location of acquisition of the sample.
-                                   (position.t is the timeStamp of the measure of the sensor location, ex: gps measurement.)
-        data          (undefined): Sample data type is undefined for now but an array of float is advised.
+    variableName : str
+        Identifier for the sample (ex: 'temperature', 'windVector'...).
+
+    producer : str
+        Identifier of the producer of this particular sample (ex: a UAV id).
+
+    timeStamp : int
+        Acquisition date of the sample (in milliseconds).
+
+    position : types.Position
+        Location of acquisition of the sample.
+        position.t should be the timeStamp of the measure of the sensor location.
+        ex: GPS location closest to acquisition time (self.timestamp).
+
+    data :
+        Sample data.
+        Sample data type is undefined for now but an array of float is advised.
+        (TODO fix this type.)
     """
 
     def __init__(self, variableName='noname', producer='unknown', timeStamp=0,
