@@ -35,28 +35,28 @@ class Position(object):
 
     Methods
     -------
-    __add__, __sub__ -> Position:
-        Addition or subtraction of Position objects.
+    __add__(other), __sub__(other) -> Position:
+        Addition or subtraction of self with other (type(other) == Position).
 
-    __mult__ -> scalar:
-        Dot product of two position or
-        matrix multiplication, depending on parameter.
+    __mult__(other) -> scalar:
+        Dot product of self and other
+        matrix multiplication, depending on type(other).
 
     __eq__, __ne__ -> bool:
         Comparison operator. Two Position are equal if and only
-        if norm(v1 - v2) = 0.0 .
+        if norm(v1 - v2) = 0.0 . (type(other) == Position).
 
-    __getattr__ -> None:
+    __getattr__(name) -> None:
         Get a dimension value. (ex: xvalue = position.x, effectively call
         xvalue = position.__getattr__('x'), and is equivalent to
         xvalue = position.data[1]).
 
-    __setattr__ -> None:
+    __setattr__(name, value) -> None:
         Set a dimension value. (ex: position.x = 14.0 will effectively call
         position.__setattr__('x', 14.0), and is equivalent to
         position.data[1] = 14.0).
 
-    to_list -> list(scalar):
+    to_list() -> list(scalar):
         Returns [self.t, self.x, self.y, self.z].
     """
 
