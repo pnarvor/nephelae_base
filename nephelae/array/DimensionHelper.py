@@ -1,3 +1,15 @@
+"""DimensionHelper module
+
+Contains a bunch of helper classes mostly used in the array.ScaledArray type.
+
+The goal of the ScaledArray type is to be able to access a data array using
+floating point indexes instead of integer indexes.
+
+The idea behind this is that the data array represent a section of space.
+For example a MesoNH data cube represent a cube of atmosphere. This cube has a size
+in number of lines and columns, 
+"""
+
 import numpy as np
 from scipy.interpolate import griddata
 from scipy.interpolate import interp1d
