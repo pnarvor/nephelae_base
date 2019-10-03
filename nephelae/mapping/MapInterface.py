@@ -10,28 +10,55 @@ class MapInterface(abc.ABC):
 
     """MapInterface
 
-    This is an interface designed to be subclassed with GprPredictor class
-    and MesoNHVariable. Its goal is to give a unified access for static
-    MesoNH data in simulation or real time data estimation with flying uavs.
+    This is an interface designed to be subclassed with
+    nephelae.mappin.GprPredictor class and nephelae_mesonh.MesoNHVariable.
+    Its goal is to give a unique access for static MesoNH data in simulation
+    or real time data estimation with flying UAVs. This allows to simplify
+    the design of the interface with the GUI components, since they only see
+    maps of the same type.
 
+    A map can be defined on a space with an arbitrary number of dimensions.
+    A single map sample can also have an arbitrary number of dimensions.
+
+    /!\ This in an abstract class. It cannot be instanciated, and must be
+    subclassed. All the methods with the "abc.abstractmethod" decorator
+    must be implemented in the sub-class. nephelae.mappin.GprPredictor class
+    and nephelae_mesonh.MesoNHVariable are examples of classes derived from
+    MapInterface.
+
+    Attributes
+    ----------
+
+    name : str
+        A unique identifer for this map instance.
     """
 
     def __init__(self, name):
+        """
+        Parameters
+        ----------
+
+        name : str
+            A unique identifer for this map instance.
+        """
 
         self.name = name
 
 
     @abc.abstractmethod
     def at_locations(self, locations):
-        """
-        return variable value at locations
+        """Returns map value at sparse locations
+        
+        Parameters
+        ----------
 
-        input:
-            locations: N*D np.array (N location, D dimensions)
+        input : NxD numpy.array
+            Location of the sample to fetch.
+            (N : number of locations, D : number dimensions of space)
 
-        output:
-            NxM np.array : variable value at locations
-                           (variable is M dimensionnal)
+        output : NxM numpy.array
+            Map value at each location.
+            (N : number of locations, M : number of dimensions of a map sample)
         """
         pass
 
@@ -39,9 +66,13 @@ class MapInterface(abc.ABC):
     @abc.abstractmethod
     def shape(self):
         """
-        List of number of data points in each dimensions.
-        Can be empty if no dimensions, and element can be None
-        if infinite dimension span
+        List size of each dimension. Must be empty if no dimensions,
+        and a size can be equal to None if the dimension if infinite.
+        (For example with a periodic dimension).
+
+        Returns
+        -------
+            tuple(int,None,...) or ()
         """
         pass
 
@@ -49,9 +80,13 @@ class MapInterface(abc.ABC):
     @abc.abstractmethod
     def span(self):
         """
-        Returns a list of span of each dimension.
-        Can be empty if no dimensions, and element can be None
-        if infinite dimension span
+        Physical length of each dimension (for example in meters).
+        Must be empty if no dimensions, and a length can be equal to None if
+        the dimension if infinite. (For example with a periodic dimension).
+
+        Returns
+        -------
+            tuple(float,None,...) or ()
         """
         pass
 
@@ -59,9 +94,13 @@ class MapInterface(abc.ABC):
     @abc.abstractmethod
     def bounds(self):
         """
-        Returns a list of bounds of each dimension.
-        Can be empty if no dimensions, and element can be None
-        if infinite dimension span
+        Physical bounds of each dimension (mix and max value in each dimension).
+        Must be empty if no dimensions, and an element can be equal to None if
+        the dimension if infinite. (For example with a periodic dimension).
+
+        Returns
+        -------
+            tuple(nephelae.type.Bounds,None,...) or ()
         """
         pass
 
@@ -69,9 +108,13 @@ class MapInterface(abc.ABC):
     @abc.abstractmethod
     def resolution(self):
         """
-        Return a list of resolution in each dimension
+        Resolution of each dimension (for example in pixels per meters).
         Can be empty if no dimensions.
-        Is ALWAYS defined for each dimension.
+        MUST be defined for each dimension.
+
+        Returns
+        -------
+            tuple(float,...) or ()
         """
         pass
 
@@ -79,7 +122,17 @@ class MapInterface(abc.ABC):
     @abc.abstractmethod
     def computes_stddev(self):
         """
-        Tells if a standard deviation is computed
+        Tells if the standard deviation is computed.
+        (and returned by [] operator). This is for compatibility with
+        nephelae.mapping.GprPredictor.
+
+        /!\ Will probably be deleted in near future. (Compatibility with
+        GprPredictor might be resolved with a cached stddev map).
+
+        Returns
+        -------
+        boolean
+            True if [] operator also returns the standard deviation.
         """
         pass
     
@@ -95,23 +148,32 @@ class MapInterface(abc.ABC):
     
     def range(self):
         """
-        Returns bounds of values inside the map (mostly for display)
-        Can be None if not computed
-
-        Must be a list of instances of nephelae.types.Bounds
+        Returns min and max values inside the map (mostly for display, to
+        avoid finding min-max each render for the colorscale normalization).
+        Can be None if not computed.
+        
+        Returns
+        -------
+        Bounds or (Bounds,...)
+            Can return a tuple of Bounds if sample dimension > 1.
         """
         return None
 
 
     def __getitem__(self, keys):
         """
-        return a slice of space filled with variable values.
+        Returns a slice of map data ([] operator).
 
-        input:
-            keys like reading a numpy.array (tuple of slice)
+        Parameters
+        ----------
+        keys : (int,float,slice,...)
+            keys like for reading a numpy.array.
 
-        output:
-            numpy.array with values (squeezed in collapsed dimensions)
+        Returns
+        -------
+        numpy.array
+            Section of space selected with keys.
+            (to be changed with a nephelae.array.ScaledArray ?).
         """
 
         # print("keys :", keys)
