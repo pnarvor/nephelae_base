@@ -1,6 +1,6 @@
 # TODO TODO TODO TODO TODO TODO TODO
 # Search for a dedicated library to do this
-# Go search arounf pysqlite
+# Go search around pysqlite
 # TODO TODO TODO TODO TODO TODO TODO
 
 import numpy as np
@@ -13,14 +13,40 @@ from nephelae.types import Bounds
 
 class SpbEntry:
 
-    """SpbEntry
+    """
+    SpbEntry
 
-    Aim to unify the elements in the SpatializedDatabase.
-    Contains a space-time location and at least one tag.
+    Database entry. Contains a position (t,x,y,z) and tags to be searchable
+    by the database.
+
+    Attributes
+    ----------
+
+    data : any type
+        Data to store in a database.
+
+    position : nephelae.types.Position
+        An (t,x,y,z) position to enable the database to search in a localised
+        region of space-time.
+
+    tags : [str,...]
+        Tags to classify data. Used for retrieve data from the database.
 
     """
 
     def __init__(self, data, position, tags=['misc']):
+
+        """
+        data : any type
+            Data to store in a database.
+
+        position : nephelae.types.Position
+            An (t,x,y,z) position to enable the database to search in a
+            localised region of space-time.
+
+        tags : [str,...]
+            Tags to classify data. Used for retrieve data from the database.
+        """
 
         self.data     = data
         self.position = position
@@ -28,25 +54,55 @@ class SpbEntry:
 
 
     def __eq__(self, other):
+        """
+        Checks equality with other entry.
+        (Not sure why it is there... to be checked)
+        """
         if self.position != other.position:
             return False
         elif self.tags != other.tags:
             return False
         elif str(self.data) != str(other.data):
+            # Ugly. Re-check this.
             return False
         return True
 
 
 class SpbSortableElement:
 
-    """SpbSortableElement
+    """
+    SpbSortableElement
 
-    Intended to be used as a generic container in sorted lists.
-    Contains a single index value to use for sorting and a data sample.
-    All the numerical comparison operators are overloaded to compare  only
-    the indexes of two instances.
+    Intended to be used as a generic container, sortable with an arbitrary
+    criterion. This class contains an attribute containing a single value
+    used to compare two SpbSortableElement.
+    
+    The comparison operators where re-implemented in this class for this purpose.
 
-    TODO : see if already exists
+    Example:
+
+    One has a collection of samples measured at specific time stored in the
+    data0 list and wants to store them in a time ascending order :
+    
+    timeSortedList = [SpbSortableElement(datum.t, datum) for datum in data]
+    timeSortedList.sort()
+
+    In this exemple, each SpbSortableElement.index was set to datum.t. The
+    Comparison between each SpbSortableElement is between the 
+    SpbSortableElements.index than to the re-implementation of the comparison
+    operators. The list is indeed sortable in time ascending order. If datum.x
+    where used instead of datum.t, the list would be sorted in x ascending
+    order.
+
+    Note : python lists are perfectly capable of sorting themselves with an
+    arbitrary criterion. However, the python bisect module used in this module
+    to quickly insert and retrieve data from a sorted list is not capable of
+    such behavior. Hence the necessity of having this type.
+    
+    TODO : take a look inside the bisect module to see if this is possible
+    to implement. (would make the code clearer and computation faster).
+    (Also you may have a commit with your name inside python sources. No this
+    is not a bait).
 
     """
 
@@ -99,21 +155,34 @@ class SpbSortableElement:
 
 class SpatializedList:
 
-    """SpatializedList
+    """
+    SpatializedList
 
     Class to (supposedly) efficiently insert and retrieve data based on their
-    space-time location.
+    space-time location (based on python3 bisect module), and associated tags.
 
-    Heavily based on python3 bisect module.
+    All inserted data elements are assumed to have the same interface as
+    SpbEntry (have a position (nephelae.types.Position) attribute, and a 
+    tags (list(str,...)) attribute).
 
-    All data element are assumed to have the same interface as SpbEntry
+    This class manage 4 lists containing the same data but each sorted along
+    a different dimension of space-time (seems an awful waste of memory but
+    only references to data are duplicated, not the data itself). This allows
+    for fast retrieval of data in a region of interest.
 
-    Base principle is to keep 4 list containing the same data but sorted along
-    each dimension of space time (seems an awful waste of memory but only
-    references to data are duplicated, not the data itself).
-    When a query is made, smaller lists are made from subsets of the main
-    list and the result is the common elements between the smaller lists.
+    Note : A huge memory space is used (seems too large). Memory usage is to
+    be investigated.
 
+    Methods
+    -------
+    find_entries(tags, keys, sortCriteria) -> list(SpbEntry,...):
+        Method to search data, based on tags and space-time region.
+        The space-time must be a tuple of slices (same format as keys in a
+        __getitem__ method).
+
+    find_bounds(tags, keys) -> list(nephelae.types.Bounds, ...):
+        Similar to find_entries method but returns the bounding box for data
+        with given tags and inside the space-time regien given by keys.
 
     """
 
@@ -252,13 +321,20 @@ class SpatializedList:
 
 class SpatializedDatabase:
 
-    """SpatializedDatabase
+    """
+    SpatializedDatabase
 
-    This is a test class for Nephelae raw Uav data server.
-    Must handle space-time related requests like all data in a region of 
-    space-time. (Hence the very well though name TODO: find a real one). 
-    Made to match the subscriber pattern used in nephelae_paparazzi.PprzUav.
 
+    Methods
+    -------
+    find_entries(tags, keys, sortCriteria) -> list(SpbEntry,...):
+        Method to search data, based on tags and space-time region.
+        The space-time must be a tuple of slices (same format as keys in a
+        __getitem__ method).
+
+    find_bounds(tags, keys) -> list(nephelae.types.Bounds, ...):
+        Similar to find_entries method but returns the bounding box for data
+        with given tags and inside the space-time regien given by keys.
     """
 
     # class member functions #####################################
