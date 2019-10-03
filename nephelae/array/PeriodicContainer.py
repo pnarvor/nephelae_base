@@ -3,7 +3,54 @@ import numpy as np
 class PeriodicContainer:
 
     """ 
-    PeriodicContainer : This class is a helper to access data in a numpy-like array where some dimensions are known to be periodic
+    PeriodicContainer
+    
+    Helper class to ease access to an array with data known periodic on 
+    some dimensions.
+
+    Example:
+
+    Let array0 be a numpy.array of size 10x20 with periodic data on the first
+    dimension. Then with array1 = PeriodicContainer(array0, periodicDimensions=[0]),
+    one can access array0 data in the same way as using directly the  array0
+    variable, but with the first dimension seemingly infinite. For example :
+
+        data = array0[5:15,:]
+
+    would raise an exception because array0.shape[0] = 10, but :
+
+        array1 = PeriodicContainer(array0, periodicDimensions=[0])
+        data   = array1[5:15,:]
+
+    becomes a valid expression. The PeriodicContainer class automatically
+    traduce
+
+        data = array0[5:15,:]
+
+    into
+
+        data0 = array0[5:,:]
+        data1 = array0[:(15 % array0.shape[0]),:]
+        data = [data0, data1]
+
+    As a result, any indexes used to access a periodic dimension is valid.
+
+    This classes can handle an array with arbitrary number of dimensions.
+
+    Attributes
+    ----------
+
+    data : numpy.array (or equivalent)
+        The original data array in which some dimensions are periodic.
+
+    shape : tuple(int), (to be removed ?)
+        Original shape of the array.
+
+    periodicShape : tuple(int)
+        Same as self.shape, but with -1 on periodicDimensions.
+
+    isPeriodic : tuple(bool)
+        Element is true if dimension is periodic.
     """
 
     def __init__(self, data, periodicDimension=[]):
