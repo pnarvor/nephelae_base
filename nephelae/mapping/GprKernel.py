@@ -8,23 +8,56 @@ from   copy import deepcopy
 
 class NephKernel(gpk.Kernel):
 
-    """NephKernel
+    """
+    NephKernel
 
-    Base class for kernel used in the nephelae_project
+    Base class for Gaussian Process kernel used in the nephelae_project
 
-    Kernel compatible with sklearn.gaussian_process.Kernel
-    to be used in GaussianProcessRegressor.
+    Kernel derived from sklearn.gaussian_process.Kernel
+    to be used in sklearn.gaussian_process.GaussianProcessRegressor.
 
-    Is equivalent to a scikit-learn RBF kernel with white noise.
-    
-    /!\ Hyper parameters optimizatin HAS NOT BEEN TESTED
+    This kernel equivalent to a scikit-learn RBF (Radial Basis Funcion) kernel,
+    with white noise and some additional methods. The exact definition of the
+    kernel is :
+        variance*exp(-0.5*|(x-y)/lengthScales|^2) + diag(noiseVariance)
+
+    /!\ Hyper parameters optimization HAS NOT BEEN TESTED
     When using with GaussianProcessRegressor, set optimizer=None
+    
+    Attributes
+    ----------
+    lengthScales : numpy.array
+        Length scale of considered process on each dimension of the input space.
+        See a GPR tutorial for more info.
 
-    Mostly to implement resolution and span methods.
+    variance : float or numpy.array
+        Variance of the considered process. Is a numpy.array if the output
+        space is multidimensional. See a GPR tutorial for more info.
+
+    noiseVariance : float or numpy.array
+        Variance of the measure noise (usually sensor noise, or used as a
+        smoothing parameter). See a GPR tutorial for more info.
 
     """
 
     def __init__(self, lengthScale, variance, noiseVariance):
+
+        """
+        Parameters
+        ----------
+
+        lengthScales : numpy.array
+            Length scale of considered process on each dimension of the input
+            space. See a GPR tutorial for more info.
+
+        variance : float or numpy.array
+            Variance of the considered process. Is a numpy.array if the output
+            space is multidimensional. See a GPR tutorial for more info.
+
+        noiseVariance : float or numpy.array
+            Variance of the measure noise (usually sensor noise, or used as a
+            smoothing parameter). See a GPR tutorial for more info.
+        """
 
         self.lengthScales  = lengthScale
         self.variance      = variance
@@ -32,6 +65,10 @@ class NephKernel(gpk.Kernel):
 
 
     def __call__(self, X, Y=None):
+        """See sklearn.gaussian_process.kernels for details
+        https://scikit-learn.org/stable/modules/classes.html#module-sklearn.gaussian_process
+            TODO : a doc...
+        """
 
         if Y is None:
             Y = X
@@ -47,47 +84,110 @@ class NephKernel(gpk.Kernel):
 
 
     def diag(self, X):
+        """See sklearn.gaussian_process.kernels for details
+        https://scikit-learn.org/stable/modules/classes.html#module-sklearn.gaussian_process
+            TODO : a doc...
+        """
         return np.array([self.variance + self.noiseVariance]*X.shape[0])
 
 
     def is_stationary(self):
+        """See sklearn.gaussian_process.kernels for details
+        https://scikit-learn.org/stable/modules/classes.html#module-sklearn.gaussian_process
+            TODO : a doc...
+        """
         return True
 
 
     def resolution(self):
-        # Value computed by estimating the cutting frequency of the RBF kernel
-        # The kernel is the autocorrelation of the process and thus its fourier
-        # transform is the power spectrum of the process.
-        # Resolution is then computed as the inverse of twice the frequency
-        # where the spectrum falls below -60db (shannon's theorem)
+        """Returns the optimal resolution to which compute a dense map.
+
+        Value computed by estimating the cutting frequency of the RBF kernel.
+        The kernel is the autocorrelation of the process and thus its Fourier
+        transform is the power spectrum of the process.
+
+        This resolution was computed as the inverse of twice the cut-off
+        frequency where the spectrum falls below -60dB (Nyquist-Shannon
+        sampling theorem).
+
+        The resolution returned by this method is the minimal resolution
+        without loos of information.
+        """
         return 0.84 * np.array(self.lengthScales)
         # return 0.5*0.84 * np.array(self.lengthScales)
 
 
     def span(self):
-        # Distance from which a sample is deemed negligible
-        # return 3.0 * np.array(self.lengthScales)
+        """Distance from which a sample contribution is deemed negligible
+        in front of another one.
+
+        This is used to discard negligible data before the costly computation
+        of a GPR prediction.
+
+        Is set at 3 sigmas (kernel being a Gaussian-based kernel).
+
+        This parameter is a trade-off performance versus-precision.
+        TODO : (make this criterion configurable ?)
+        """
         return 3.0 * np.array(self.lengthScales)
 
 
 
 class WindKernel(NephKernel):
 
-    """WindKernel
+    """
+    WindKernel
+    Derived from NephKernel.
+
+    Kernel design to take wind into account when computing the distance
+    between two samples.
+
+    More generally : each measurement point is considered to be able to
+    drift over time, like clouds goes with the wind. The net result is that
+    two data points taken at the same location in space but at different
+    times should be considered different (=low kernel value). Two data points
+    taken at different locations but related by the relation
+    p1 = p0 + v*dt where v is the wind speed should be considered similar
+    (high kernel value).
+
+    A few of the benefits of using this kernel to predict the dense map of a
+    cloud are :
+        - Even when no new data is taken, successive predicted map with old
+          data will still predict the true cloud location if the wind speed
+          is accurate.
+        - Data points can have a longer lifetime than if they are considered
+          fixed, so have a longer time lengthScale. Predicted maps should
+          be more precise with less data.
+
     /!\ Only implemented for dimension (t,x,y,z). (only (t,x,y) won't work)
+
+    Attributes
+    ----------
+    wind : nephelae.mapping.WindMap
+        A class able to return a wind estimation at a given location.
+
+
     """
 
-    # Actually used (maybe)
     def __init__(self, lengthScales, variance, noiseVariance, windMap):
+
+        """
+        Parameters
+        ----------
+        wind : nephelae.mapping.WindMap
+            A class able to return a wind estimation at a given location.
         """
 
-        windMap : A MapInterface instance returning xy wind values.
-        """
         super().__init__(lengthScales, variance, noiseVariance)
         self.windMap = windMap
 
     
     def __call__(self, X, Y=None):
+
+        """See sklearn.gaussian_process.kernels for details
+        https://scikit-learn.org/stable/modules/classes.html#module-sklearn.gaussian_process
+            TODO : a doc...
+        """
 
         if Y is None:
             Y = X
@@ -161,6 +261,17 @@ class WindKernel(NephKernel):
 
 
     def __deepcopy__(self, memo):
+
+        """For compatibility with sklearn
+
+        sklearn does a deepcopy of the kernel, which in sklearn implementation
+        is not costly. However in this specific implementation, the kernel
+        contains a reference a of full database. This method overrides the
+        deepcopy of the WindMap attribute to avoid the full deepcopy of
+        the database.
+
+        /!\ This method may not behave as intended. Check it.
+        """
         print("Deepcopy was called ################################################################################") 
         # Forbidding deepcopy of self.windMap
         # scikit-learn will deepcopy the kernel and if the windMap is a 
