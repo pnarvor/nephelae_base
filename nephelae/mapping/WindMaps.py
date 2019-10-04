@@ -9,11 +9,11 @@ from .GprKernel    import WindKernel
 
 class WindMapConstant(MapInterface):
 
-    """WindConstant
-    
-    Constant wind predictor.
-    
-    Will output the same value at every point in space.
+    """WindMapConstant
+    Derived from nephelae.mapping.MapInterface
+
+    Returns a identical fixed wind value at each location.
+
     """
 
     def __init__(self, variableName, wind=[0.0,0.0],
@@ -50,8 +50,13 @@ class WindMapConstant(MapInterface):
 class WindMapUav(GprPredictor):
 
     """WindMapUav
-    
-    Wind maps base on measurements from 
+    /!\ NOT FULLY IMPLEMENTED. DO NOT USE THIS.
+    Derived from nephelae.mapping.MapInterface.
+
+    Returns a predicted wind value based on measure fetch from a database and
+    GPR prediction.
+
+    /!\ NOT FULLY IMPLEMENTED. DO NOT USE THIS.
     """
 
     # def __init__(self, dataServer, lengthScales=[60.0, 300.0, 300.0, 30.0],
