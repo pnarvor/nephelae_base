@@ -89,15 +89,16 @@ class SpbSortableElement:
 
     In this exemple, each SpbSortableElement.index was set to datum.t. The
     Comparison between each SpbSortableElement is between the 
-    SpbSortableElements.index than to the re-implementation of the comparison
-    operators. The list is indeed sortable in time ascending order. If datum.x
-    where used instead of datum.t, the list would be sorted in x ascending
-    order.
+    SpbSortableElements.index thanks to the re-implementation of the comparison
+    operators. The list then sortable in time ascending order using standard
+    python methods. If datum.x where used instead of datum.t, the list would be
+    sorted in x ascending order.
 
     Note : python lists are perfectly capable of sorting themselves with an
-    arbitrary criterion. However, the python bisect module used in this module
-    to quickly insert and retrieve data from a sorted list is not capable of
-    such behavior. Hence the necessity of having this type.
+    arbitrary criterion (given as a lambda function in the sort method). 
+    However, the python bisect module used in this module, used to quickly
+    insert and retrieve data from a sorted list is not capable of such
+    behavior. Hence the necessity of using this type.
     
     TODO : take a look inside the bisect module to see if this is possible
     to implement. (would make the code clearer and computation faster).
