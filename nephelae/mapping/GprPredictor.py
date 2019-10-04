@@ -8,29 +8,85 @@ from .MapInterface import MapInterface
 
 class GprPredictor(MapInterface):
 
-    """GprPredictor
+    """
+    GprPredictor
 
-    Class dedicated to prediction using Gaussian Process Regression.
+    Computes dense maps using sparse samples, using Gaussian Process Regression.
+    Base on scikit-learn GPR library.
 
-    No kernel parameters is optimised, kernel is given as a fixed parameter.
+    /!\ Kernel parameters optimisation is not currently supported !
 
+    Attributes
+    ----------
+    database : nephelae.database.NephelaeDataServer
+        Data server from which fetch data to build the map.
+
+    databaseTags : list(str,...)
+        Tags used to retrieve from the database relevant data to build the map.
+
+    kernel : sklearn.gaussian_process.kernel.Kernel derived type
+        Kernel used in GPR. See here for more details :
+        https://scikit-learn.org/stable/modules/classes.html#module-sklearn.gaussian_process
+
+    gprProc : sklearn.gaussian_process.GaussianProcessRegressor
+        Class doing the GPR computation. (Not used here. Trouble updating
+        data inside this class. Is re-build each time. TODO : debug this)
+
+    computesStddev : bool
+        On prediction, GaussianProcessRegressor can either return only the
+        Maximum A Posteriori (MAP) or both the MAP and its associated
+        covariance map. (TODO : remove this and transform it in a cached
+        covariance map).
+
+    updateRange : bool
+        Mainly for drawing purposes. If true min-max value of the last predicted
+        map are re-computed each time.
+
+    dataRange : list(Bounds,...)
+        Contains range of value inside last predicted map. See
+        nephelae.mapping.MapInterface for more details.
+
+    lock : threading.Lock
+        Simple mutex to allow only one map computation at a time in
+        self.at_location method. self.at_location will return Non if busy.
+
+    Methods
+    -------
+
+    at_locations(locations) ->  numpy.array:
+        Computes predicted value at each given location using GPR.
+        This method is used in the map interface when requesting a dense map.
+        When requesting a dense map, each location must be the position of
+        on pixel of the requested map.
+
+    See nephelae.mapping.MapInterface for other methods.
     """
 
     def __init__(self, name, database, databaseTags, kernel,
                  computesStddev=True, updateRange=True):
 
         """
-        variableName (str):
-            name of the variable (no inside class purpose, only an identifier)
+        name : str
+            Name of the computed map. Must be unique.
 
         database (nephelae_mapping.database):
-            database from which fetching the measured data
+            database from which fetch the relevant data for map computation.
 
-        databaseTags (list of strings):
-            tags for searching data in the database
+        databaseTags : list(str, ...)
+            tags for searching data in the database.
        
-        kernel (GprKernel): kernel to use for the prediction
-                            (is compatiable with scikit-learn kernels)
+        kernel : sklearn.gaussian_process.kernel.Kernel derived type
+            Kernel used in GPR.
+
+        computesStddev : bool
+            On prediction, GaussianProcessRegressor can either return only the
+            Maximum A Posteriori (MAP) or both the MAP and its associated
+            covariance map. (TODO : remove this and transform it in a cached
+            covariance map).
+
+        updateRange : bool
+            Mainly for drawing purposes. If true min-max value of the last predicted
+            map are re-computed each time.
         """
         super().__init__(name)
 
@@ -48,6 +104,37 @@ class GprPredictor(MapInterface):
 
 
     def at_locations(self, locations):
+        
+        """Computes predicted value at each given location using GPR.
+
+        This method is used in the map interface when requesting a dense map.
+        When requesting a dense map, each location must be the position of
+        on pixel of the requested map.
+
+        This method automatically fetch relevant data from self.database
+        to compute the predicted values.
+
+        Parameters
+        ----------
+        locations : numpy.array (N x 4)
+            Locations N x (t,x,y,z) for each of the N points where to compute
+            a predicted value using GPR. 
+            Note : this implementation of GprPredictor does not enforce the
+            use of a 4D space (t,x,y,z) for location. However, the
+            self.database attribute is most likely a
+            nephelae.database.NephelaeDataServer type, which enforce the
+            use of a 4D (t,x,y,z) space.
+
+        Returns : numpy.array (N x M)
+            Predicted values at locations. Can be more than 1 dimensional
+            depending on the data fetched from the database.
+            Example : If the database contains samples of 2D wind vector.
+            The samples are 2D. The predicted map is then a 2D field vector
+            defined on a 4D space-time.
+
+        Note : This method probably needs more refining.
+        (TODO : investigate this)
+        """
 
         # try:
         # with self.lock:
