@@ -13,6 +13,7 @@ setup(name='nephelae',
         'scipy',
         'utm',
         'matplotlib',
+        'scikit-lean',
         'sh'
       ],
       zip_safe=False)
