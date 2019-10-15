@@ -70,8 +70,17 @@ class MapServer:
 
     def build_from_file(self, configFile):
         """Build the MapServer instance from a configuration file"""
-        pass
+        raise NotImplemented("This is not implemented yet. Please wait, we are working as fast as we can.")
 
 
     def names(self):
         return self.maps.keys()
+
+
+    def process_keys(self, keys):
+        def process_key(key, dim):
+            if dim is None:
+                return key
+            if dim.min is not None:
+
+
