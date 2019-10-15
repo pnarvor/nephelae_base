@@ -1,6 +1,7 @@
 from nephelae.types   import Bounds
 from nepheale.mapping import MapInterface
 
+
 class MapServer:
 
     """
@@ -77,10 +78,43 @@ class MapServer:
         return self.maps.keys()
 
 
+    def __getitem__(self, mapId):
+        class MapReader:
+            """
+            MapReader.
+
+            This class is only for syntactic sugar. This is to be able to call
+            directly MapServer['map'][keys] but by cropping keys according to
+            MapServer.bounds.
+
+            """
+            def __init__(self, mapServer, mapId):
+                self.mapServer = mapServer
+                self.mapId     = mapId
+            def __getitem__(self, keys):
+                return self.mapServer.maps[self.mapId][self.mapServer.process_keys(keys)]
+        return MapReader(self, mapId)
+
+
     def process_keys(self, keys):
+
+        """Will crop key from a __getitem__ method according to self.bounds"""
+
         def process_key(key, dim):
-            if dim is None:
+            if dim is None or key is None:
                 return key
             if dim.min is not None:
+                key = max(key, dim.min)
+            if dim.max is not None:
+                key = min(key, dim.max)
+            return key
+        newKeys = []
+        for key, b in zip(keys, self.bounds):
+            if isinstance(key, slice):
+                newKeys.append(slice(
+                    process_key(key.start),
+                    process_key(key.stop)))
+            else:
+                newKeys.append(process_key(key))
 
 
