@@ -27,40 +27,37 @@ class NephelaeDataServer(SpatializedDatabase):
         self.observerSet   = MultiObserverSubject(['add_gps', 'add_sample'])
         self.uavIds        = []
         self.variableNames = []
+        self.dataLock      = threading.Lock()
        
-        # For debug, to be removed
-        self.gps      = []
-        self.samples  = []
-
 
     def set_navigation_frame(self, navFrame):
         self.navFrame = navFrame
 
 
     def add_gps(self, gps):
-        self.observerSet.add_gps(gps)
+        self.observerSet.add_gps(gps) # mutex protected
         if self.navFrame is None:
             return
         uavId = str(gps.uavId)
-        if uavId not in self.uavIds:
-            self.uavIds.append(uavId)
-        self.gps.append(gps)
         tags=[uavId, 'GPS']
-        self.insert(SpbEntry(gps, gps - self.navFrame, tags))
+        with self.dataLock:
+            if uavId not in self.uavIds:
+                self.uavIds.append(uavId)
+            self.insert(SpbEntry(gps, gps - self.navFrame, tags))
 
 
     def add_sample(self, sample):
         # sample assumed to comply with nephelae_base.types.sensor_sample
-        self.observerSet.add_sample(sample)
+        self.observerSet.add_sample(sample) # mutex protected
         if self.navFrame is None:
             return
-        self.samples.append(sample)
         tags=[str(sample.producer),
               str(sample.variableName),
               'SAMPLE']
-        self.insert(SpbEntry(sample, sample.position, tags))
-        if str(sample.variableName) not in self.variableNames:
-            self.variableNames.append(str(sample.variableName))
+        with self.dataLock:
+            self.insert(SpbEntry(sample, sample.position, tags))
+            if str(sample.variableName) not in self.variableNames:
+                self.variableNames.append(str(sample.variableName))
 
     def add_gps_observer(self, observer):
         self.observerSet.attach_observer(observer, 'add_gps')
