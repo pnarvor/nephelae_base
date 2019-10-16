@@ -1,5 +1,5 @@
 from nephelae.types   import Bounds
-from nepheale.mapping import MapInterface
+from nephelae.mapping import MapInterface
 
 
 class MapServer:
@@ -101,20 +101,25 @@ class MapServer:
         """Will crop key from a __getitem__ method according to self.bounds"""
 
         def process_key(key, dim):
-            if dim is None or key is None:
-                return key
             if dim.min is not None:
                 key = max(key, dim.min)
             if dim.max is not None:
                 key = min(key, dim.max)
             return key
+
+        keys = list(keys)
+        while len(keys) < len(self.bounds):
+            keys.append(slice(None))
+
         newKeys = []
         for key, b in zip(keys, self.bounds):
-            if isinstance(key, slice):
+            if b is None:
+                newKeys.append(key)
+            elif isinstance(key, slice):
                 newKeys.append(slice(
-                    process_key(key.start),
-                    process_key(key.stop)))
+                    b.min if key.start is None else process_key(key.start, b),
+                    b.max if key.stop  is None else process_key(key.stop,  b)))
             else:
-                newKeys.append(process_key(key))
-
+                newKeys.append(process_key(key, b))
+        return newKeys
 
