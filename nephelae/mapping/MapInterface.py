@@ -154,8 +154,8 @@ class MapInterface(abc.ABC):
         
         Returns
         -------
-        Bounds or (Bounds,...)
-            Can return a tuple of Bounds if sample dimension > 1.
+        tuple(Bounds,...)
+            /!\ tuple even if samples are scalars
         """
         return None
 
