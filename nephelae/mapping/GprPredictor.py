@@ -177,13 +177,9 @@ class GprPredictor(MapInterface):
                            s.position.z]\
                            for s in samples])
             trainValues = np.array([s.data for s in samples]).squeeze()
-            # print("Train locations :", trainLocations.shape)
-            # print("Train values    :", trainValues.shape)
-            # print("Predic locations:", locations.shape)
             if len(trainValues.shape) < 2:
                 trainValues = trainValues.reshape(-1,1)
             try:
-                # self.gprProc.fit(trainLocations, trainValues)
                 gprProc = GaussianProcessRegressor(self.kernel,
                                                    alpha=0.0,
                                                    optimizer=None,
@@ -194,14 +190,7 @@ class GprPredictor(MapInterface):
                 raise e
 
             
-            if "Liquid" in self.name:
-                print("Doing prediction :", self.name)
-                print("Train locations   :", trainLocations.shape)
-                print("Train values      :", trainValues.shape)
-                print("Train values mean :", trainValues.mean(axis=0))
-                print("Predic locations  :", locations.shape)
             if self.updateRange:
-                # res = self.gprProc.predict(locations, return_std=self.computes_stddev())
                 res = gprProc.predict(locations, return_std=self.computes_stddev())
                 if self.computes_stddev():
                     tmp = res[0]
@@ -218,19 +207,11 @@ class GprPredictor(MapInterface):
                     for b,m,M in zip(self.dataRange, Min, Max):
                         b.update(m)
                         b.update(M)
-                if "Liquid" in self.name:
-                    print("Updating range :", self.dataRange, "\n\n")
                 return res
             else:
-                if "Liquid" in self.name:
-                    print("Not updating range :", self.dataRange, "\n\n")
-                # return self.gprProc.predict(locations, return_std=self.computes_stddev())
                 return gprProc.predict(locations, return_std=self.computes_stddev())
         finally:
             self.lock.release()
-        # except Exception as e:
-        #     print("Got exception :", e)
-        #     raise e
 
     def shape(self):
         return (None, None, None, None)
