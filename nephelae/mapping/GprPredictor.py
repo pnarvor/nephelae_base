@@ -63,7 +63,7 @@ class GprPredictor(MapInterface):
     """
 
     def __init__(self, name, database, databaseTags, kernel,
-                 computesStddev=True, updateRange=True):
+                 sampleSize=1, computesStddev=True, updateRange=True):
 
         """
         name : str
@@ -101,6 +101,7 @@ class GprPredictor(MapInterface):
         self.updateRange    = updateRange
         self.dataRange      = []
         self.lock           = threading.Lock()
+        self.sampleSize     = sampleSize # Find a way to make this automatic
 
 
     def at_locations(self, locations):
@@ -245,6 +246,10 @@ class GprPredictor(MapInterface):
 
     def resolution(self):
         return self.kernel.resolution()
+
+
+    def sample_size(self):
+        return self.sampleSize
    
 
     def range(self):

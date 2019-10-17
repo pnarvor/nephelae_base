@@ -19,7 +19,7 @@ class WindMapConstant(MapInterface):
     def __init__(self, variableName, wind=[0.0,0.0],
                  resolution=[50.0,50.0,50.0,50.0]):
         super().__init__(variableName)
-        self.wind = wind
+        self.wind  = wind
         self.resol = resolution
 
 
@@ -41,6 +41,10 @@ class WindMapConstant(MapInterface):
 
     def resolution(self):
         return self.resol
+
+
+    def sample_size(self):
+        return len(self.wind)
 
 
     def computes_stddev(self):

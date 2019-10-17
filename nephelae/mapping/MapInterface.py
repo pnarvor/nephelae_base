@@ -137,13 +137,13 @@ class MapInterface(abc.ABC):
         pass
     
     
-    # # @abc.abstractmethod
-    # def sample_dims(self):
-    #     """
-    #     Returns the number of scalars in a single sample
-    #     (Usually 1)
-    #     """
-    #     pass
+    @abc.abstractmethod
+    def sample_size(self):
+        """
+        Returns the number of scalars in a single sample
+        (Usually 1 is one, but can be more for a vector field, like wind)
+        """
+        pass
 
     
     def range(self):
