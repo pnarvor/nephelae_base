@@ -51,6 +51,77 @@ class WindMapConstant(MapInterface):
         return False
 
 
+class WindObserverMap(WindMapConstant):
+
+    """
+    WindObserverMap
+
+    Will ouput a single wind value for all location. This wind value
+    is computed from received data from Observable objects such as PprzUav
+    or a database.
+
+    In the absence of data, default 
+
+    Attritubes
+    ----------
+    wind : np.array (shape=(2,)), inherited from WindMapConstant
+        Current wind value, average of fetched wind samples. (Default is [0,0])
+    
+    sampleName : str
+        Name of the sample to be kept when add_sample is called. (add_sample
+        will receive all kinds of sample types. This is to filter the samples)
+        Default is str(['UT','VT'])
+
+    windSamples : list(np.array,...)
+        List of wind measurements. Will be averaged to give a single wind
+        value for all space.
+
+    maxSamples : int
+        Maximum number of samples to be kept in self.windSamples. When reached,
+        oldest samples will be deleted until len(self.windSamples) equals
+        self.minSamples.
+
+    minSamples : int
+        Length at which windSample will be set when self.maxSamples is reached
+
+    Methods
+    -------
+    add_sample(nephelae.types.SensorSample):
+        Callback function to be registered in a publisher.
+    """
+
+    def __init__(self, name, sampleName=str(['UT','VT']),
+                 defaultWindValue=np.array([0.0,0.0]),
+                 maxSamples=30, minSamples=5,
+                 resolution=[50.0,50.0,50.0,50.0]):
+        super().__init__(name, defaultWindValue, resolution)
+
+        self.sampleName  = sampleName
+        self.windSamples = []
+        self.maxSamples  = maxSamples
+        self.minSamples  = minSamples
+
+
+    def add_sample(self, sample):
+        """Callback function to be registered in a publisher."""
+        if sample.variableName != self.sampleName:
+            return
+
+        if not self.windSamples:
+            # If wind sample is empty, this is the first sample we receive.
+            # Setting self.wind to this value is better than default.
+            self.wind = sample.data[0]
+
+        self.windSamples.append(sample.data[0])
+        if len(self.windSamples) >= self.maxSamples:
+            # Updating wind only when maxSamples is reached
+            # To update at each sample, set maxSamples-minSamples=1
+            self.wind = np.array(self.windSamples).mean(axis=0)
+            # Removing old data
+            self.windSamples[0:len(self.windSamples) - self.minSamples] = []
+            print("New wind value :", self.wind)
+
+
 class WindMapUav(GprPredictor):
 
     """WindMapUav
@@ -66,6 +137,7 @@ class WindMapUav(GprPredictor):
     # def __init__(self, dataServer, lengthScales=[60.0, 300.0, 300.0, 30.0],
     def __init__(self, dataServer, lengthScales=[60.0, 300.0, 300.0, 30.0],
                  variance=5.0**2, noiseVariance=1.0):
+        raise NotImplemented("I told you not to use this !!! (WindMapUav")
         super().__init__("H_Wind", dataServer, str(['UT','VT']),
             WindKernel(lengthScales, variance, noiseVariance, WindMapConstant('CH_Wind')),
             computesStddev=False, updateRange=False)
