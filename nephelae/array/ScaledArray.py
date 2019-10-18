@@ -140,6 +140,7 @@ class ScaledArray:
             # return float(newData) # newData contains a singleValue
             return newData # check if no problems
         else:
-            return ScaledArray(newData, newDims)
+            # Setting same interpolation mode in child array
+            return ScaledArray(newData, newDims, self.interpolation)
 
 
