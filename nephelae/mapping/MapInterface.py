@@ -182,8 +182,10 @@ class MapInterface(abc.ABC):
         params = []
         for key, res in zip(keys, self.resolution()):
             if isinstance(key, slice):
-                size = int((key.stop - key.start) / res) + 1
-                params.append(np.linspace(key.start, key.start+(size-1)*res, size))
+                # size = int((key.stop - key.start) / res) + 1
+                # params.append(np.linspace(key.start, key.start+(size-1)*res, size))
+                size = int((key.stop - key.start) / res + 0.5)
+                params.append(np.linspace(key.start + res/2.0, key.stop + res/2.0,size))
             else:
                 params.append(key)
 
