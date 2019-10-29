@@ -115,4 +115,19 @@ class Bounds:
         return self.max - self.min
 
 
+    def isinside(self, value):
+        """
+        Checks if a value is inside [self.min, self.max]
+        If self.min is None, min check is ignored, same for self.max.
+        """
+        if self.min is not None:
+            if value < self.min:
+                return False
+        if self.max is not None:
+            if value > self.max:
+                return False
+        return True
+
+
+
 
