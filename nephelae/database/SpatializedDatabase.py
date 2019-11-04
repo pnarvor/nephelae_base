@@ -295,13 +295,7 @@ class SpatializedList:
         extract_entries(self.xSorted, keys[1], outputDict)
         extract_entries(self.ySorted, keys[2], outputDict)
         extract_entries(self.zSorted, keys[3], outputDict)
-<<<<<<< Updated upstream
-
         return outputDict
-
-=======
-        return outputDict
->>>>>>> Stashed changes
 
     def find_entries(self, tags=[], keys=None, sortCriteria=None):
 
@@ -414,7 +408,15 @@ class SpatializedDatabase:
                     return self.taggedData[tag]
             return self.taggedData['ALL']
         
+<<<<<<< HEAD
 <<<<<<< Updated upstream
+=======
+    def find_entry(self, tags=[], index=0):
+        # Making sure we have a list of tags, event with one element
+        if isinstance(tags, str):
+            tags = [tags]
+        return self.best_search_list(tags).find_entry(tags, index)
+>>>>>>> [1-index] Done a prototype of what we want (passing an index instead of a slice), still buggy af
 
 =======
 >>>>>>> Stashed changes
