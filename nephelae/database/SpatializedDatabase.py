@@ -402,6 +402,23 @@ class SpatializedDatabase:
         return self.best_search_list(tags).find_entries(tags, keys, sortCriteria)
 
 
+    def __getitem__(self, tags):
+        """Syntactic sugar for self.find_entries"""
+        class IndexHandler:
+            def __init__(self, tags, database):
+                self.tags         = tags
+                self.database     = database
+                self.sortCriteria = None
+            def __getitem__(self, keys):
+                if isinstance(keys, slice):
+                    keys = (keys,)
+                return self.database.find_entries(self.tags, keys, self.sortCriteria)
+            def __call__(self, sortCriteria):
+                self.sortCriteria = sortCriteria
+                return self
+        return IndexHandler(tags, self)
+
+
     def find_bounds(self, tags=[], keys=None):
         # Making sure we have a list of tags, event with one element
         if isinstance(tags, str):
