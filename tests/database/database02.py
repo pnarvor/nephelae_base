@@ -13,7 +13,7 @@ from nephelae_paparazzi import PprzMesonhUav, PprzSimulation
 from nephelae.database import NephelaeDataServer
 
 # mesonhFiles = '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
-mesonhFiles = '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+mesonhFiles = '/local/fseguin/nephelae_data/MesoNH02/bomex_hf.nc'
 
 
 

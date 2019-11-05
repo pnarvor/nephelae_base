@@ -223,25 +223,26 @@ class SpatializedList:
 
         def process_time_key(key, sortedList):
             """Helper key format function of the time key"""
-            if not isinstance(key, slice):
-                raise ValueError("key must be a slice")
+            if not isinstance(key, slice) and not isinstance(key, float):
+                raise ValueError("key must be a slice or float")
             if sortedList is None:
-                return slice(None)
-            
-            if key.start is None:
-                key_start = None
-            elif key.start < 0.0:
-                key_start = sortedList[-1].index + key.start
+                return slice(None)            
+            if isinstance(key, slice):
+                if key.start is None:
+                    key_start = None
+                elif key.start < 0.0:
+                    key_start = sortedList[-1].index + key.start
+                else:
+                    key_start = key.start
+                if key.stop is None:
+                    key_stop = None
+                elif key.stop < 0.0:
+                    key_stop = sortedList[-1].index + key.stop
+                else:
+                    key_stop = key.stop
+                return slice(key_start, key_stop)
             else:
-                key_start = key.start
-            if key.stop is None:
-                key_stop = None
-            elif key.stop < 0.0:
-                key_stop = sortedList[-1].index + key.stop
-            else:
-                key_stop = key.stop
-            return slice(key_start, key_stop)
-        
+                return key
         if keys is None:
             # in this case fetch all data.
             return (slice(None), slice(None), slice(None), slice(None))
@@ -267,15 +268,22 @@ class SpatializedList:
         # Supposedly efficient way
         outputDict = {}
         def extract_entries(sortedList, key, outputDict):
-            if key.start is None:
-                key_start = None
+            print(key)
+            if isinstance(key, slice):
+                if key.start is None:
+                    key_start = None
+                else:
+                    key_start = bi.bisect_left(sortedList, key.start)
+                if key.stop is None:
+                    key_stop = None
+                else:
+                    key_stop = bi.bisect_right(sortedList, key.stop)
+                slc = slice(key_start, key_stop, None)
             else:
-                key_start = bi.bisect_left(sortedList, key.start)
-            if key.stop is None:
-                key_stop = None
-            else:
-                key_stop = bi.bisect_right(sortedList, key.stop)
-            slc = slice(key_start, key_stop, None)
+                if key is None:
+                    slc = None
+                else:
+                    slc = bi.bisect_left(sortedList, key)
             for element in sortedList[slc]:
                 if all([tag in element.data.tags for tag in tags]):
                     if id(element.data) not in outputDict.keys():
@@ -287,9 +295,13 @@ class SpatializedList:
         extract_entries(self.xSorted, keys[1], outputDict)
         extract_entries(self.ySorted, keys[2], outputDict)
         extract_entries(self.zSorted, keys[3], outputDict)
+<<<<<<< Updated upstream
 
         return outputDict
 
+=======
+        return outputDict
+>>>>>>> Stashed changes
 
     def find_entries(self, tags=[], keys=None, sortCriteria=None):
 
@@ -402,7 +414,10 @@ class SpatializedDatabase:
                     return self.taggedData[tag]
             return self.taggedData['ALL']
         
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     def find_entries(self, tags=[], keys=None, sortCriteria=None):
         # Making sure we have a list of tags, event with one element
         if isinstance(tags, str):
