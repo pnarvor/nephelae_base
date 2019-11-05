@@ -1,4 +1,4 @@
-
+import numpy as np
 
 class Bounds:
     
@@ -94,14 +94,21 @@ class Bounds:
 
     def update(self, value):
         """Updates min and max attributes with respect to value."""
+
         if self.min is None:
             self.min = value
         else:
-            self.min = min(self.min, value)
+            if isinstance(self.min, (float, int)):
+                self.min = min(self.min, value)
+            else:
+                self.min = np.minimum(min(self.min, value))
         if self.max is None:
             self.max = value
         else:
-            self.max = max(self.max, value)
+            if isinstance(self.max, (float, int)):
+                self.max = max(self.max, value)
+            else:
+                self.max = np.maximum(max(self.max, value))
 
 
     def reset(self):
@@ -120,13 +127,27 @@ class Bounds:
         Checks if a value is inside [self.min, self.max]
         If self.min is None, min check is ignored, same for self.max.
         """
-        if self.min is not None:
-            if value < self.min:
+        if isinstance(value, (float, int)):
+            if not isinstance(self.min, (float, int)):
+                raise ValueError("Cannot compare " + str(value)+" and "+str(self.min))
+            if not isinstance(self.max, (float, int)):
+                raise ValueError("Cannot compare " + str(value)+" and "+str(self.max))
+
+            if self.min is not None:
+                if value < self.min:
+                    return False
+            if self.max is not None:
+                if value > self.max:
+                    return False
+            return True
+        else:
+            if any(self.min > value):
                 return False
-        if self.max is not None:
-            if value > self.max:
+            if any(self.max < value):
                 return False
-        return True
+            return True
+
+
 
 
 
