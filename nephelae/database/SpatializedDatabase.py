@@ -268,7 +268,16 @@ class SpatializedList:
         # Supposedly efficient way
         outputDict = {}
         def extract_entries(sortedList, key, outputDict):
-            print(key)
+            "Check if all tags are present"
+            def check_tags(element, outputDict):
+                if all([tag in element.data.tags for tag in tags]):
+                    if id(element.data) not in outputDict.keys():
+                        outputDict[id(element.data)] = []
+                    # Will insert if tags is empty (all([]) returns True)
+                    outputDict[id(element.data)].append(element.data)
+                    return True
+                return False
+
             if isinstance(key, slice):
                 if key.start is None:
                     key_start = None
@@ -284,13 +293,29 @@ class SpatializedList:
                     slc = None
                 else:
                     slc = bi.bisect_left(sortedList, key)
-            for element in sortedList[slc]:
-                if all([tag in element.data.tags for tag in tags]):
-                    if id(element.data) not in outputDict.keys():
-                        outputDict[id(element.data)] = []
-                    # Will insert if tags is empty (all([]) returns True)
-                    outputDict[id(element.data)].append(element.data)
+            if isinstance(slc, slice):
+                for element in sortedList[slc]:
+                    check_tags(element, outputDict)
+            else:
+                if slc == len(sortedList):
+                    slc = len(sortedList)-1
+                compteur = 0
+                for elem1, elem2 in zip(reversed(sortedList[:slc]), sortedList[slc:]):
+                    if check_tags(elem1, outputDict):
+                        return
+                    elif check_tags(elem2, outputDict):
+                        return
+                    compteur = compteur + 1
+                for elem in sortedList[slc+compteur:]:
+                    if check_tags(elem, outputDict):
+                        return
+                for elem in sortedList[:max(0, slc-compteur)]:
+                    if check_tags(elem, outputDict):
+                        return
 
+
+
+        
         extract_entries(self.tSorted, keys[0], outputDict)
         extract_entries(self.xSorted, keys[1], outputDict)
         extract_entries(self.ySorted, keys[2], outputDict)
@@ -307,6 +332,7 @@ class SpatializedList:
         """
         
         outputDict = self.build_entry_dict(tags, keys)
+        
         res = [l[0] for l in outputDict.values() if len(l) == 4]
         if sortCriteria is not None:
             res.sort(key=sortCriteria)
@@ -408,23 +434,12 @@ class SpatializedDatabase:
                     return self.taggedData[tag]
             return self.taggedData['ALL']
         
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
-    def find_entry(self, tags=[], index=0):
-        # Making sure we have a list of tags, event with one element
-        if isinstance(tags, str):
-            tags = [tags]
-        return self.best_search_list(tags).find_entry(tags, index)
->>>>>>> [1-index] Done a prototype of what we want (passing an index instead of a slice), still buggy af
-
-=======
->>>>>>> Stashed changes
     def find_entries(self, tags=[], keys=None, sortCriteria=None):
         # Making sure we have a list of tags, event with one element
         if isinstance(tags, str):
             tags = [tags]
         return self.best_search_list(tags).find_entries(tags, keys, sortCriteria)
+        
 
 
     def __getitem__(self, tags):
@@ -435,7 +450,7 @@ class SpatializedDatabase:
                 self.database     = database
                 self.sortCriteria = None
             def __getitem__(self, keys):
-                if isinstance(keys, slice):
+                if isinstance(keys, slice) or isinstance(keys, float):
                     keys = (keys,)
                 return self.database.find_entries(self.tags, keys, self.sortCriteria)
             def __call__(self, sortCriteria):
