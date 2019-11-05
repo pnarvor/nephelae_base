@@ -53,6 +53,16 @@ class SpbEntry:
         self.tags     = tags
 
 
+    def __repr__(self):
+        return "Entry at position : " + str(self.position) + \
+               " tags : " + str(self.tags)
+
+
+    def __str__(self):
+        return "Entry at position : " + str(self.position) + \
+               ", tags : " + str(self.tags) + ", data : " + str(self.data)
+
+
     def __eq__(self, other):
         """
         Checks equality with other entry.
@@ -209,39 +219,37 @@ class SpatializedList:
 
 
     def process_keys(self, keys):
-        
-        if keys is None:
-            return (slice(None), slice(None), slice(None), slice(None))
-        if len(keys) == 4: 
-            return keys
-        keys = list(keys)
-        while len(keys) < 4:
-            keys.append(slice(None))
+        """Ensure we have a tuple of 4 slices, and format the time key"""
 
-        def process_key(key, sortedList):
+        def process_time_key(key, sortedList):
+            """Helper key format function of the time key"""
             if not isinstance(key, slice):
                 raise ValueError("key must be a slice")
             if sortedList is None:
                 return slice(None)
-            if key.step is None:
-                return key
-            if key.step >= 0:
-                return key
             
             if key.start is None:
                 key_start = None
-            else:
+            elif key.start < 0.0:
                 key_start = sortedList[-1].index + key.start
+            else:
+                key_start = key.start
             if key.stop is None:
                 key_stop = None
-            else:
+            elif key.stop < 0.0:
                 key_stop = sortedList[-1].index + key.stop
+            else:
+                key_stop = key.stop
             return slice(key_start, key_stop)
-	    
-        return (process_key(keys[0], self.tSorted),
-                process_key(keys[1], self.xSorted),
-                process_key(keys[2], self.ySorted),
-                process_key(keys[3], self.zSorted))
+        
+        if keys is None:
+            # in this case fetch all data.
+            return (slice(None), slice(None), slice(None), slice(None))
+        keys = list(keys)
+        while len(keys) < 4:
+            # Fetch all data on dimensions without key
+            keys.append(slice(None))
+        return (process_time_key(keys[0], self.tSorted), keys[1], keys[2], keys[3])
 
 
     def build_entry_dict(self, tags=[], keys=None):
