@@ -309,7 +309,7 @@ class SpatializedList:
                 for elem in sortedList[slc+compteur:]:
                     if check_tags(elem, outputDict):
                         return
-                for elem in sortedList[:max(0, slc-compteur)]:
+                for elem in reversed(sortedList[:max(0, slc-compteur)]):
                     if check_tags(elem, outputDict):
                         return
 
@@ -450,7 +450,7 @@ class SpatializedDatabase:
                 self.database     = database
                 self.sortCriteria = None
             def __getitem__(self, keys):
-                if isinstance(keys, slice) or isinstance(keys, float):
+                if isinstance(keys, slice) or isinstance(keys, (float, int)):
                     keys = (keys,)
                 return self.database.find_entries(self.tags, keys, self.sortCriteria)
             def __call__(self, sortCriteria):
