@@ -101,14 +101,14 @@ class Bounds:
             if isinstance(self.min, (float, int)):
                 self.min = min(self.min, value)
             else:
-                self.min = np.minimum(min(self.min, value))
+                self.min = np.minimum(self.min, value)
         if self.max is None:
             self.max = value
         else:
             if isinstance(self.max, (float, int)):
                 self.max = max(self.max, value)
             else:
-                self.max = np.maximum(max(self.max, value))
+                self.max = np.maximum(self.max, value)
 
 
     def reset(self):
@@ -141,9 +141,10 @@ class Bounds:
                     return False
             return True
         else:
-            if any(self.min > value):
+            print(value, self.min, self.max)
+            if any(np.greater(self.min, value).tolist()):
                 return False
-            if any(self.max < value):
+            if any(np.less(self.max, value).tolist()):
                 return False
             return True
 
