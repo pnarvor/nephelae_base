@@ -6,7 +6,7 @@ class MethodCompound:
     method_compound
 
     Proxy function for calling two fonctions in one call.  Returned values are
-    appended into a list. If one of the callee is a method_compound, the output
+    appended into a list. If one of the callee is a MethodCompound, the output
     of the callee is assumed a list and results of the other callee are
     appended.
 
@@ -38,8 +38,8 @@ class Pluginable:
     Pluginable
 
     This is a metaprogrammaming class intended to safely manage the addition of
-    new methods and attributes to classes derived from this class. Can be
-    viewed as an implementation of the Strategy pattern.
+    new methods and attributes at runtime to classes derived from this class.
+    Can be viewed as an implementation of the Strategy pattern.
 
 
     Methods
@@ -67,7 +67,7 @@ class Pluginable:
             (Does not have to be the name as the original method name).
         'conflictMode' : either 'append', 'prepend', 'replace' or 'abort'
             This specifies the behavior if self has already a method called
-            'name' then trying to bind a new method.
+            'name' when trying to bind a new method.
             'append'  : old method will be called first, then the new one.
             'prepend' : new method will be called first, then the old one.
             'replace' : new method replaces old method
@@ -79,12 +79,10 @@ class Pluginable:
         ----------
         plugin : class
             plugin class to be applyed to self
-            /!\ No instance of this class will be created. Instead the methods
+            /!\ No instance of plugin will be created. Instead, the methods
             will be added to this object, and a __initplugin__ method will
             be called. The __initplugin__ method may add or modify arguments
             in this object.
-            Must also define a __pluginmethods__ getter returning the method to
-            add to this object.
 
         args, kwargs :
             Arguments to be passed down to plugin.__initplugin__
