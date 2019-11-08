@@ -15,5 +15,4 @@ from .Bounds    import Bounds
 
 from .ObserverPattern import ObserverSubject
 from .ObserverPattern import MultiObserverSubject
-
-
+from .Pluginable      import Pluginable
