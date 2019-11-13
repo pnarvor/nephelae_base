@@ -1,0 +1,8 @@
+---
+head: 'head01.yaml'
+definitions: 'definitions01.yaml'
+aircrafts:
+    - 'aircraft01.yaml'
+    - 'aircraft02.yaml'
+
+

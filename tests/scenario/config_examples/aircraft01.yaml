@@ -1,0 +1,5 @@
+---
+aircraft01:
+    - id: 200
+    - property: "property1"
+    - area: *flight_area

@@ -1,0 +1,7 @@
+---
+aliases:
+- &local_frame "local frame"
+- &flight_area "flight area"
+
+local_frame: *local_frame
+flight_area: *flight_area

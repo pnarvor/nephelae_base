@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='nephelae',
-      version='0.1',
+      version='0.1.1',
       description='Core functionnalities of Nephelae project real-time mapping system.',
       url='ssh://git@redmine.laas.fr/laas/users/simon/nephelae/nephelae-devel/nephelae_base.git',
       author='Pierre Narvor',
@@ -14,7 +14,8 @@ setup(name='nephelae',
         'utm',
         'matplotlib',
         'scikit-learn',
-        'sh'
+        'sh',
+        'yaml'
       ],
       zip_safe=False)
 
