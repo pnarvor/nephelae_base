@@ -75,3 +75,7 @@ class NavigationRef:
             raise AttributeError("Gps has no attribute '"+name+"'")
 
 
+    def __getitem__(self, key):
+        return self.__getattr__(key)
+
+
