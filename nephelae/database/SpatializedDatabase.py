@@ -218,7 +218,7 @@ class SpatializedList:
         bi.insort(self.zSorted, SpbSortableElement(data.position.z, data))
 
 
-    def process_keys(self, keys):
+    def process_keys(self, keys, assumePositiveTime=False):
         """Ensure we have a tuple of 4 slices, and format the time key"""
 
         def process_time_key(key, sortedList):
@@ -250,10 +250,17 @@ class SpatializedList:
         while len(keys) < 4:
             # Fetch all data on dimensions without key
             keys.append(slice(None))
-        return (process_time_key(keys[0], self.tSorted), keys[1], keys[2], keys[3])
+
+        if assumePositiveTime:
+            return (process_time_key(keys[0], self.tSorted),
+                    keys[1],
+                    keys[2],
+                    keys[3])
+        else:
+            return keys
 
 
-    def build_entry_dict(self, tags=[], keys=None):
+    def build_entry_dict(self, tags=[], keys=None, assumePositiveTime=False):
 
         """
         keys : a tuple of slices(float,float,None)
@@ -262,7 +269,7 @@ class SpatializedList:
                There must exactly be 4 slices in the tuple
         """
         
-        keys = self.process_keys(keys)
+        keys = self.process_keys(keys, assumePositiveTime)
 
         # Using a python dict to be able to remove duplicates
         # Supposedly efficient way
@@ -322,7 +329,8 @@ class SpatializedList:
         extract_entries(self.zSorted, keys[3], outputDict)
         return outputDict
 
-    def find_entries(self, tags=[], keys=None, sortCriteria=None):
+    def find_entries(self, tags=[], keys=None,
+                           sortCriteria=None, assumePositiveTime=False):
 
         """
         keys : a tuple of slices(float,float,None)
@@ -331,7 +339,7 @@ class SpatializedList:
                There must exactly be 4 slices in the tuple
         """
         
-        outputDict = self.build_entry_dict(tags, keys)
+        outputDict = self.build_entry_dict(tags, keys, assumePositiveTime)
         
         res = [l[0] for l in outputDict.values() if len(l) == 4]
         if sortCriteria is not None:
@@ -339,7 +347,7 @@ class SpatializedList:
         return res
 
 
-    def find_bounds(self, tags=[], keys=None):
+    def find_bounds(self, tags=[], keys=None, assumePositiveTime=False):
 
         """
         keys : a tuple of slices(float,float,None)
@@ -348,7 +356,7 @@ class SpatializedList:
                There must exactly be 4 slices in the tuple
         """
         
-        outputDict = self.build_entry_dict(tags, keys)
+        outputDict = self.build_entry_dict(tags, keys, assumePositiveTime)
         bounds = [Bounds(), Bounds(), Bounds(), Bounds()]
         for l in outputDict.values():
             if len(l) != 4:
@@ -434,11 +442,13 @@ class SpatializedDatabase:
                     return self.taggedData[tag]
             return self.taggedData['ALL']
         
-    def find_entries(self, tags=[], keys=None, sortCriteria=None):
+    def find_entries(self, tags=[], keys=None,
+                           sortCriteria=None, assumePositiveTime=True):
         # Making sure we have a list of tags, event with one element
         if isinstance(tags, str):
             tags = [tags]
-        return self.best_search_list(tags).find_entries(tags, keys, sortCriteria)
+        return self.best_search_list(tags).find_entries(
+                    tags, keys, sortCriteria, assumePositiveTime)
         
 
 
@@ -446,24 +456,27 @@ class SpatializedDatabase:
         """Syntactic sugar for self.find_entries"""
         class IndexHandler:
             def __init__(self, tags, database):
-                self.tags         = tags
-                self.database     = database
-                self.sortCriteria = None
+                self.tags               = tags
+                self.database           = database
+                self.sortCriteria       = None
+                self.assumePositiveTime = True
             def __getitem__(self, keys):
                 if isinstance(keys, slice) or isinstance(keys, (float, int)):
                     keys = (keys,)
-                return self.database.find_entries(self.tags, keys, self.sortCriteria)
-            def __call__(self, sortCriteria):
-                self.sortCriteria = sortCriteria
+                return self.database.find_entries(self.tags, keys,
+                            self.sortCriteria, self.assumePositiveTime)
+            def __call__(self, sortCriteria=None, assumePositiveTime=True):
+                self.sortCriteria       = sortCriteria
+                self.assumePositiveTime = assumePositiveTime
                 return self
         return IndexHandler(tags, self)
 
 
-    def find_bounds(self, tags=[], keys=None):
+    def find_bounds(self, tags=[], keys=None, assumePositiveTime=True):
         # Making sure we have a list of tags, event with one element
         if isinstance(tags, str):
             tags = [tags]
-        return self.best_search_list(tags).find_bounds(tags, keys)
+        return self.best_search_list(tags).find_bounds(tags, keys, assumePositiveTime)
 
 
     def __getstate__(self):

@@ -144,7 +144,7 @@ class GprPredictor(MapInterface):
             return
         try:
 
-            # ############## WRRRROOOOOOOOOOOOOOOOOOOOOOONNG #####################
+            # ############## NOT WRRRROOOOOOOOOOOOOOOOOOOOOOONNG #####################
             # # Must take all data otherwise prediction not possible because outside 
             # # locations
             # searchKeys = [slice(b.min,b.max) for b in Bounds.from_array(locations.T)]
@@ -157,6 +157,7 @@ class GprPredictor(MapInterface):
             # Here only time limts are considered
             # locations are assumed to be sorted in increasing time order
             # (same time location will probably be asked more often anyway)
+
             dataBounds = self.database.find_bounds(self.databaseTags)[0]
             kernelSpan = self.kernel.span()[0]
             locBounds = Bounds(locations[0,0], locations[-1,0])
@@ -167,8 +168,9 @@ class GprPredictor(MapInterface):
             locBounds.max = locBounds.max + kernelSpan
 
             samples = [entry.data for entry in \
-                self.database.find_entries(self.databaseTags,
-                                           (slice(locBounds.min, locBounds.max),))]
+                self.database[self.databaseTags]\
+                             (assumePositiveTime=False)\
+                             [locBounds.min:locBounds.max]]
             
             trainLocations =\
                 np.array([[s.position.t,\
@@ -184,6 +186,8 @@ class GprPredictor(MapInterface):
                                                    alpha=0.0,
                                                    optimizer=None,
                                                    copy_X_train=False)
+                # print("Train locations :\n", trainLocations)
+                # print("Train values :\n", trainValues)
                 gprProc.fit(trainLocations, trainValues)
             except Exception as e:
                 print("Got exception in", self.name)
