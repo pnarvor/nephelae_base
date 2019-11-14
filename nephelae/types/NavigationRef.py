@@ -65,17 +65,18 @@ class NavigationRef:
         # For compatibility with paparazzi Gps type
         if name == 'stamp':
             return self.position.t
-        if name == 'utm_east':
+        elif name == 'utm_east':
             return self.position.x
-        if name == 'utm_north':
+        elif name == 'utm_north':
             return self.position.y
-        if name == 'ground_alt':
+        elif name == 'ground_alt':
             return self.position.z
         else:
-            raise AttributeError("Gps has no attribute '"+name+"'")
+            raise AttributeError("NavigationRef has no attribute '"+name+"'")
 
 
     def __getitem__(self, key):
-        return self.__getattr__(key)
+        # return self.__getattr__(key)
+        return getattr(self, key)
 
 
