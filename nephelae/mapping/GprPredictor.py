@@ -143,7 +143,6 @@ class GprPredictor(MapInterface):
             print("###### Cloud not lock", self.name, "! ####################################")
             return
         try:
-
             # ############## NOT WRRRROOOOOOOOOOOOOOOOOOOOOOONNG #####################
             # # Must take all data otherwise prediction not possible because outside 
             # # locations
@@ -172,12 +171,30 @@ class GprPredictor(MapInterface):
                              (assumePositiveTime=False)\
                              [locBounds.min:locBounds.max]]
             
+            if len(samples) < 1:
+                Min = [self.kernel.prior]
+                Max = [self.kernel.prior]
+                if len(Min) != len(self.dataRange):
+                    self.dataRange = [Bounds(m, M) for m,M in zip(Min,Max)]
+                else:
+                    for b,m,M in zip(self.dataRange, Min, Max):
+                        b.update(m)
+                        b.update(M)
+                # TODO : Check if this is correct or not (probably not)
+                if self.computes_stddev():
+                    temp = np.ones(locations.shape)*self.kernel.prior
+                    x = (temp, np.ones(locations.shape[0])*self.kernel.prior)
+                else:
+                    x = np.ones(locations.shape)*self.kernel.prior
+                return x
+
             trainLocations =\
                 np.array([[s.position.t,\
                            s.position.x,\
                            s.position.y,\
                            s.position.z]\
                            for s in samples])
+            
             trainValues = np.array([s.data for s in samples]).squeeze()
             if len(trainValues.shape) < 2:
                 trainValues = trainValues.reshape(-1,1)
@@ -190,10 +207,10 @@ class GprPredictor(MapInterface):
                 # print("Train values :\n", trainValues)
                 gprProc.fit(trainLocations, trainValues)
             except Exception as e:
+                print('########### The problem is here ##########')
                 print("Got exception in", self.name)
                 raise e
 
-            
             if self.updateRange:
                 res = gprProc.predict(locations, return_std=self.computes_stddev())
                 if self.computes_stddev():
