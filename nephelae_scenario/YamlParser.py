@@ -17,13 +17,18 @@ class YamlParser:
         self.configFiles    = {}
         self.yamlStream     = ""
         self.configRoot     = None
+        self.config         = None
 
 
     def parse(self):
-        self.__init__(self.mainConfigFile)
-        self.__build_yaml()
-        self.config = yaml.safe_load(self.yamlStream)
-
+        
+        # TODO Temporary. uncomment this
+        # self.__init__(self.mainConfigFile)
+        # self.__build_yaml()
+        # self.config = yaml.safe_load(self.yamlStream)
+        
+        with open(self.mainConfigFile, 'r') as f:
+            self.config = yaml.safe_load(f)
         return self.config
         
 

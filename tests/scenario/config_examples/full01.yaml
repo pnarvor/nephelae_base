@@ -1,0 +1,67 @@
+---
+# local frame must be given in utm coordinates
+local_frame:
+    east:     &local_frame_east   360284.0
+    north:    &local_frame_north 4813595.0
+    alt:      &local_frame_alt         0.0
+    utm_zone: &local_frame_utm_zone    31N
+
+# flight area in local coordinates
+flight_area: &flight_area [[-10000.0, -10000.0, 300.0], [10000.0, 10000.0, 4000.0]]
+
+# database config
+database:
+    enable_save: False
+    # filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
+
+mesonh_files: &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+
+# optional fields. Will not be read by the scenario. Used to define yaml aliases.
+defaults:
+    circle_radius:
+        - &circle_radius_min  50.0
+        - &circle_radius_max 500.0
+        - defaults: &circle_radius_defaults
+            - SimpleBounds: [[*circle_radius_min, *circle_radius_max]]
+
+    drift:
+        - &xdrift_min -10.0
+        - &xdrift_max  10.0
+        - &ydrift_min -10.0
+        - &ydrift_max  10.0
+        - &zdrift_min  -5.0
+        - &zdrift_max   5.0
+        - drift: &drift_defaults
+            - Length: [3]
+            - SimpleBounds: [[[*xdrift_min, *ydrift_min, *zdrift_min],
+                              [*xdrift_max, *ydrift_max, *zdrift_max]]]
+        - hdrift: &hdrift_defaults
+            - Length: [2]
+            - SimpleBounds: [[[*xdrift_min, *ydrift_min],
+                              [*xdrift_max, *ydrift_max]]]
+        - zdrift: &zdrift_defaults
+            - SimpleBounds: [[*zdrift_min, *zdrift_max]]
+
+    lace: &lace_defaults
+        parameters:
+            start:
+                - Length: [3]
+                - SimpleBounds: [*flight_area]
+            first_turn_direction:
+                - DefaultValue:  [1.0]
+                - AllowedValues: [[-1.0, 1.0]]
+            circle_radius: *circle_radius_defaults
+            drift: *drift_defaults
+        updatables:
+            hdrift: *hdrift_defaults
+            zdrift: *zdrift_defaults
+
+aircrafts:
+    200:
+        plugins:
+            - Missions:
+                Lace: *lace_defaults
+            - MesonhProbe:
+                mesonhFiles: *mesonh_files
+                mesonhVariables: ['RCT', 'WT', ['UT', 'VT']]
+
