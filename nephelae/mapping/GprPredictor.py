@@ -144,8 +144,8 @@ class GprPredictor(MapInterface):
             return
         try:
             # ############## NOT WRRRROOOOOOOOOOOOOOOOOOOOOOONNG #####################
-            # # Must take all data otherwise prediction not possible because outside 
-            # # locations
+            # Must take all data otherwise prediction not possible because outside 
+            # locations
             # searchKeys = [slice(b.min,b.max) for b in Bounds.from_array(locations.T)]
             # samples = [entry.data for entry in \
             #            self.database.find_entries(self.databaseTags, tuple(searchKeys)]
@@ -172,20 +172,12 @@ class GprPredictor(MapInterface):
                              [locBounds.min:locBounds.max]]
             
             if len(samples) < 1:
-                Min = [self.kernel.prior]
-                Max = [self.kernel.prior]
-                if len(Min) != len(self.dataRange):
-                    self.dataRange = [Bounds(m, M) for m,M in zip(Min,Max)]
-                else:
-                    for b,m,M in zip(self.dataRange, Min, Max):
-                        b.update(m)
-                        b.update(M)
-                # TODO : Check if this is correct or not (probably not)
+                self.dataRange[0].update(self.kernel.mean)
                 if self.computes_stddev():
-                    temp = np.ones(locations.shape)*self.kernel.prior
-                    x = (temp, np.ones(locations.shape[0])*self.kernel.prior)
+                    temp = np.ones(locations.shape)*self.kernel.mean
+                    x = (temp, np.ones(locations.shape[0])*self.kernel.variance)
                 else:
-                    x = np.ones(locations.shape)*self.kernel.prior
+                    x = np.ones(locations.shape)*self.kernel.mean
                 return x
 
             trainLocations =\

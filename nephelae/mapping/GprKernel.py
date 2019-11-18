@@ -169,7 +169,7 @@ class WindKernel(NephKernel):
 
     """
 
-    def __init__(self, lengthScales, variance, noiseVariance, windMap, prior=0):
+    def __init__(self, lengthScales, variance, noiseVariance, windMap, mean=0):
 
         """
         Parameters
@@ -180,7 +180,7 @@ class WindKernel(NephKernel):
 
         super().__init__(lengthScales, variance, noiseVariance)
         self.windMap = windMap
-        self.prior = prior
+        self.mean = mean
 
     
     def __call__(self, X, Y=None):
