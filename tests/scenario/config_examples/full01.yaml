@@ -65,6 +65,6 @@ aircrafts:
                 Lace: *lace_defaults
             - MesonhProbe:
                 mesonhFiles: *mesonh_files
-                mesonhVariables: ['RCT', 'WT', ['UT', 'VT']]
+                mesonhVariables: ['RCT', 'WT', 'THT', ['UT', 'VT']]
                 rctFeedback: True
 
