@@ -20,6 +20,8 @@ from nephelae.types  import Gps
 from nephelae.types  import SensorSample
 
 from nephelae.mapping  import GprPredictor
+from nephelae.mapping  import StdMap
+from nephelae.mapping  import ValueMap
 from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
 from nephelae.database import NephelaeDataServer
@@ -87,7 +89,7 @@ def parameters(rct):
 
 #########################################################################
 
-mesonhPath = '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
+mesonhPath = '/local/fseguin/nephelae_data/REFHR.1.ARMCu.4D.nc'
 dataset = MesonhDataset(mesonhPath)
 
 rct = MesonhVariable(dataset, ['RCT','WT'])
@@ -107,22 +109,23 @@ kernel0 = WindKernel(lengthScales, processVariance, noiseStddev**2, WindMapConst
 noise = noiseStddev*np.random.randn(p.shape[0])
 dtfile = 'output/wind_data04.neph'
 print("Getting mesonh values... ", end='', flush=True)
-# dtbase = NephelaeDataServer()
+dtbase = NephelaeDataServer()
 # for pos,n in zip(p,noise):
-#     dtbase.add_gps(Gps("100", Position(pos[0],pos[1],pos[2],pos[3])))
-#     dtbase.add_sample(SensorSample('RCT', '100', pos[0],
-#         Position(pos[0],pos[1],pos[2],pos[3]),
-#         [rct[pos[0],pos[1],pos[2],pos[3] + n]]))
-#     dtbase.add_sample(SensorSample('Wind', '100', pos[0],
-#         Position(pos[0],pos[1],pos[2],pos[3]),
-#         [ut[pos[0],pos[1],pos[2],pos[3]], vt[pos[0],pos[1],pos[2],pos[3]]]))
+#    dtbase.add_gps(Gps("100", Position(pos[0],pos[1],pos[2],pos[3])))
+#    dtbase.add_sample(SensorSample('RCT', '100', pos[0],
+#        Position(pos[0],pos[1],pos[2],pos[3]),
+#        [rct[pos[0],pos[1],pos[2],pos[3] + n]]))
+#    dtbase.add_sample(SensorSample('Wind', '100', pos[0],
+#        Position(pos[0],pos[1],pos[2],pos[3]),
+#        [ut[pos[0],pos[1],pos[2],pos[3]], vt[pos[0],pos[1],pos[2],pos[3]]]))
 # dtbase.save(dtfile, force=True)
 dtbase = NephelaeDataServer.load(dtfile)
 print("Done !", flush=True)
 
 
-gprMap = GprPredictor('RCT', dtbase, ['RCT'], kernel0)
-
+gpr = GprPredictor(dtbase, ['RCT'], kernel0)
+map_gpr = ValueMap('RCT_val', gpr)
+std_gpr = StdMap('RCT_val', gpr)
 
 profiling = False
 # profiling = True
@@ -140,38 +143,37 @@ def do_update(t):
     # prediction
 
     # print(gprMap.range())
-    map0, std0 = gprMap[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
-
+    map0 = map_gpr[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
+    std0 = std_gpr[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
     # uncomment this to remove negative values  
-    # map0.data[map0.data < 0.0] = 0.0
+    map0.data[map0.data < 0.0] = 0.0
    
     # display
     if not profiling:
         global axes
         axes[0].cla()
         axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data[:,:,0].T, origin='lower',
-                       interpolation=interp,
-                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
+                      interpolation=interp,
+                      extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
         axes[0].set_title("Ground truth")
 
         try:
-            axes[0].plot(p[:int(t-tStart + 0.5),1], p[:int(t-tStart + 0.5),2], '.')
+           axes[0].plot(p[:int(t-tStart + 0.5),1], p[:int(t-tStart + 0.5),2], '.')
         finally:
-            pass
+           pass
 
         axes[1].cla()
         axes[1].imshow(map0.data[:,:,0].T, origin='lower', interpolation=interp,
-                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
+                      extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[1].grid()
         axes[1].set_title("MAP")
 
         axes[2].cla()
         axes[2].imshow(std0.data.T**2, origin='lower', interpolation=interp,
-                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
+                      extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[2].grid()
         axes[2].set_title("Variance AP")
-
 def init():
     pass
 def update(i):

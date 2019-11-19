@@ -7,7 +7,7 @@ from nephelae.types import Bounds
 from .MapInterface import MapInterface
 from .GprPredictor import GprPredictor
 
-class StdMap(MapInterface):
+class ValueMap(MapInterface):
     def __init__(self, name, gpr, sampleSize=1):
         super().__init__(name)
         self.sampleSize = sampleSize
@@ -22,13 +22,14 @@ class StdMap(MapInterface):
                 if not self.gpr.checkCache(self.keys):
                     self.gpr.setKeys(self.keys)
                     self.gpr.computeMaps(locations)
-                return self.gpr.cache[1]
+                res = self.gpr.cache[0]
             finally:
                 self.gpr.locationsLock.release()
         else:
             cond = threading.Condition(self.gpr.locationsLock)
             cond.wait_for(cond.wait())
-            return self.at_locations(locations)
+            res = self.at_locations(locations)
+        return res
 
     def shape(self):
         return (None, None, None, None)
@@ -48,7 +49,7 @@ class StdMap(MapInterface):
     # Will remove this when everything is fixed
     def computes_stddev(self):
         return False
-    
+
     def __getitem__(self, keys):
         if self.gpr.getItemLock.acquire(blocking=True, timeout=1.0):
             try:
