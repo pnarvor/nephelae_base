@@ -2,13 +2,14 @@ import yaml
 import os
 import time
 
-from nephelae.types     import NavigationRef, Position
-from nephelae.database  import NephelaeDataServer
-from nephelae_paparazzi import build_aircraft, AircraftLogger
+from nephelae.types             import NavigationRef, Position, Pluginable
+from nephelae.database          import NephelaeDataServer
+from nephelae_paparazzi         import build_aircraft, AircraftLogger
+from nephelae_paparazzi.plugins import WindSimulation
 
 from .YamlParser import YamlParser
 
-class Scenario:
+class Scenario(Pluginable):
 
     """
     Scenario
@@ -33,6 +34,7 @@ class Scenario:
         self.mesonhFiles = None
         self.maps        = None
         self.logger      = AircraftLogger(quiet=True)
+        self.running     = False
 
 
     def load(self):
@@ -49,7 +51,6 @@ class Scenario:
         self.flightArea = self.config['flight_area']
         
         self.database = NephelaeDataServer()
-
         # TODO
         # try:
         #     if self.config['database']['enable_save']:
@@ -59,20 +60,27 @@ class Scenario:
         #     pass
         
         if 'mesonh_files' in self.config.keys():
-            self.mesonhFile = self.config['mesonh_files']
+            self.mesonhFiles = self.config['mesonh_files']
         
         for key in self.config['aircrafts']:
             aircraft = build_aircraft(str(key), self.localFrame,
                                       self.config['aircrafts'])
-            aircraft.add_gps_observer(self.logger)
-            aircraft.add_status_observer(self.logger)
-            aircraft.add_sensor_observer(self.logger)
+            # aircraft.add_gps_observer(self.logger)
+            # aircraft.add_status_observer(self.logger)
+            # aircraft.add_sensor_observer(self.logger)
             self.aircrafts[str(key)] = aircraft
 
-    def start():
+        if 'wind_feedback' in self.config.keys():
+            if self.config['wind_feedback']:
+                self.load_plugin(WindSimulation, self.mesonhFiles)
+                                 
+
+    def start(self):
+        self.running = True
         for aircraft in self.aircrafts.values():
             aircraft.start()
     
-    def stop():
+    def stop(self):
+        self.running = False
         for aircraft in self.aircrafts.values():
             aircraft.stop()

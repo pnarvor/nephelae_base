@@ -14,16 +14,20 @@ database:
     enable_save: False
     # filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
 
-mesonh_files: &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+# Setting this to true will activate feedback to WORLD_ENV requests
+wind_feedback: True
 
-# optional fields. Will not be read by the scenario. Used to define yaml aliases.
+# Default fields. Used to define yaml aliases, to define values in one single place.
 defaults:
+    start: &start_defaults
+        - Length: [3]
+        - SimpleBounds: [*flight_area]
     circle_radius:
         - &circle_radius_min  50.0
         - &circle_radius_max 500.0
         - defaults: &circle_radius_defaults
             - SimpleBounds: [[*circle_radius_min, *circle_radius_max]]
-
     drift:
         - &xdrift_min -10.0
         - &xdrift_max  10.0
@@ -44,9 +48,7 @@ defaults:
 
     lace: &lace_defaults
         parameters:
-            start:
-                - Length: [3]
-                - SimpleBounds: [*flight_area]
+            start: *start_defaults
             first_turn_direction:
                 - DefaultValue:  [1.0]
                 - AllowedValues: [[-1.0, 1.0]]
@@ -64,4 +66,5 @@ aircrafts:
             - MesonhProbe:
                 mesonhFiles: *mesonh_files
                 mesonhVariables: ['RCT', 'WT', ['UT', 'VT']]
+                rctFeedback: True
 
