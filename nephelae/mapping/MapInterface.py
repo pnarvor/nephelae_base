@@ -120,24 +120,6 @@ class MapInterface(abc.ABC):
 
 
     @abc.abstractmethod
-    def computes_stddev(self):
-        """
-        Tells if the standard deviation is computed.
-        (and returned by [] operator). This is for compatibility with
-        nephelae.mapping.GprPredictor.
-
-        /!\ Will probably be deleted in near future. (Compatibility with
-        GprPredictor might be resolved with a cached stddev map).
-
-        Returns
-        -------
-        boolean
-            True if [] operator also returns the standard deviation.
-        """
-        pass
-    
-    
-    @abc.abstractmethod
     def sample_size(self):
         """
         Returns the number of scalars in a single sample
@@ -202,17 +184,8 @@ class MapInterface(abc.ABC):
         for param in params:
             if np.array(param).shape:
                 dims.add_dimension(param, 'LUT')
-        # if isinstance(pred, (list, tuple)):
-        if self.computes_stddev():
-            outputShape = list(T.shape)
-            res = [ScaledArray(pred[1].reshape(outputShape).squeeze(), dims)]
-            if len(pred[0].shape) == 2:
-                outputShape.append(pred[0].shape[1])
-            res.insert(0,ScaledArray(pred[0].reshape(outputShape).squeeze(), dims))
-            return res
-        else:
-            outputShape = list(T.shape)
-            if len(pred.shape) == 2:
-                outputShape.append(pred.shape[1])
-            return ScaledArray(pred.reshape(outputShape).squeeze(), dims)
+        outputShape = list(T.shape)
+        if len(pred.shape) == 2:
+            outputShape.append(pred.shape[1])
+        return ScaledArray(pred.reshape(outputShape).squeeze(), dims)
 

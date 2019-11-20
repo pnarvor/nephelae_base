@@ -4,9 +4,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 
 from nephelae.types import Bounds
 
-from .MapInterface import MapInterface
-
-class GprPredictor(MapInterface):
+class GprPredictor():
 
     """
     GprPredictor
@@ -32,28 +30,17 @@ class GprPredictor(MapInterface):
         Class doing the GPR computation. (Not used here. Trouble updating
         data inside this class. Is re-build each time. TODO : debug this)
 
-    computesStddev : bool
-        On prediction, GaussianProcessRegressor can either return only the
-        Maximum A Posteriori (MAP) or both the MAP and its associated
-        covariance map. (TODO : remove this and transform it in a cached
-        covariance map).
-
-    updateRange : bool
-        Mainly for drawing purposes. If true min-max value of the last predicted
-        map are re-computed each time.
-
-    dataRange : list(Bounds,...)
-        Contains range of value inside last predicted map. See
-        nephelae.mapping.MapInterface for more details.
-
     lock : threading.Lock
         Simple mutex to allow only one map computation at a time in
-        self.at_location method. self.at_location will return Non if busy.
+        self.compute_maps method. self.compute_maps will return None if busy.
+
+    cache : 3-tuple
+        Contains locations, computed Values and Stds maps of given locations.
 
     Methods
     -------
 
-    at_locations(locations) ->  numpy.array:
+    compute_maps(locations):
         Computes predicted value at each given location using GPR.
         This method is used in the map interface when requesting a dense map.
         When requesting a dense map, each location must be the position of
@@ -62,8 +49,7 @@ class GprPredictor(MapInterface):
     See nephelae.mapping.MapInterface for other methods.
     """
 
-    def __init__(self, name, database, databaseTags, kernel,
-                 sampleSize=1, computesStddev=True, updateRange=True):
+    def __init__(self, database, databaseTags, kernel):
 
         """
         name : str
@@ -74,38 +60,24 @@ class GprPredictor(MapInterface):
 
         databaseTags : list(str, ...)
             tags for searching data in the database.
-       
+
         kernel : sklearn.gaussian_process.kernel.Kernel derived type
             Kernel used in GPR.
-
-        computesStddev : bool
-            On prediction, GaussianProcessRegressor can either return only the
-            Maximum A Posteriori (MAP) or both the MAP and its associated
-            covariance map. (TODO : remove this and transform it in a cached
-            covariance map).
-
-        updateRange : bool
-            Mainly for drawing purposes. If true min-max value of the last predicted
-            map are re-computed each time.
         """
-        super().__init__(name)
-
-        self.database     = database
-        self.databaseTags = databaseTags
-        self.kernel       = kernel
+        self.database       = database
+        self.databaseTags   = databaseTags
+        self.kernel         = kernel
         self.gprProc = GaussianProcessRegressor(self.kernel,
-                                                alpha=0.0,
-                                                optimizer=None,
-                                                copy_X_train=False)
-        self.computesStddev = computesStddev
-        self.updateRange    = updateRange
-        self.dataRange      = []
-        self.lock           = threading.Lock()
-        self.sampleSize     = sampleSize # Find a way to make this automatic
+                alpha=0.0,
+                optimizer=None,
+                copy_X_train=False)
+        self.cache          = None
+        self.keys           = None
+        self.locationsLock  = threading.Lock()
+        self.getItemLock    = threading.Lock()
 
+    def computeMaps(self, locations):
 
-    def at_locations(self, locations):
-        
         """Computes predicted value at each given location using GPR.
 
         This method is used in the map interface when requesting a dense map.
@@ -136,111 +108,37 @@ class GprPredictor(MapInterface):
         Note : This method probably needs more refining.
         (TODO : investigate this)
         """
+        kernelSpan = self.kernel.span()[0]
+        locBounds = Bounds(locations[0,0], locations[-1,0])
 
-        # try:
-        # with self.lock:
-        if not self.lock.acquire(blocking=True, timeout=1.0):
-            print("###### Cloud not lock", self.name, "! ####################################")
-            return
-        try:
-
-            # ############## NOT WRRRROOOOOOOOOOOOOOOOOOOOOOONNG #####################
-            # # Must take all data otherwise prediction not possible because outside 
-            # # locations
-            # searchKeys = [slice(b.min,b.max) for b in Bounds.from_array(locations.T)]
-            # samples = [entry.data for entry in \
-            #            self.database.find_entries(self.databaseTags, tuple(searchKeys)]
-
-            # Finding bounds of data we currently have then compute
-            # proper bounds of data to request. This ensure we have some data
-            # to make predictions on.
-            # Here only time limts are considered
-            # locations are assumed to be sorted in increasing time order
-            # (same time location will probably be asked more often anyway)
-
-            dataBounds = self.database.find_bounds(self.databaseTags)[0]
-            kernelSpan = self.kernel.span()[0]
-            locBounds = Bounds(locations[0,0], locations[-1,0])
-
-            locBounds.min = max([locBounds.min, dataBounds.min])
-            locBounds.max = min([locBounds.max, dataBounds.max])
-            locBounds.min = locBounds.min - kernelSpan
-            locBounds.max = locBounds.max + kernelSpan
-
-            samples = [entry.data for entry in \
+        locBounds.min = locBounds.min - kernelSpan
+        locBounds.max = locBounds.max + kernelSpan
+        samples = [entry.data for entry in \
                 self.database[self.databaseTags]\
-                             (assumePositiveTime=False)\
-                             [locBounds.min:locBounds.max]]
-            
+                (assumePositiveTime=False)\
+                [locBounds.min:locBounds.max]]
+
+        if len(samples) < 1:
+            self.cache = (np.ones(locations.shape)*self.kernel.mean,
+                    np.ones(locations.shape[0])*self.kernel.variance)
+
+        else:
             trainLocations =\
                 np.array([[s.position.t,\
-                           s.position.x,\
-                           s.position.y,\
-                           s.position.z]\
-                           for s in samples])
+                s.position.x,\
+                s.position.y,\
+                s.position.z]\
+                for s in samples])
+
             trainValues = np.array([s.data for s in samples]).squeeze()
             if len(trainValues.shape) < 2:
                 trainValues = trainValues.reshape(-1,1)
-            try:
-                gprProc = GaussianProcessRegressor(self.kernel,
-                                                   alpha=0.0,
-                                                   optimizer=None,
-                                                   copy_X_train=False)
-                # print("Train locations :\n", trainLocations)
-                # print("Train values :\n", trainValues)
-                gprProc.fit(trainLocations, trainValues)
-            except Exception as e:
-                print("Got exception in", self.name)
-                raise e
 
-            
-            if self.updateRange:
-                res = gprProc.predict(locations, return_std=self.computes_stddev())
-                if self.computes_stddev():
-                    tmp = res[0]
-                else:
-                    tmp = res
-                Min = tmp.min(axis=0)
-                Max = tmp.max(axis=0)
-                if np.isscalar(Min):
-                    Min = [Min]
-                    Max = [Max]
-                if len(Min) != len(self.dataRange):
-                    self.dataRange = [Bounds(m, M) for m,M in zip(Min,Max)]
-                else:
-                    for b,m,M in zip(self.dataRange, Min, Max):
-                        b.update(m)
-                        b.update(M)
-                return res
-            else:
-                return gprProc.predict(locations, return_std=self.computes_stddev())
-        finally:
-            self.lock.release()
+            self.gprProc.fit(trainLocations, trainValues)
+            self.cache = self.gprProc.predict(locations, return_std=True)
 
-    def shape(self):
-        return (None, None, None, None)
+    def checkCache(self, keys):
+        return (self.cache is not None) and keys == self.keys
 
-
-    def span(self):
-        return (None, None, None, None)
-
-
-    def bounds(self):
-        return (None, None, None, None)
-
-
-    def resolution(self):
-        return self.kernel.resolution()
-
-
-    def sample_size(self):
-        return self.sampleSize
-   
-
-    def range(self):
-        return self.dataRange
-
-
-    def computes_stddev(self):
-        return self.computesStddev
-
+    def setKeys(self, keys):
+        self.keys = keys
