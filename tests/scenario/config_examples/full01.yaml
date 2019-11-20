@@ -6,16 +6,20 @@ local_frame:
     alt:      &local_frame_alt         0.0
     utm_zone: &local_frame_utm_zone    31N
 
-# flight area in local coordinates
+# flight area relative to local frame
 flight_area: &flight_area [[-10000.0, -10000.0, 300.0], [10000.0, 10000.0, 4000.0]]
 
 # database config
 database:
-    enable_save: False
-    # filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
+    enable_save: True
+    filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
+    timer_tick: 10.0 # (in seconds) default is 60.0
+    overwrite_existing: True # Will overwrite a database file if it exists
 
-mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+mesonh_files: &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+
 # Setting this to true will activate feedback to WORLD_ENV requests
+# (Simulated aircrafts will fly in a simulated wind)
 wind_feedback: True
 
 # Default fields. Used to define yaml aliases, to define values in one single place.
@@ -66,5 +70,5 @@ aircrafts:
             - MesonhProbe:
                 mesonhFiles: *mesonh_files
                 mesonhVariables: ['RCT', 'WT', 'THT', ['UT', 'VT']]
-                rctFeedback: True
+                rctFeedback: True # Forward RCT value to pprz lwc_sim module
 

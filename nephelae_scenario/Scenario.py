@@ -23,6 +23,8 @@ class Scenario(Pluginable):
     """
 
     def __init__(self, mainConfigPath):
+
+        print(mainConfigPath)
         
         self.parser = YamlParser(mainConfigPath)
         
@@ -49,16 +51,8 @@ class Scenario(Pluginable):
         self.localFrame = NavigationRef(ref)
         self.flightArea = self.config['flight_area']
         
-        self.database = NephelaeDataServer()
-        self.database.set_navigation_frame(self.localFrame)
-        # TODO
-        # try:
-        #     if self.config['database']['enable_save']:
-        #         self.database.enable_periodic_save(
-        #             self.config['database']['enable_save'])
-        # except KeyError:
-        #     pass
-        
+        self.database = self.configure_database()
+            
         if 'mesonh_files' in self.config.keys():
             self.mesonhFiles = self.config['mesonh_files']
         
@@ -84,3 +78,47 @@ class Scenario(Pluginable):
         self.running = False
         for aircraft in self.aircrafts.values():
             aircraft.stop()
+
+        # Disabling database periodic save (will ave once before stoping)
+        # Will be ignore if periodic save was already disabled
+        self.database.disable_periodic_save()
+
+
+    def configure_database(self):
+        """TODO implement the replay"""
+
+        database = NephelaeDataServer()
+        database.set_navigation_frame(self.localFrame)
+        
+        try:
+            config = self.config['database']
+        except KeyError:
+            # No specific options were given to the database.
+            # Leaving default behavior.
+            return database
+
+        enableSave = False
+        try:
+            enableSave = config['enable_save']
+        except KeyError:
+            # No saving configuration
+            pass
+
+        if enableSave:
+            try:
+                filePath = config['filepath']
+            except KeyError:
+                raise ValueError("Configuration file "+self.mainConfigPath+\
+                    " asked for database saving but did not set a 'filepath' field.")
+            try:
+                timerTick = config['timer_tick']
+            except KeyError:
+                timerTick = 60.0
+            try:
+                force = config['overwrite_existing']
+            except KeyError:
+                force = False
+            database.enable_periodic_save(filePath, timerTick, force)
+
+        return database
+
