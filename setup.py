@@ -15,7 +15,7 @@ setup(name='nephelae',
         'matplotlib',
         'scikit-learn',
         'sh',
-        'yaml'
+        'PyYAML'
       ],
       zip_safe=False)
 
