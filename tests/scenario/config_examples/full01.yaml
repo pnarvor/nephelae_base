@@ -62,11 +62,24 @@ defaults:
             hdrift: *hdrift_defaults
             zdrift: *zdrift_defaults
 
+    rosette: &rosette_defaults
+        parameters:
+            start: *start_defaults
+            first_turn_direction:
+                - DefaultValue:  [1.0]
+                - AllowedValues: [[-1.0, 1.0]]
+            circle_radius: *circle_radius_defaults
+            drift: *drift_defaults
+        updatables:
+            hdrift: *hdrift_defaults
+            zdrift: *zdrift_defaults
+
 aircrafts:
     200:
         plugins:
             - Missions:
                 Lace: *lace_defaults
+                Rosette: *rosette_defaults
             - MesonhProbe:
                 mesonhFiles: *mesonh_files
                 mesonhVariables: ['RCT', 'WT', 'THT', ['UT', 'VT']]
