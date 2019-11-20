@@ -1,0 +1,30 @@
+---
+# local frame must be given in utm coordinates
+local_frame:
+    east:     &local_frame_east   360284.0
+    north:    &local_frame_north 4813595.0
+    alt:      &local_frame_alt         0.0
+    utm_zone: &local_frame_utm_zone    31N
+
+# flight area in local coordinates
+flight_area: &flight_area [[-10000.0, -10000.0, 300.0], [10000.0, 10000.0, 4000.0]]
+
+# database config
+database:
+    enable_save: False
+    # filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
+
+mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+# Setting this to true will activate feedback to WORLD_ENV requests
+wind_feedback: True
+
+# Default fields. Used to define yaml aliases, to define values in one single place.
+
+aircrafts:
+    200:
+        plugins:
+            - MesonhProbe:
+                mesonhFiles: *mesonh_files
+                mesonhVariables: ['RCT', 'WT', 'THT', ['UT', 'VT']]
+                rctFeedback: True
+
