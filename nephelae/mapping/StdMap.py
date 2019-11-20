@@ -45,10 +45,6 @@ class StdMap(MapInterface):
     def sample_size(self):
         return self.sampleSize
     
-    # Will remove this when everything is fixed
-    def computes_stddev(self):
-        return False
-    
     def __getitem__(self, keys):
         if self.gpr.getItemLock.acquire(blocking=True, timeout=1.0):
             try:
