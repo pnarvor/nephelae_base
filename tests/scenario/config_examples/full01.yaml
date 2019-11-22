@@ -80,6 +80,8 @@ aircrafts:
             - Missions:
                 Lace: *lace_defaults
                 Rosette: *rosette_defaults
+            - MissionWindUpdater:
+                period: 10.0
             - MesonhProbe:
                 mesonhFiles: *mesonh_files
                 mesonhVariables: ['RCT', 'WT', 'THT', ['UT', 'VT']]
