@@ -4,7 +4,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 
 from nephelae.types import Bounds
 
-class GprPredictor():
+class GprPredictor(MapInterface):
 
     """
     GprPredictor
@@ -40,7 +40,7 @@ class GprPredictor():
     Methods
     -------
 
-    compute_maps(locations):
+    at_locations(locations):
         Computes predicted value at each given location using GPR.
         This method is used in the map interface when requesting a dense map.
         When requesting a dense map, each location must be the position of
@@ -75,8 +75,9 @@ class GprPredictor():
         self.keys           = None
         self.locationsLock  = threading.Lock()
         self.getItemLock    = threading.Lock()
+        self.computeStd     = False
 
-    def computeMaps(self, locations):
+    def at_locations(self, locations):
 
         """Computes predicted value at each given location using GPR.
 
@@ -108,37 +109,111 @@ class GprPredictor():
         Note : This method probably needs more refining.
         (TODO : investigate this)
         """
-        kernelSpan = self.kernel.span()[0]
-        locBounds = Bounds(locations[0,0], locations[-1,0])
+        with self.locationLock:
+            kernelSpan = self.kernel.span()[0]
+            locBounds = Bounds(locations[0,0], locations[-1,0])
 
-        locBounds.min = locBounds.min - kernelSpan
-        locBounds.max = locBounds.max + kernelSpan
-        samples = [entry.data for entry in \
-                self.database[self.databaseTags]\
-                (assumePositiveTime=False)\
-                [locBounds.min:locBounds.max]]
+            locBounds.min = locBounds.min - kernelSpan
+            locBounds.max = locBounds.max + kernelSpan
+            samples = [entry.data for entry in \
+                    self.database[self.databaseTags]\
+                    (assumePositiveTime=False)\
+                    [locBounds.min:locBounds.max]]
 
-        if len(samples) < 1:
-            self.cache = (np.ones(locations.shape)*self.kernel.mean,
-                    np.ones(locations.shape[0])*self.kernel.variance)
+            if len(samples) < 1:
+                self.cache = (np.ones(locations.shape)*self.kernel.mean,
+                        np.ones(locations.shape[0])*self.kernel.variance)
 
-        else:
-            trainLocations =\
-                np.array([[s.position.t,\
-                s.position.x,\
-                s.position.y,\
-                s.position.z]\
-                for s in samples])
+            else:
+                trainLocations =\
+                    np.array([[s.position.t,\
+                    s.position.x,\
+                    s.position.y,\
+                    s.position.z]\
+                    for s in samples])
+                trainValues = np.array([s.data for s in samples]).squeeze()
+                if len(trainValues.shape) < 2:
+                    trainValues = trainValues.reshape(-1,1)
+                
+                
+                # Code optimisation, still in beta
+                
+                boundingBox = ((np.min(trainLocations[:,1]),
+                    np.min(trainLocations[:,2])), (np.max(trainLocations[:,1]),
+                        np.max(trainLocations[:,2])))
+                
+                selected_locations = np.array([loc for loc in locations
+                    if loc[1] >= boundingBox[0][0] - kernelSpan
+                    and loc[1] <= boundingBox[1][0] + kernelSpan
+                    and loc[2] >= boundingBox[0][1] - kernelSpan
+                    and loc[2] <= boundingBox[1][1]] + kernelSpan)
 
-            trainValues = np.array([s.data for s in samples]).squeeze()
-            if len(trainValues.shape) < 2:
-                trainValues = trainValues.reshape(-1,1)
+                # ################################
 
-            self.gprProc.fit(trainLocations, trainValues)
-            self.cache = self.gprProc.predict(locations, return_std=True)
+                self.gprProc.fit(trainLocations, trainValues)
+                computed_locations = self.gprProc.predict(selected_locations,
+                        return_std=self.computeStd)
+                
+                res = self.gprProc.predict(locations, return_std=self.computeStd)
+                
+                if self.computeStd:
+                    return res
+                else:
+                    return (res, None)
 
     def checkCache(self, keys):
         return (self.cache is not None) and keys == self.keys
 
     def setKeys(self, keys):
         self.keys = keys
+    
+    def shape(self):
+        return (None, None, None, None)
+
+    def span(self):
+        return (None, None, None, None)
+
+    def bounds(self):
+        return (None, None, None, None)
+
+    def resolution(self):
+        return self.kernel.resolution()
+
+    def sample_size(self):
+        return self.sampleSize
+
+    def range(self):
+        return self.dataRange
+
+    def getStd(self, keys):
+        self.computeStd = True
+        if not self.checkCache(keys):
+            self.setKeys(keys)
+            self.updateCache(keys)
+        return self.cache[1]
+
+    def getValue(self, keys):
+        self.updateCache(keys)
+        return self.cache[0]
+
+    def updateCache(self, keys):
+        with self.getItemLock:
+            if not self.checkCache(keys):
+                self.setKeys(keys)
+                locations, dims = computeLocations(keys)
+                pred = self.at_locations(locations)
+                if self.computeStd:
+                    outputShape = list(locations.shape[0])
+                    std_computed = ScaledArray(pred[1].reshape(outputShape)
+                            .squeeze(), dims)
+                    if len(pred[0].shape) == 2:
+                        outputShape.append(pred[0].shape[1])
+                        val_computed = ScaledArray(pred[0].reshape(outputShape)
+                                .squeeze(), dims))
+                        self.cache = (val_computed, std_computed)
+                else:
+                    self.cache = (computeScaledArray(locations.shape[0],
+                                pred, dims), None)
+
+    def __getitem__(self, keys):
+        return self.getValue

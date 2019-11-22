@@ -141,6 +141,7 @@ class MapInterface(abc.ABC):
         """
         return None
 
+        @abc.abstractmethod
 
     def __getitem__(self, keys):
         """
@@ -157,35 +158,32 @@ class MapInterface(abc.ABC):
             Section of space selected with keys.
             (to be changed with a nephelae.array.ScaledArray ?).
         """
+        locations, dims = computeLocations(keys)
+        pred = self.at_locations(locations)
+        return computeScaledArray(locations.shape[0], pred, dims)
 
-        # print("keys :", keys)
-        # print("resolution :", self.resolution())
-
+    def computeLocations(keys):
         params = []
         for key, res in zip(keys, self.resolution()):
             if isinstance(key, slice):
-                # size = int((key.stop - key.start) / res) + 1
-                # params.append(np.linspace(key.start, key.start+(size-1)*res, size))
                 size = int((key.stop - key.start) / res + 0.5)
-                params.append(np.linspace(key.start + res/2.0, key.stop + res/2.0,size))
+                params.append(np.linspace(
+                    key.start + res/2.0, key.stop + res/2.0,size))
             else:
                 params.append(key)
 
         T,X,Y,Z = np.meshgrid(params[0], params[1], params[2], params[3],
                               indexing='xy', copy=False)
         locations = np.array([T.ravel(), X.ravel(), Y.ravel(), Z.ravel()]).T
-
-        # check this (sorting ?)
-        # pred = self.at_locations(locations[np.argsort(locations[:,0]),:])
-        # pred = self.at_locations(locations, False)
-        # pred = self.at_locations(locations, True)
+        
         pred = self.at_locations(locations)
-        dims = DimensionHelper()
         for param in params:
             if np.array(param).shape:
                 dims.add_dimension(param, 'LUT')
-        outputShape = list(T.shape)
+        return locations, dims
+
+    def computeScaledArray(shape, pred, dims):
+        outputShape = list(shape)
         if len(pred.shape) == 2:
             outputShape.append(pred.shape[1])
         return ScaledArray(pred.reshape(outputShape).squeeze(), dims)
-

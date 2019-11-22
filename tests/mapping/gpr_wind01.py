@@ -92,7 +92,7 @@ def parameters(rct):
 mesonhPath = '/local/fseguin/nephelae_data/REFHR.1.ARMCu.4D.nc'
 dataset = MesonhDataset(mesonhPath)
 
-rct = MesonhVariable(dataset, ['RCT','WT'])
+rct = MesonhVariable(dataset, 'RCT')
 ut  = MesonhVariable(dataset, 'UT')
 vt  = MesonhVariable(dataset, 'VT')
 
@@ -152,7 +152,7 @@ def do_update(t):
     if not profiling:
         global axes
         axes[0].cla()
-        axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data[:,:,0].T, origin='lower',
+        axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data.T, origin='lower',
                       interpolation=interp,
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
@@ -164,13 +164,15 @@ def do_update(t):
            pass
 
         axes[1].cla()
-        axes[1].imshow(map0.data[:,:,0].T, origin='lower', interpolation=interp,
+        axes[1].imshow(map0.data.T, origin='lower', interpolation=interp,
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[1].grid()
         axes[1].set_title("MAP")
 
         axes[2].cla()
-        axes[2].imshow(std0.data.T**2, origin='lower', interpolation=interp,
+        std0 = np.array(std0.data)
+        print(std0.shape)
+        axes[2].imshow(std0.T**2, origin='lower', interpolation=interp,
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[2].grid()
         axes[2].set_title("Variance AP")

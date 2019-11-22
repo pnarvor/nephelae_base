@@ -1,7 +1,5 @@
 import numpy as np
 
-import threading
-
 from nephelae.types import Bounds
 
 from .MapInterface import MapInterface
@@ -14,18 +12,11 @@ class StdMap(MapInterface):
         if not isinstance(gpr, GprPredictor):
             raise ValueError('Gpr MUST be a GprPredictor type')
         self.gpr = gpr
-        self.keys = None
 
     def at_locations(self, locations):
-        if self.gpr.locationsLock.acquire(blocking=True):
-            try:
-                if not self.gpr.checkCache(self.keys):
-                    self.gpr.setKeys(self.keys)
-                    self.gpr.computeMaps(locations)
-                res = self.gpr.cache[1]
-            finally:
-                self.gpr.locationsLock.release()
-        return res
+        if not self.gpr.computeStd:
+            self.gpr.computeStd = True
+        return self.gpr.at_locations[1]
 
     def shape(self):
         return (None, None, None, None)
@@ -43,15 +34,4 @@ class StdMap(MapInterface):
         return self.sampleSize
     
     def __getitem__(self, keys):
-        if self.gpr.getItemLock.acquire(blocking=True):
-            try:
-                self.setKeys(keys)
-                res = super().__getitem__(keys)
-            finally:
-                self.gpr.getItemLock.release()
-        else:
-            res = self.__getitem__(keys)
-        return res
-
-    def setKeys(self, keys):
-        self.keys = keys
+        return self.gpr.getStd(keys)
