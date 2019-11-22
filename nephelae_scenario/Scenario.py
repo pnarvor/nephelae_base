@@ -6,6 +6,7 @@ from nephelae.types             import NavigationRef, Position, Pluginable
 from nephelae.database          import NephelaeDataServer
 from nephelae_paparazzi         import build_aircraft
 from nephelae_paparazzi.plugins import WindSimulation
+from nephelae.mapping           import WindMapConstant, WindObserverMap
 
 from .YamlParser import YamlParser
 
@@ -52,6 +53,12 @@ class Scenario(Pluginable):
         self.flightArea = self.config['flight_area']
         
         self.database = self.configure_database()
+
+        # To be configured in config file
+        # self.windMap = WindMapConstant('Horizontal Wind', [-7.5, -0.5])
+        self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
+        self.database.add_sensor_observer(self.windMap)
+
             
         if 'mesonh_files' in self.config.keys():
             self.mesonhFiles = self.config['mesonh_files']
@@ -59,9 +66,14 @@ class Scenario(Pluginable):
         for key in self.config['aircrafts']:
             aircraft = build_aircraft(str(key), self.localFrame,
                                       self.config['aircrafts'])
+
             aircraft.add_gps_observer(self.database)
             if hasattr(aircraft, 'add_sensor_observer'):
                 aircraft.add_sensor_observer(self.database)
+
+            # find better way
+            if hasattr(aircraft, 'windMap'):
+                aircraft.windMap = self.windMap
             self.aircrafts[str(key)] = aircraft
 
         if 'wind_feedback' in self.config.keys():
