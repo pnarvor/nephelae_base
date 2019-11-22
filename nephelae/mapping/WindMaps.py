@@ -119,7 +119,6 @@ class WindObserverMap(WindMapConstant):
             self.wind = np.array(self.windSamples).mean(axis=0)
             # Removing old data
             self.windSamples[0:len(self.windSamples) - self.minSamples] = []
-            print("New wind value :", self.wind)
 
 
 class WindMapUav(GprPredictor):

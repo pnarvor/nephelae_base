@@ -141,7 +141,6 @@ class Bounds:
                     return False
             return True
         else:
-            print(value, self.min, self.max)
             if any(np.greater(self.min, value).tolist()):
                 return False
             if any(np.less(self.max, value).tolist()):
