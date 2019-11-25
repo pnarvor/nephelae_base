@@ -156,11 +156,11 @@ class MapInterface(abc.ABC):
             Section of space selected with keys.
             (to be changed with a nephelae.array.ScaledArray ?).
         """
-        locations, dims, shape = computeLocations(keys)
+        locations, dims, shape = compute_locations(keys)
         pred = self.at_locations(locations)
-        return computeScaledArray(shape, pred, dims)
+        return compute_scaled_array(shape, pred, dims)
 
-    def computeLocations(self, keys):
+    def compute_locations(self, keys):
         params = []
         for key, res in zip(keys, self.resolution()):
             if isinstance(key, slice):
@@ -179,7 +179,7 @@ class MapInterface(abc.ABC):
                 dims.add_dimension(param, 'LUT')
         return locations, dims, T.shape
 
-    def computeScaledArray(self, shape, pred, dims):
+    def compute_scaled_array(self, shape, pred, dims):
         outputShape = list(shape)
         if len(pred.shape) == 2:
             outputShape.append(pred.shape[1])

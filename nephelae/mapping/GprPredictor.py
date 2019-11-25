@@ -36,8 +36,8 @@ class GprPredictor(MapInterface):
         Simple mutex to allow only one map computation at a time in
         self.compute_maps method. self.compute_maps will return None if busy.
 
-    cache : 3-tuple
-        Contains locations, computed Values and Stds maps of given locations.
+    cache : couple
+        Contains computed Values and Stds maps of given keys.
 
     Methods
     -------
@@ -78,7 +78,7 @@ class GprPredictor(MapInterface):
         self.locationsLock  = threading.Lock()
         self.getItemLock    = threading.Lock()
         self.computeStd     = False
-    def at_locations(self, locations):
+    def at_locations(self, locations, locBounds=None):
 
         """Computes predicted value at each given location using GPR.
 
@@ -111,46 +111,84 @@ class GprPredictor(MapInterface):
         (TODO : investigate this)
         """
         with self.locationsLock:
-            kernelSpan = self.kernel.span()[0]
-            locBounds = Bounds(locations[0,0], locations[-1,0])
-
-            locBounds.min = locBounds.min - kernelSpan
-            locBounds.max = locBounds.max + kernelSpan
+            if locBounds is None:
+                kernelSpan = self.kernel.span()
+                locBounds = Bounds.from_array(locations.T)
+                
+                locBounds[0].min = locBounds[0].min - kernelSpan[0]
+                locBounds[0].max = locBounds[0].max + kernelSpan[0]
+                
+                locBounds[1].min = locBounds[1].min - kernelSpan[1]
+                locBounds[1].max = locBounds[1].max + kernelSpan[1]
+                
+                locBounds[2].min = locBounds[2].min - kernelSpan[2]
+                locBounds[2].max = locBounds[2].max + kernelSpan[2]
+                
+                locBounds[3].min = locBounds[3].min - kernelSpan[3]
+                locBounds[3].max = locBounds[3].max + kernelSpan[3]
+            
             samples = [entry.data for entry in \
                     self.database[self.databaseTags]\
                     (assumePositiveTime=False)\
-                    [locBounds.min:locBounds.max]]
+                    [locBounds[0].min:locBounds[0].max,
+                    locBounds[1].min:locBounds[1].max,
+                    locBounds[2].min:locBounds[2].max,
+                    locBounds[3].min:locBounds[3].max]]
             
             if len(samples) < 1:
                  return (np.ones((locations.shape[0], 1))*self.kernel.mean,
                         np.ones(locations.shape[0])*self.kernel.variance)
 
             else:
+                
                 trainLocations =\
                     np.array([[s.position.t,\
                     s.position.x,\
                     s.position.y,\
                     s.position.z]\
                     for s in samples])
+
                 trainValues = np.array([s.data for s in samples]).squeeze()
                 if len(trainValues.shape) < 2:
                     trainValues = trainValues.reshape(-1,1)
                 
-                boundingBox = ((np.min(trainLocations[:,1]),
-                    np.min(trainLocations[:,2])), (np.max(trainLocations[:,1]),
-                        np.max(trainLocations[:,2])))
+                boundingBox = (np.min(trainLocations, axis=0), 
+                    np.max(trainLocations, axis=0))
 
-                list_indices, list_locations = [], []
+                dt = boundingBox[1][0] - boundingBox[0][0]
+                
+                wind = self.kernel.windMap.get_wind()
+
+                dx, dy = dt*wind
+
+                boundingBox[0][1] = min(boundingBox[0][1], boundingBox[0][1] +
+                        dx)
+                boundingBox[1][1] = max(boundingBox[1][1], boundingBox[1][1] +
+                        dx)
+
+                boundingBox[0][2] = min(boundingBox[0][2], boundingBox[0][2] +
+                        dy)
+                boundingBox[1][2] = max(boundingBox[1][2], boundingBox[1][2] +
+                        dy)
+
                 same_locations = np.where(np.logical_and(
                     np.logical_and(
-                        locations[:,1] >= boundingBox[0][0] - kernelSpan,
-                        locations[:,1] <= boundingBox[1][0] + kernelSpan),
+                        np.logical_and(
+                            locations[:,0] >= boundingBox[0][0] - kernelSpan[0],
+                            locations[:,0] <= boundingBox[1][0] + kernelSpan[0]),
+                        np.logical_and(
+                            locations[:,1] >= boundingBox[0][1] - kernelSpan[1],
+                            locations[:,1] <= boundingBox[1][1] + kernelSpan[1])),
                     np.logical_and(
-                        locations[:,2] >= boundingBox[0][1] - kernelSpan,
-                        locations[:,2] <= boundingBox[1][1] + kernelSpan)))[0]
+                        np.logical_and(
+                            locations[:,2] >= boundingBox[0][2] - kernelSpan[2],
+                            locations[:,2] <= boundingBox[1][2] + kernelSpan[2]),
+                        np.logical_and(
+                            locations[:,3] >= boundingBox[0][3] - kernelSpan[3],
+                            locations[:,3] <= boundingBox[1][3] + kernelSpan[3])
+                    )))[0]
                 
                 selected_locations = locations[same_locations]
-                same_locations.astype(int)
                 
                 self.gprProc.fit(trainLocations, trainValues)
                 computed_locations = self.gprProc.predict(
@@ -158,7 +196,9 @@ class GprPredictor(MapInterface):
                 
                 if self.computeStd:
                     val_res = np.ones((locations.shape[0], 1))*self.kernel.mean
-                    std_res = np.ones(locations.shape[0])*self.kernel.variance
+                    std_res = \
+                    np.ones(locations.shape[0])*np.sqrt(self.kernel.variance + 
+                            self.kernel.noiseVariance)
                     np.put(val_res, same_locations, computed_locations[0])
                     np.put(std_res, same_locations, computed_locations[1])
                     return (val_res, std_res)
@@ -167,10 +207,10 @@ class GprPredictor(MapInterface):
                     np.put(res, same_locations, computed_locations)
                     return (res, None)
 
-    def checkCache(self, keys):
+    def check_cache(self, keys):
         return (self.cache is not None) and keys == self.keys
 
-    def setKeys(self, keys):
+    def set_keys(self, keys):
         self.keys = keys
     
     def shape(self):
@@ -191,35 +231,35 @@ class GprPredictor(MapInterface):
     def range(self):
         return self.dataRange
 
-    def getStd(self, keys):
-        self.updateCache(keys)
+    def get_std(self, keys):
+        self.update_cache(keys)
         return self.cache[1]
 
-    def getValue(self, keys):
-        self.updateCache(keys)
+    def get_value(self, keys):
+        self.update_cache(keys)
         return self.cache[0]
 
-    def updateCache(self, keys):
+    def update_cache(self, keys):
         with self.getItemLock:
-            if not self.checkCache(keys):
-                self.setKeys(keys)
-                locations, dims, shape = self.computeLocations(keys)
+            if not self.check_cache(keys):
+                self.set_keys(keys)
+                locations, dims, shape = self.compute_locations(keys)
                 pred = self.at_locations(locations)
                 if self.computeStd:
                     outputShape = list(shape)
-                    std_computed = ScaledArray(pred[1].reshape(outputShape)
+                    stdComputed = ScaledArray(pred[1].reshape(outputShape)
                             .squeeze(), dims)
                     if len(pred[0].shape) == 2:
                         outputShape.append(pred[0].shape[1])
-                        val_computed = ScaledArray(pred[0].reshape(outputShape)
+                        valComputed = ScaledArray(pred[0].reshape(outputShape)
                                 .squeeze(), dims)
-                        self.cache = (val_computed, std_computed)
+                        self.cache = (valComputed, stdComputed)
                 else:
-                    self.cache = (self.computeScaledArray(shape, pred[0], dims),
-                            None)
+                    self.cache = (self.compute_scaled_array(shape, pred[0],
+                        dims), None)
 
-    def setComputeStd(self, state):
+    def set_compute_std(self, state):
         self.computeStd = state
 
     def __getitem__(self, keys):
-        return self.getValue
+        return self.get_value

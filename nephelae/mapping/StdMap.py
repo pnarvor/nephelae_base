@@ -12,11 +12,9 @@ class StdMap(MapInterface):
         if not isinstance(gpr, GprPredictor):
             raise ValueError('Gpr MUST be a GprPredictor type')
         self.gpr = gpr
-        self.gpr.setComputeStd(True)
+        self.gpr.set_compute_std(True)
 
     def at_locations(self, locations):
-        if not self.gpr.computeStd:
-            self.gpr.computeStd = True
         return self.gpr.at_locations[1]
 
     def shape(self):
@@ -35,4 +33,4 @@ class StdMap(MapInterface):
         return self.sampleSize
     
     def __getitem__(self, keys):
-        return self.gpr.getStd(keys)
+        return self.gpr.get_std(keys)

@@ -46,10 +46,8 @@ class WindMapConstant(MapInterface):
     def sample_size(self):
         return len(self.wind)
 
-
-    def computes_stddev(self):
-        return False
-
+    def get_wind(self):
+        return self.wind
 
 class WindObserverMap(WindMapConstant):
 

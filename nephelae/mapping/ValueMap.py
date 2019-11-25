@@ -32,4 +32,5 @@ class ValueMap(MapInterface):
         return self.sampleSize
     
     def __getitem__(self, keys):
-        return self.gpr.getValue(keys)
+        return self.gpr.get_value(keys)
+
