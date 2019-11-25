@@ -136,25 +136,22 @@ class GprPredictor(MapInterface):
                 if len(trainValues.shape) < 2:
                     trainValues = trainValues.reshape(-1,1)
                 
-                
-                # Code optimisation, still in beta
-                
                 boundingBox = ((np.min(trainLocations[:,1]),
                     np.min(trainLocations[:,2])), (np.max(trainLocations[:,1]),
                         np.max(trainLocations[:,2])))
-                list_indices, list_locations = [], []
-                for i in range(locations.shape[0]):
-                    if (locations[i][1] >= boundingBox[0][0] - kernelSpan
-                    and locations[i][1] <= boundingBox[1][0] + kernelSpan
-                    and locations[i][2] >= boundingBox[0][1] - kernelSpan
-                    and locations[i][2] <= boundingBox[1][1] + kernelSpan):
-                        list_indices.append(i)
-                        list_locations.append(locations[i])
-                selected_locations = np.array(list_locations)
-                same_locations = np.array(list_indices, dtype=np.int32)
-                
-                # ################################
 
+                list_indices, list_locations = [], []
+                same_locations = np.where(np.logical_and(
+                    np.logical_and(
+                        locations[:,1] >= boundingBox[0][0] - kernelSpan,
+                        locations[:,1] <= boundingBox[1][0] + kernelSpan),
+                    np.logical_and(
+                        locations[:,2] >= boundingBox[0][1] - kernelSpan,
+                        locations[:,2] <= boundingBox[1][1] + kernelSpan)))[0]
+                
+                selected_locations = locations[same_locations]
+                same_locations.astype(int)
+                
                 self.gprProc.fit(trainLocations, trainValues)
                 computed_locations = self.gprProc.predict(
                         selected_locations, return_std=self.computeStd)
