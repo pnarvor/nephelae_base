@@ -12,6 +12,7 @@ class StdMap(MapInterface):
         if not isinstance(gpr, GprPredictor):
             raise ValueError('Gpr MUST be a GprPredictor type')
         self.gpr = gpr
+        self.gpr.setComputeStd(True)
 
     def at_locations(self, locations):
         if not self.gpr.computeStd:

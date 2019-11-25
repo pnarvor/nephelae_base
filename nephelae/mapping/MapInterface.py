@@ -141,8 +141,6 @@ class MapInterface(abc.ABC):
         """
         return None
 
-        @abc.abstractmethod
-
     def __getitem__(self, keys):
         """
         Returns a slice of map data ([] operator).
@@ -158,11 +156,11 @@ class MapInterface(abc.ABC):
             Section of space selected with keys.
             (to be changed with a nephelae.array.ScaledArray ?).
         """
-        locations, dims = computeLocations(keys)
+        locations, dims, shape = computeLocations(keys)
         pred = self.at_locations(locations)
-        return computeScaledArray(locations.shape[0], pred, dims)
+        return computeScaledArray(shape, pred, dims)
 
-    def computeLocations(keys):
+    def computeLocations(self, keys):
         params = []
         for key, res in zip(keys, self.resolution()):
             if isinstance(key, slice):
@@ -175,14 +173,13 @@ class MapInterface(abc.ABC):
         T,X,Y,Z = np.meshgrid(params[0], params[1], params[2], params[3],
                               indexing='xy', copy=False)
         locations = np.array([T.ravel(), X.ravel(), Y.ravel(), Z.ravel()]).T
-        
-        pred = self.at_locations(locations)
+        dims = DimensionHelper()
         for param in params:
             if np.array(param).shape:
                 dims.add_dimension(param, 'LUT')
-        return locations, dims
+        return locations, dims, T.shape
 
-    def computeScaledArray(shape, pred, dims):
+    def computeScaledArray(self, shape, pred, dims):
         outputShape = list(shape)
         if len(pred.shape) == 2:
             outputShape.append(pred.shape[1])

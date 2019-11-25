@@ -170,9 +170,7 @@ def do_update(t):
         axes[1].set_title("MAP")
 
         axes[2].cla()
-        std0 = np.array(std0.data)
-        print(std0.shape)
-        axes[2].imshow(std0.T**2, origin='lower', interpolation=interp,
+        axes[2].imshow(std0.data.T**2, origin='lower', interpolation=interp,
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[2].grid()
         axes[2].set_title("Variance AP")

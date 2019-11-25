@@ -2,7 +2,9 @@ import numpy as np
 import threading
 from sklearn.gaussian_process import GaussianProcessRegressor
 
+from nephelae.array import ScaledArray
 from nephelae.types import Bounds
+from nephelae.mapping import MapInterface
 
 class GprPredictor(MapInterface):
 
@@ -76,7 +78,6 @@ class GprPredictor(MapInterface):
         self.locationsLock  = threading.Lock()
         self.getItemLock    = threading.Lock()
         self.computeStd     = False
-
     def at_locations(self, locations):
 
         """Computes predicted value at each given location using GPR.
@@ -109,7 +110,7 @@ class GprPredictor(MapInterface):
         Note : This method probably needs more refining.
         (TODO : investigate this)
         """
-        with self.locationLock:
+        with self.locationsLock:
             kernelSpan = self.kernel.span()[0]
             locBounds = Bounds(locations[0,0], locations[-1,0])
 
@@ -119,9 +120,9 @@ class GprPredictor(MapInterface):
                     self.database[self.databaseTags]\
                     (assumePositiveTime=False)\
                     [locBounds.min:locBounds.max]]
-
+            
             if len(samples) < 1:
-                self.cache = (np.ones(locations.shape)*self.kernel.mean,
+                 return (np.ones((locations.shape[0], 1))*self.kernel.mean,
                         np.ones(locations.shape[0])*self.kernel.variance)
 
             else:
@@ -142,23 +143,37 @@ class GprPredictor(MapInterface):
                     np.min(trainLocations[:,2])), (np.max(trainLocations[:,1]),
                         np.max(trainLocations[:,2])))
                 
-                selected_locations = np.array([loc for loc in locations
-                    if loc[1] >= boundingBox[0][0] - kernelSpan
-                    and loc[1] <= boundingBox[1][0] + kernelSpan
-                    and loc[2] >= boundingBox[0][1] - kernelSpan
-                    and loc[2] <= boundingBox[1][1]] + kernelSpan)
+                selected_locations = np.array([locations[i]
+                    for i in range(locations.shape[0])
+                    if locations[i][1] >= boundingBox[0][0] - kernelSpan
+                    and locations[i][1] <= boundingBox[1][0] + kernelSpan
+                    and locations[i][2] >= boundingBox[0][1] - kernelSpan
+                    and locations[i][2] <= boundingBox[1][1] + kernelSpan])
 
                 # ################################
 
                 self.gprProc.fit(trainLocations, trainValues)
-                computed_locations = self.gprProc.predict(selected_locations,
-                        return_std=self.computeStd)
+                computed_locations = self.gprProc.predict(
+                        selected_locations, return_std=self.computeStd)
                 
-                res = self.gprProc.predict(locations, return_std=self.computeStd)
+                same_locations = np.array([i
+                    for i in range(locations.shape[0])
+                    if locations[i][1] >= boundingBox[0][0] - kernelSpan
+                    and locations[i][1] <= boundingBox[1][0] + kernelSpan
+                    and locations[i][2] >= boundingBox[0][1] - kernelSpan
+                    and locations[i][2] <= boundingBox[1][1] + kernelSpan],
+                    dtype=np.int16)
+                print(same_locations.shape[0])
                 
                 if self.computeStd:
-                    return res
+                    val_res = np.ones((locations.shape[0], 1))*self.kernel.mean
+                    std_res = np.ones(locations.shape[0])*self.kernel.variance
+                    np.put(val_res, same_locations, computed_locations[0])
+                    np.put(std_res, same_locations, computed_locations[1])
+                    return (val_res, std_res)
                 else:
+                    res = np.ones(locations.shape[0], 1)*self.kernel.mean
+                    np.put(res, same_locations, computed_locations)
                     return (res, None)
 
     def checkCache(self, keys):
@@ -186,10 +201,7 @@ class GprPredictor(MapInterface):
         return self.dataRange
 
     def getStd(self, keys):
-        self.computeStd = True
-        if not self.checkCache(keys):
-            self.setKeys(keys)
-            self.updateCache(keys)
+        self.updateCache(keys)
         return self.cache[1]
 
     def getValue(self, keys):
@@ -200,20 +212,23 @@ class GprPredictor(MapInterface):
         with self.getItemLock:
             if not self.checkCache(keys):
                 self.setKeys(keys)
-                locations, dims = computeLocations(keys)
+                locations, dims, shape = self.computeLocations(keys)
                 pred = self.at_locations(locations)
                 if self.computeStd:
-                    outputShape = list(locations.shape[0])
+                    outputShape = list(shape)
                     std_computed = ScaledArray(pred[1].reshape(outputShape)
                             .squeeze(), dims)
                     if len(pred[0].shape) == 2:
                         outputShape.append(pred[0].shape[1])
                         val_computed = ScaledArray(pred[0].reshape(outputShape)
-                                .squeeze(), dims))
+                                .squeeze(), dims)
                         self.cache = (val_computed, std_computed)
                 else:
-                    self.cache = (computeScaledArray(locations.shape[0],
-                                pred, dims), None)
+                    self.cache = (self.computeScaledArray(shape, pred[0], dims),
+                            None)
+
+    def setComputeStd(self, state):
+        self.computeStd = state
 
     def __getitem__(self, keys):
         return self.getValue
