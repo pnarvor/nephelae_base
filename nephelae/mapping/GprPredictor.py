@@ -142,28 +142,22 @@ class GprPredictor(MapInterface):
                 boundingBox = ((np.min(trainLocations[:,1]),
                     np.min(trainLocations[:,2])), (np.max(trainLocations[:,1]),
                         np.max(trainLocations[:,2])))
-                
-                selected_locations = np.array([locations[i]
-                    for i in range(locations.shape[0])
-                    if locations[i][1] >= boundingBox[0][0] - kernelSpan
+                list_indices, list_locations = [], []
+                for i in range(locations.shape[0]):
+                    if (locations[i][1] >= boundingBox[0][0] - kernelSpan
                     and locations[i][1] <= boundingBox[1][0] + kernelSpan
                     and locations[i][2] >= boundingBox[0][1] - kernelSpan
-                    and locations[i][2] <= boundingBox[1][1] + kernelSpan])
-
+                    and locations[i][2] <= boundingBox[1][1] + kernelSpan):
+                        list_indices.append(i)
+                        list_locations.append(locations[i])
+                selected_locations = np.array(list_locations)
+                same_locations = np.array(list_indices, dtype=np.int32)
+                
                 # ################################
 
                 self.gprProc.fit(trainLocations, trainValues)
                 computed_locations = self.gprProc.predict(
                         selected_locations, return_std=self.computeStd)
-                
-                same_locations = np.array([i
-                    for i in range(locations.shape[0])
-                    if locations[i][1] >= boundingBox[0][0] - kernelSpan
-                    and locations[i][1] <= boundingBox[1][0] + kernelSpan
-                    and locations[i][2] >= boundingBox[0][1] - kernelSpan
-                    and locations[i][2] <= boundingBox[1][1] + kernelSpan],
-                    dtype=np.int16)
-                print(same_locations.shape[0])
                 
                 if self.computeStd:
                     val_res = np.ones((locations.shape[0], 1))*self.kernel.mean
