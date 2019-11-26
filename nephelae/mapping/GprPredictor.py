@@ -51,7 +51,7 @@ class GprPredictor(MapInterface):
     See nephelae.mapping.MapInterface for other methods.
     """
 
-    def __init__(self, database, databaseTags, kernel):
+    def __init__(self, database, databaseTags, kernel, updateRange=True):
 
         """
         name : str
@@ -78,6 +78,10 @@ class GprPredictor(MapInterface):
         self.locationsLock  = threading.Lock()
         self.getItemLock    = threading.Lock()
         self.computeStd     = False
+        self.updateRange    = updateRange
+        self.dataRange      = []
+
+    
     def at_locations(self, locations, locBounds=None):
 
         """Computes predicted value at each given location using GPR.
@@ -201,11 +205,30 @@ class GprPredictor(MapInterface):
                             self.kernel.noiseVariance)
                     np.put(val_res, same_locations, computed_locations[0])
                     np.put(std_res, same_locations, computed_locations[1])
-                    return (val_res, std_res)
+                    val_return = (val_res, std_res)
                 else:
                     res = np.ones(locations.shape[0], 1)*self.kernel.mean
                     np.put(res, same_locations, computed_locations)
-                    return (res, None)
+                    val_return = (res, None)
+                
+                if self.updateRange:
+                    tmp = val_return[0]
+                
+                    Min = tmp.min(axis=0)
+                    Max = tmp.max(axis=0)
+                
+                    if np.isscalar(Min):
+                        Min = [Min]
+                        Max = [Max]
+                
+                    if len(Min) != len(self.dataRange):
+                        self.dataRange = [Bounds(m, M) for m,M in zip(Min,Max)]
+                    else:
+                        for b,m,M in zip(self.dataRange, Min, Max):
+                            b.update(m)
+                            b.update(M)
+                
+                return val_return
 
     def check_cache(self, keys):
         return (self.cache is not None) and keys == self.keys
