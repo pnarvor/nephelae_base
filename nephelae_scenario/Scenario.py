@@ -58,10 +58,11 @@ class Scenario(Pluginable):
 
         # Using current time as global mission time
         self.missionT0 = time.time()
+        localFrameConfig = ensure_dictionary(self.config['local_frame'])
         ref = Position(self.missionT0,
-                       self.config['local_frame']['east'],
-                       self.config['local_frame']['north'],
-                       self.config['local_frame']['alt'])
+                       localFrameConfig['east'],
+                       localFrameConfig['north'],
+                       localFrameConfig['alt'])
         self.localFrame = NavigationRef(ref)
         self.flightArea = self.config['flight_area']
         
