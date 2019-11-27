@@ -16,73 +16,9 @@ from nephelae_mesonh import MesonhDataset, MesonhMap
 
 from .YamlParser import YamlParser
 from .loadables  import kernels as KernelTypes
-
-def ensure_dictionary(config):
-    """
-    ensure_dictionary
-
-    Ensure that config is a dictionary. If not, it is probably a list of one
-    element dictionaries (the writer of the configuration file probably put
-    hyphens '-' in front of his keys). If it is the case, this function will
-    return a single dictionary built by fusing all the elements of the list.
-
-    This function is mostly intended to simplify the parsing functions, as
-    the output is always a dictionary.
-    """
-    if isinstance(config, dict):
-        return config
-    if not isinstance(config, list):
-        raise TypeError("Unforeseen error in configuration file.\n" +
-                        str(config))
-
-    output = {}
-    for element in config:
-        if not isinstance(element, dict):
-            raise ValueError("Parsing error in the configuration file.\n" +
-                             str(element))
-        if len(element) != 1:
-            raise ValueError("Parsing error in the configuration file.\n" +
-                             str(element))
-
-        # getting one key in the dictionary
-        key = next(iter(element))
-
-        # Checking if key is not already in the output
-        if key in output.keys():
-            raise ValueError("Parsing error in the configuration file."+
-                             "Two elements have the same key : " + str(key))
-        
-        # inserting this element in the output dictionary
-        output[key] = element[key]
-
-    return output
-
-def ensure_list(config):
-    """
-    ensure_list
-
-    Ensure that config is a list of one-valued dictionaries. This is called
-    when the order of elements is important when loading the config file. (The
-    yaml elements MUST have hyphens '-' in front of them).
-
-    This function returns nothing, as no recovery can be achieved, the order of
-    elements being lost when the dictionary is built.
-    """
-
-    if not isinstance(config, list):
-        raise TypeError("config is not a list. Did you forget some '-' "+
-                        "in your configuration file ?\n" + str(config))
-
-    for element in config:
-        if not isinstance(element, dict):
-            raise ValueError("Parsing error in the configuration file.\n" +
-                             str(element))
-        if len(element) != 1:
-            raise ValueError("Parsing error in the configuration file.\n" +
-                             str(element))
+from .utils      import ensure_dictionary, ensure_list, find_aircraft_id
 
 
-        
 class Scenario(Pluginable):
 
     """
