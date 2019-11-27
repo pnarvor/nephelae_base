@@ -6,8 +6,9 @@ from warnings import warn
 from nephelae.types             import NavigationRef, Position, Pluginable, Bounds
 from nephelae.database          import NephelaeDataServer
 
-from nephelae_paparazzi         import build_aircraft
+from nephelae_paparazzi         import Aircraft
 from nephelae_paparazzi.plugins import WindSimulation
+from nephelae_paparazzi.plugins.loaders import load_plugins
 
 from nephelae.mapping import WindMapConstant, WindObserverMap
 from nephelae.mapping import GprPredictor, ValueMap, StdMap
@@ -70,24 +71,15 @@ class Scenario(Pluginable):
         # self.windMap = WindMapConstant('Horizontal Wind', [-7.5, -0.5])
         self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
         self.database.add_sensor_observer(self.windMap)
-
             
         if 'mesonh_files' in self.config.keys():
             self.mesonhFiles   = self.config['mesonh_files']
             self.mesonhDataset = MesonhDataset(self.mesonhFiles)
-        
-        for key in self.config['aircrafts']:
-            aircraft = build_aircraft(str(key), self.localFrame,
-                                      self.config['aircrafts'])
-
-            aircraft.add_gps_observer(self.database)
-            if hasattr(aircraft, 'add_sensor_observer'):
-                aircraft.add_sensor_observer(self.database)
-
-            # find better way
-            if hasattr(aircraft, 'windMap'):
-                aircraft.windMap = self.windMap
-            self.aircrafts[str(key)] = aircraft
+       
+        if 'aircrafts' in self.config.keys():
+            self.load_aircrafts(self.config['aircrafts'])
+        else:
+            print("Warning : no aircrafts defined in config file")
 
         if 'wind_feedback' in self.config.keys():
             if self.config['wind_feedback']:
@@ -152,6 +144,51 @@ class Scenario(Pluginable):
             database.enable_periodic_save(filePath, timerTick, force)
 
         return database
+
+    
+    def load_aircrafts(self, config):
+        """
+        Instanciate Aircrafts objects, load aicrafts plugins and populate the
+        self.aircrafts attribute.
+        """
+        config = ensure_dictionary(config)
+        for item in config.items():
+            self.load_aircraft(item)
+
+    
+    def load_aircraft(self, item):
+        """
+        load_aircraft
+
+        Instanciate and returns an Aircraft instance with all its plugin
+        loaded.
+        """
+        
+        config     = ensure_dictionary(item[1])
+        aircraftId = find_aircraft_id(item[0], config)
+
+        if aircraftId in self.aircrafts.keys():
+            raise RuntimeError("Aircraft '"+aircraftId+"' already loaded. " +
+                               "This should not happen at all, aborting.")
+        
+        aircraft = Aircraft(aircraftId, self.localFrame)
+        if 'plugins' in config.keys():
+            for plugin in config['plugins']:
+                print(plugin)
+            print("")
+            print(ensure_list(config['plugins']))
+            print("")
+            load_plugins(aircraft, ensure_list(config['plugins']))
+
+        aircraft.add_gps_observer(self.database)
+        if hasattr(aircraft, 'add_sensor_observer'):
+            aircraft.add_sensor_observer(self.database)
+
+        # find better way
+        if hasattr(aircraft, 'windMap'):
+            aircraft.windMap = self.windMap
+
+        self.aircrafts[aircraftId] = aircraft
 
 
     def load_maps(self, config):
