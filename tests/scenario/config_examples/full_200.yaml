@@ -17,7 +17,7 @@ database:
 mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
 # Setting this to true will activate feedback to WORLD_ENV requests
 wind_feedback: True
-mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, -400.0]
+# mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, -400.0]
 
 # Default fields. Used to define yaml aliases, to define values in one single place.
 defaults:
@@ -70,7 +70,7 @@ aircrafts:
                 mesonhFiles: *mesonh_files
                 mesonhVariables: ['RCT', 'WT', 'THT', ['UT', 'VT']]
                 rctFeedback: True
-                mesonhOrigin: *mesonh_origin
+                # mesonhOrigin: *mesonh_origin
 
 
 maps:
@@ -97,5 +97,5 @@ maps:
         name: 'Liquid Water (MesoNH)'
         type: 'MesonhMap'
         mesonh_variable: 'RCT'
-        origin: *mesonh_origin
+        # origin: *mesonh_origin
 
