@@ -7,3 +7,5 @@ from .WindMaps     import WindMapConstant, WindObserverMap
 
 from .StdMap       import StdMap
 from .ValueMap     import ValueMap
+
+from .MacroscopicFunctions import compute_com

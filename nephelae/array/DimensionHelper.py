@@ -242,9 +242,6 @@ class DimensionHelper:
 
     def to_unit(self, keys):
 
-        if not isinstance(keys, (tuple, list)):
-            keys = (keys,)
-        
         if len(keys) != len(self.dims):
             raise ValueError("Number or keys must be equal to number of " +
                              "Dimension (" + str(len(keys)) + "/" + 
@@ -256,9 +253,6 @@ class DimensionHelper:
 
 
     def to_index(self, keys):
-        
-        if not isinstance(keys, (tuple, list)):
-            keys = (keys,)
         
         if len(keys) != len(self.dims):
             raise ValueError("Number or keys must be equal to number of " +

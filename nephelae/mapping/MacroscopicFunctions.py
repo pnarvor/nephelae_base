@@ -17,7 +17,12 @@ def compute_com(scaledArr):
     Tuple (1xN)
         Returns the C.O.M. in the coordinates of the map
     """
-    data = scaledArr.data
-    indices = np.indices(data.shape)
+    res = None
+    data = scaledArr.data.ravel()
+    indices = np.indices(scaledArr.data.shape)
     locations = np.array([x.ravel() for x in indices])
-    return np.sum(data+locations)/np.sum(data)
+    x = np.sum(data)
+    if x != 0:
+        center_of_mass = np.sum(data*locations, axis=1)/x
+        res = scaledArr.dimHelper.to_unit(center_of_mass)
+    return res
