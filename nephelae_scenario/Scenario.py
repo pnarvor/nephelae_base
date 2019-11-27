@@ -174,11 +174,6 @@ class Scenario(Pluginable):
         
         aircraft = Aircraft(aircraftId, self.localFrame)
         if 'plugins' in config.keys():
-            for plugin in config['plugins']:
-                print(plugin)
-            print("")
-            print(ensure_list(config['plugins']))
-            print("")
             load_plugins(aircraft, ensure_list(config['plugins']))
 
         aircraft.add_gps_observer(self.database)
