@@ -10,3 +10,4 @@ from .ValueMap     import ValueMap
 
 from .MacroscopicFunctions import compute_com
 from .MacroscopicFunctions import compute_cross_section_border
+from .MacroscopicFunctions import compute_cloud_volume

@@ -24,6 +24,7 @@ from nephelae.mapping  import StdMap
 from nephelae.mapping  import ValueMap
 from nephelae.mapping  import compute_com
 from nephelae.mapping  import compute_cross_section_border
+from nephelae.mapping  import compute_cloud_volume
 from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
 from nephelae.database import NephelaeDataServer
@@ -139,6 +140,7 @@ interp='nearest'
 map0 = map_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
 map0.data[map0.data < 0.0] = 0.0
 std0 = std_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
+map1 = map_gpr[329,12.5:6387.5,1837.5:2715.5,800.0:1100.0]
 
 inner, outer = compute_cross_section_border(map0, std0, threshold=2e-4)
 fig, axes = plt.subplots(2,1)
@@ -147,6 +149,8 @@ axes[0].contour(inner.T, levels=0, colors='white')
 axes[1].imshow(outer.T)
 axes[1].contour(outer.T, levels=0, colors='white')
 coordinates = compute_com(map0)
+nb_pixels = compute_cloud_volume(map1)
+print(nb_pixels)
 fig, axes = plt.subplots(1,1)
 plt.imshow(map0.data.T, origin='lower', interpolation=interp, extent=[12.5,
     6387.5, 1837.5, 2715.5])

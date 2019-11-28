@@ -74,3 +74,27 @@ def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
     threshold_array(inner_border, threshold)
     threshold_array(outer_border, threshold)
     return inner_border, outer_border
+
+def compute_bounding_box(scaledArr_data, threshold=1e-5):
+    print(np.where(scaledArr_data.data > threshold))
+
+def compute_cloud_volume(scaledArr_data, threshold=1e-5):
+    """
+    Computes the number of pixels defining the cloud.
+
+    Parameters
+    ---------
+    scaledArr_data : ScaledArray
+        Contains the data of interest
+    threshold: number
+        Gives the number where the values are nullified (0) or not (1)
+    
+    Returns
+    ---------
+    Number
+        The number of points defining the area/volume of the cloud
+    """
+    res = scaledArr_data.data
+    res[res < threshold] = 0.0
+    res[res >= threshold] = 1.0
+    return np.sum(res)
