@@ -166,7 +166,7 @@ class MapInterface(abc.ABC):
             if isinstance(key, slice):
                 size = int((key.stop - key.start) / res + 0.5)
                 params.append(np.linspace(
-                    key.start + res/2.0, key.stop + res/2.0,size))
+                    key.start, key.stop, size))
             else:
                 params.append(key)
 
@@ -174,9 +174,12 @@ class MapInterface(abc.ABC):
                               indexing='xy', copy=False)
         locations = np.array([T.ravel(), X.ravel(), Y.ravel(), Z.ravel()]).T
         dims = DimensionHelper()
-        for param in params:
+        # for param in params:
+        #     if np.array(param).shape:
+        #         dims.add_dimension(param, 'LUT')
+        for param, key in zip(params, keys):
             if np.array(param).shape:
-                dims.add_dimension(param, 'LUT')
+                dims.add_dimension([key.start, key.stop], 'linear', len(param))
         return locations, dims, T.shape
 
     def compute_scaled_array(self, shape, pred, dims):
