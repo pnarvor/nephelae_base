@@ -127,8 +127,8 @@ gpr = GprPredictor(dtbase, ['RCT'], kernel0)
 map_gpr = ValueMap('RCT_val', gpr)
 std_gpr = StdMap('RCT_val', gpr)
 
-profiling = False
-# profiling = True
+# profiling = False
+profiling = True
 if not profiling:
     fig, axes = plt.subplots(3,1,sharex=True,sharey=True)
 simTime = p0.t

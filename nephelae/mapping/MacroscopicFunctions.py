@@ -71,6 +71,6 @@ def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
     inner_border, outer_border = (scaledArr_data.data - factor *
             scaledArr_std.data, scaledArr_data.data + factor *
             scaledArr_std.data)
-    threshold_arr(inner_border, threshold)
-    threshold_arr(outer_border, threshold)
+    threshold_array(inner_border, threshold)
+    threshold_array(outer_border, threshold)
     return inner_border, outer_border

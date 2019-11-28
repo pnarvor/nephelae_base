@@ -9,3 +9,4 @@ from .StdMap       import StdMap
 from .ValueMap     import ValueMap
 
 from .MacroscopicFunctions import compute_com
+from .MacroscopicFunctions import compute_cross_section_border
