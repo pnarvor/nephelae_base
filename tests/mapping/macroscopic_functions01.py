@@ -25,6 +25,7 @@ from nephelae.mapping  import ValueMap
 from nephelae.mapping  import compute_com
 from nephelae.mapping  import compute_cross_section_border
 from nephelae.mapping  import compute_cloud_volume
+from nephelae.mapping  import compute_bounding_box
 from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
 from nephelae.database import NephelaeDataServer
@@ -150,7 +151,9 @@ axes[1].imshow(outer.T)
 axes[1].contour(outer.T, levels=0, colors='white')
 coordinates = compute_com(map0)
 nb_pixels = compute_cloud_volume(map1)
+shape_bounding_box = compute_bounding_box(map1)
 print(nb_pixels)
+print(shape_bounding_box)
 fig, axes = plt.subplots(1,1)
 plt.imshow(map0.data.T, origin='lower', interpolation=interp, extent=[12.5,
     6387.5, 1837.5, 2715.5])
