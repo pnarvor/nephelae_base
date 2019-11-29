@@ -60,19 +60,24 @@ class MapComparator:
         # slice2 outer border fall on the same position.
 
         self.newKeys = []
-        self.externalBounds = []
         i = 0
-        for key, res1, res2 in zip(keys,self.map1.resolution(),self.map2.resolution()):
+        for key in keys:
             if isinstance(key, slice):
                 self.newKeys.append(
-                    slice(self.bounds[i].min + (res2 - res1) / 2.0,
-                    self.bounds[i].max + (res1 - res2) / 2.0))
+                    slice(self.bounds[i].min, self.bounds[i].max))
+                i = i + 1
+            else:
+                self.newKeys.append(key)
+
+        self.externalBounds = []
+        i = 0
+        for key, res1 in zip(keys,self.map1.resolution()):
+            if isinstance(key, slice):
                 self.externalBounds.append(
                     Bounds(self.bounds[i].min - res1 / 2.0,
                            self.bounds[i].max + res1 / 2.0))
                 i = i + 1
-            else:
-                self.newKeys.append(key)
+
         self.slice2 = self.map2.__getitem__(self.newKeys)
 
         # This is the part that does not allow anything else than 2D slices
