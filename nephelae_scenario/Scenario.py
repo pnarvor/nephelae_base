@@ -12,6 +12,7 @@ from nephelae_paparazzi.plugins.loaders import load_plugins
 
 from nephelae.mapping import WindMapConstant, WindObserverMap
 from nephelae.mapping import GprPredictor, ValueMap, StdMap
+from nephelae.mapping import BorderIncertitude
 
 from nephelae_mesonh import MesonhDataset, MesonhMap
 
@@ -48,6 +49,7 @@ class Scenario(Pluginable):
         self.mesonhDataset = None
         self.maps          = None
         self.kernels       = None
+        self.borderClasses = None
 
         self.running = False
 
@@ -90,6 +92,9 @@ class Scenario(Pluginable):
             self.load_maps(self.config['maps'])
         else:
             print("Warning : no maps defined in config file")
+
+        if 'genborders' in self.config.keys():
+            self.load_borderclasses(self.config['genborders'])
 
 
 
@@ -306,7 +311,19 @@ class Scenario(Pluginable):
             # Kernel instanciation
             self.kernels[key] = KernelTypes[kernelConfig['type']](**params)
 
-        
-
-
-
+    def load_borderclasses(self, config):
+        config = ensure_dictionary(config)
+        self.borderClasses = {}
+        for key in config:
+            borderConfig = ensure_dictionary(config[key])
+            if borderConfig['type'] == 'BorderIncertitude':
+                if borderConfig['map_id']+'_std' in self.maps.keys():
+                    self.borderClasses[key] = \
+                    BorderIncertitude(borderConfig['name'],
+                            self.maps[borderConfig['map_id']],
+                            self.maps[borderConfig['map_id']+'_std'])
+                else:
+                    raise ValueError("This map_id has no associated std_map," +
+                    "cannot instanciate this BorderCloud")
+            else:
+                raise ValueError("No known type")
