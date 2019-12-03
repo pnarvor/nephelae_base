@@ -9,7 +9,7 @@ from .StdMap               import StdMap
 from .ValueMap             import ValueMap
 
 from .FactoryBorder        import FactoryBorder
-from .BorderCloud          import BorderCloud
+from .BorderIncertitude    import BorderIncertitude
 
 from .MacroscopicFunctions import compute_com
 from .MacroscopicFunctions import compute_cross_section_border
