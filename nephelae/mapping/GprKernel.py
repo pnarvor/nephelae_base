@@ -113,8 +113,10 @@ class NephKernel(gpk.Kernel):
         The resolution returned by this method is the minimal resolution
         without loos of information.
         """
-        return 0.84 * np.array(self.lengthScales)
-        # return 0.5*0.84 * np.array(self.lengthScales)
+        # return 0.84 * np.array(self.lengthScales)
+        # return 0.42 * np.array(self.lengthScales)
+        # After a bit of experiement, this seems better => investigate why
+        return 0.3 * np.array(self.lengthScales) # 0.84 / (2 * sqrt(2)) ???
 
 
     def span(self):
