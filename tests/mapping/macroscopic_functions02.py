@@ -160,7 +160,7 @@ def do_update(t):
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
         axes[0].set_title("Ground truth")
-        print(get_number_of_elements(rct0.data.T))
+        print(get_number_of_elements(rct0))
 
         try:
            axes[0].plot(p[:int(t-tStart + 0.5),1], p[:int(t-tStart + 0.5),2], '.')
