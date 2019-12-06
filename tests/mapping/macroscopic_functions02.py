@@ -26,6 +26,7 @@ from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
 from nephelae.mapping  import compute_com
 from nephelae.mapping  import get_number_of_elements
+from nephelae.mapping  import compute_list_of_coms
 from nephelae.database import NephelaeDataServer
 
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -160,12 +161,16 @@ def do_update(t):
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
         axes[0].set_title("Ground truth")
-        print(get_number_of_elements(rct0))
 
         try:
            axes[0].plot(p[:int(t-tStart + 0.5),1], p[:int(t-tStart + 0.5),2], '.')
         finally:
            pass
+
+        list_coordinates = compute_list_of_coms(rct0)
+        for coords in list_coordinates:
+            axes[0].plot(coords[0], coords[1], 'r.')
+
 
         axes[1].cla()
         coordinates = compute_com(map0)

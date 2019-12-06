@@ -46,7 +46,7 @@ def threshold_array(arr, threshold=1e-5):
     arr[arr >= threshold] = 1.0
     return arr
 
-def get_number_of_elements(scaledArr, threshold=1e-5):
+def get_number_of_elements(scaledArr):
     """
     Computes the number of elements displayed on a image, using a threshold.
 
@@ -54,17 +54,43 @@ def get_number_of_elements(scaledArr, threshold=1e-5):
     ---------
     scaledArr : ScaledArray
         Contains the data of interest
-    threshold : Number
-        Gives the number where values are nullified (0) or not (1)
     
     Returns
     ---------
-    Number :
-        Returns the number of elements displayed on the image
+    NdArray, Number :
+        Returns the number of elements displayed on the image and the numpy
+        array labeled associated to the data.
     """
-    data_to_label = scaledArr.data
-    threshold_array(data_to_label)
-    return ndimage.measurements.label(data_to_label)
+    return ndimage.measurements.label(scaledArr.data)
+
+def compute_list_of_coms(scaledArr):
+    """
+    Computes all the centers of elements displayed on a map. Returns None if
+    there is no element.
+
+    Parameters
+    ---------
+    scaledArr : ScaledArray
+        Contains the data of interest
+    
+    Returns
+    ---------
+    List of tuple
+        Returns all tuples of coordinates of all the elements displayed on the
+        map
+    """
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    if number_of_elements != 0:
+        list_of_coms = []
+        for i in range(1, number_of_elements):
+            x = np.copy(scaledArr.data)
+            scaledArr_work = ScaledArray(x, scaledArr.dimHelper,
+                scaledArr.interpolation)
+            scaledArr_work.data[data_labeled != i] = 0
+            list_of_coms.append(compute_com(scaledArr_work))
+    else:
+        list_of_coms = None
+    return list_of_coms
 
 def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
         threshold=1e-5):

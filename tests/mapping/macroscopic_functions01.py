@@ -27,7 +27,7 @@ from nephelae.mapping  import compute_cloud_volume
 from nephelae.mapping  import compute_bounding_box
 from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
-from nephelae.mapping  import BorderCloud
+from nephelae.mapping  import BorderIncertitude
 from nephelae.database import NephelaeDataServer
 
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -144,7 +144,6 @@ map0 = map_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
 map0.data[map0.data < 0.0] = 0.0
 std0 = std_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
 map1 = map_gpr[329,12.5:6387.5,1837.5:2715.5,800.0:1100.0]
-
 inner, outer = cloud_border[329,12.5:6387.5,1837.5:2715.5,1100.0]
 fig, axes = plt.subplots(2,1)
 axes[0].imshow(inner.data.T)
