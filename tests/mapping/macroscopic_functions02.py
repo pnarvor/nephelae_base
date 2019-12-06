@@ -25,6 +25,7 @@ from nephelae.mapping  import ValueMap
 from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
 from nephelae.mapping  import compute_com
+from nephelae.mapping  import get_number_of_elements
 from nephelae.database import NephelaeDataServer
 
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -146,6 +147,7 @@ def do_update(t):
     # print(gprMap.range())
     map0 = map_gpr[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
     std0 = std_gpr[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
+    rct0 = rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z]
     # uncomment this to remove negative values  
     map0.data[map0.data < 0.0] = 0.0
    
@@ -153,11 +155,12 @@ def do_update(t):
     if not profiling:
         global axes
         axes[0].cla()
-        axes[0].imshow(rct[t,b[1].min:b[1].max,b[2].min:b[2].max,p0.z].data.T, origin='lower',
+        axes[0].imshow(rct0.data.T, origin='lower',
                       interpolation=interp,
                       extent=[b[1].min, b[1].max, b[2].min, b[2].max])
         axes[0].grid()
         axes[0].set_title("Ground truth")
+        print(get_number_of_elements(rct0.data.T))
 
         try:
            axes[0].plot(p[:int(t-tStart + 0.5),1], p[:int(t-tStart + 0.5),2], '.')

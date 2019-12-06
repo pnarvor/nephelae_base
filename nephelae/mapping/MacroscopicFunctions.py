@@ -1,6 +1,7 @@
 import numpy as np
 
 from nephelae.array import ScaledArray
+from scipy import ndimage
 
 def compute_com(scaledArr):
     """
@@ -44,6 +45,26 @@ def threshold_array(arr, threshold=1e-5):
     arr[arr < threshold] = 0.0
     arr[arr >= threshold] = 1.0
     return arr
+
+def get_number_of_elements(scaledArr, threshold=1e-5):
+    """
+    Computes the number of elements displayed on a image, using a threshold.
+
+    Parameters
+    ---------
+    scaledArr : ScaledArray
+        Contains the data of interest
+    threshold : Number
+        Gives the number where values are nullified (0) or not (1)
+    
+    Returns
+    ---------
+    Number :
+        Returns the number of elements displayed on the image
+    """
+    threshold_array(scaledArr)
+    labeled_array, number_of_elements = ndimage.measurements.label(scaledArr)
+    return number_of_elements
 
 def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
         threshold=1e-5):
