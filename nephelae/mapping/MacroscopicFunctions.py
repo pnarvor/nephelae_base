@@ -64,7 +64,6 @@ def get_number_of_elements(scaledArr, threshold=1e-5):
     """
     data_to_label = scaledArr.data
     threshold_array(data_to_label)
-    labeled_array, number_of_elements = \
     return ndimage.measurements.label(data_to_label)
 
 def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
