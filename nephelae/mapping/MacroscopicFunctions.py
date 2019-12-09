@@ -3,6 +3,8 @@ import numpy as np
 from nephelae.array import ScaledArray
 from scipy import ndimage
 
+from nephelae.types import Bounds
+
 def compute_com(scaledArr):
     """
     Computes the C.O.M. (center of mass) of a scaled array.
@@ -122,15 +124,13 @@ def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
     threshold_array(outer_border, threshold)
     return inner_border, outer_border
 
-def compute_bounding_box(scaledArr_data, threshold=1e-5):
+def compute_bounding_box(scaledArr):
     """
     Computes the indices where values are superior to the threshold.
     Parameters
     --------
     scaledArr_data : ScaledArray
         Contains the data of interest
-    threshold: number
-        Gives the number where the values are nullified (0) or not (1)
 
     Returns
     ---------
@@ -139,12 +139,17 @@ def compute_bounding_box(scaledArr_data, threshold=1e-5):
         threshold. The length of the list is equal to the value returned by
         compute_cloud_volume.
     """
-    res = np.where(scaledArr_data.data > threshold)
-    locations = np.array([X for X in res])
-    indices = tuple(np.array(locations[i]) for i in
-            range(locations.shape[0]))
-    return [Bounds.from_array(x) from x in indices]
-
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    list_of_boxes = []
+    for i in range(1, number_of_elements+1):
+        out = np.where(data_labeled == i)
+        locations = np.array([X for X in out])
+        mins = scaledArr.dimHelper.to_unit(np.amin(locations, axis=1).tolist())
+        maxs = scaledArr.dimHelper.to_unit(np.amax(locations, axis=1).tolist())
+        list_of_boxes.append([Bounds(mins[i], maxs[i]) for i in
+            range(len(mins))])
+    return list_of_boxes
+    
 def compute_cloud_volume(scaledArr_data, threshold=1e-5):
     """
     Computes the number of pixels defining the cloud. The volume is
