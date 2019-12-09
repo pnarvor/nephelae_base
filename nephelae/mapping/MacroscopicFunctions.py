@@ -140,7 +140,10 @@ def compute_bounding_box(scaledArr_data, threshold=1e-5):
         compute_cloud_volume.
     """
     res = np.where(scaledArr_data.data > threshold)
-    return list(zip(*res))
+    locations = np.array([X for X in res])
+    indices = tuple(np.array(locations[i]) for i in
+            range(locations.shape[0]))
+    return [Bounds.from_array(x) from x in indices]
 
 def compute_cloud_volume(scaledArr_data, threshold=1e-5):
     """
