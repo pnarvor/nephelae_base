@@ -10,6 +10,7 @@ from .ValueMap             import ValueMap
 
 from .FactoryBorder        import FactoryBorder
 from .BorderIncertitude    import BorderIncertitude
+from .BorderRaw            import BorderRaw
 
 from .MacroscopicFunctions import compute_com
 from .MacroscopicFunctions import compute_cross_section_border

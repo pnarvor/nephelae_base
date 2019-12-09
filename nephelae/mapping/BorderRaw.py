@@ -4,6 +4,7 @@ import numpy as np
 from nephelae.array import ScaledArray
 
 from .FactoryBorder import FactoryBorder
+from .MacroscopicFunctions import threshold_array
 
 class BorderRaw(FactoryBorder):
     def __init__(self, name, mapInterface):
