@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 
 class Position(object):
 
@@ -165,8 +166,21 @@ class Position(object):
         """For serialization (unpickling) purposes."""
         super().__setattr__('data', data)
 
+
     def to_list(self):
         """Returns [self.t, self.x, self.y, self.z]"""
         return list(self.data)
+
+
+    def copy(self):
+        return deepcopy(self)
+
+
+    def __copy__(self, memo):
+        return Position(self.t, self.x, self.y, self. z)
+
+
+    def __deepcopy__(self, memo):
+        return Position(deepcopy(self.data,memo))
 
 
