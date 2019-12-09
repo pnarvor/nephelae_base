@@ -81,7 +81,7 @@ def compute_list_of_coms(scaledArr):
     """
     data_labeled, number_of_elements = get_number_of_elements(scaledArr)
     list_of_coms = []
-    for i in range(1, number_of_elements):
+    for i in range(1, number_of_elements+1):
         out = np.where(data_labeled == i)
         locations = np.array([X for X in out])
         indices = tuple(np.array(locations[i]) for i in
