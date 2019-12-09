@@ -24,7 +24,7 @@ class NephelaeDataServer(SpatializedDatabase):
         super().__init__() 
 
         self.navFrame      = NavigationRef()
-        self.observerSet   = MultiObserverSubject(['add_gps', 'add_sample'])
+        self.observerSet   = MultiObserverSubject(['add_gps', 'add_sample', 'add_status'])
         self.uavIds        = []
         self.variableNames = []
         self.dataLock      = threading.Lock()
@@ -46,6 +46,16 @@ class NephelaeDataServer(SpatializedDatabase):
             self.insert(SpbEntry(gps, gps - self.navFrame, tags))
 
 
+    def add_status(self, status):
+        self.observerSet.add_status(status) # mutex protected
+        uavId = status.aircraftId
+        tags=[uavId, 'STATUS']
+        with self.dataLock:
+            if uavId not in self.uavIds:
+                self.uavIds.append(uavId)
+            self.insert(SpbEntry(status, status.position, tags))
+        
+
     def add_sample(self, sample):
         # sample assumed to comply with nephelae_base.types.sensor_sample
         self.observerSet.add_sample(sample) # mutex protected
@@ -59,20 +69,23 @@ class NephelaeDataServer(SpatializedDatabase):
             if str(sample.variableName) not in self.variableNames:
                 self.variableNames.append(str(sample.variableName))
 
+
     def add_gps_observer(self, observer):
         self.observerSet.attach_observer(observer, 'add_gps')
-
-
-    def add_sensor_observer(self, observer):
-        self.observerSet.attach_observer(observer, 'add_sample')
-
-
     def remove_gps_observer(self, observer):
         self.observerSet.detach_observer(observer, 'add_gps')
 
 
+    def add_sensor_observer(self, observer):
+        self.observerSet.attach_observer(observer, 'add_sample')
     def remove_sensor_observer(self, observer):
         self.observerSet.detach_observer(observer, 'add_sample')
+
+
+    def add_status_observer(self, observer):
+        self.observerSet.attach_observer(observer, 'add_status')
+    def remove_status_observer(self, observer):
+        self.observerSet.detach_observer(observer, 'add_status')
 
 
     def __getstate__(self):
