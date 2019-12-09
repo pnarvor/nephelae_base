@@ -80,16 +80,16 @@ def compute_list_of_coms(scaledArr):
         map
     """
     data_labeled, number_of_elements = get_number_of_elements(scaledArr)
-    if number_of_elements != 0:
-        list_of_coms = []
-        for i in range(1, number_of_elements):
-            x = np.copy(scaledArr.data)
-            scaledArr_work = ScaledArray(x, scaledArr.dimHelper,
-                scaledArr.interpolation)
-            scaledArr_work.data[data_labeled != i] = 0
-            list_of_coms.append(compute_com(scaledArr_work))
-    else:
-        list_of_coms = None
+    list_of_coms = []
+    for i in range(1, number_of_elements):
+        out = np.where(data_labeled == i)
+        locations = np.array([X for X in out])
+        indices = tuple(np.array(locations[i]) for i in
+                range(locations.shape[0]))
+        data = scaledArr.data[indices].ravel()
+        center_of_mass = np.sum(locations*data, axis=1)/np.sum(data)
+        res = scaledArr.dimHelper.to_unit(center_of_mass)
+        list_of_coms.append(res)
     return list_of_coms
 
 def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
