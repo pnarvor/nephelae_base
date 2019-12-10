@@ -65,6 +65,60 @@ def get_number_of_elements(scaledArr):
     """
     return ndimage.measurements.label(scaledArr.data)
 
+def compute_selected_element_com(coords, scaledArr):
+    """
+    Computes the center of mass of a selected element, using a tuple of
+    coordinates. Return None if there is no center of mass.
+
+    Parameters
+    ---------
+    coords : Tuple
+        Tuple of coordinates
+
+    Returns
+    ---------
+    Tuple :
+        Coordinates of the center of mass. None if there is no element
+        associated with the map.
+    """
+    res = None
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    if is_in_element(coords, data_labeled):
+        out = np.where(data_labeled == data_labeled[coords])
+        locations = np.array([X for X in out])
+        indices = tuple(np.array(locations[i]) for i in
+                range(locations.shape[0]))
+        data = scaledArr.data[indices].ravel()
+        center_of_mass = np.sum(locations*data, axis=1)/np.sum(data)
+        res = scaledArr.dimHelper.to_unit(center_of_mass)
+    return res
+
+def compute_selected_element_volume(coords, scaledArr):
+    """
+    Computes the number of pixels defining the cloud, depending of the
+    coordinates.
+
+    Parameters
+    ---------
+    coords : Tuple
+        Tuple of coordinates
+    
+    scaledArr : ScaledArray
+        Contains the data of interest
+
+    Returns
+    ---------
+    Number :
+        The number of pixels of the cloud displayed. Returns None if there is no
+        element associated with the coordinates.
+    """
+    res = None
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    if is_in_element(coords, data_labeled):
+        out = np.where(data_labeled == data_labeled[coords])
+        res = len(out[0])
+    return res
+
 def compute_list_of_coms(scaledArr):
     """
     Computes all the centers of elements displayed on a map. Returns None if
@@ -128,6 +182,7 @@ def compute_bounding_box(scaledArr):
     """
     Computes the bounds where an element is spotted. Returns the list of bounds
     of all elements.
+    
     Parameters
     --------
     scaledArr_data : ScaledArray
