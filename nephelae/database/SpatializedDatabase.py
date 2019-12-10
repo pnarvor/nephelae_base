@@ -223,8 +223,8 @@ class SpatializedList:
 
         def process_time_key(key, sortedList):
             """Helper key format function of the time key"""
-            if not isinstance(key, slice) and not isinstance(key, float):
-                raise ValueError("key must be a slice or float")
+            if not isinstance(key, slice) and not isinstance(key, (int, float)):
+                raise ValueError("key must be a slice or a scalar (int or float)")
             if sortedList is None:
                 return slice(None)            
             if isinstance(key, slice):
