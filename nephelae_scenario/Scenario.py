@@ -181,7 +181,6 @@ class Scenario(Pluginable):
         if 'plugins' in config.keys():
             load_plugins(aircraft, ensure_list(config['plugins']))
 
-        aircraft.add_gps_observer(self.database)
         aircraft.add_status_observer(self.database)
         if hasattr(aircraft, 'add_sensor_observer'):
             aircraft.add_sensor_observer(self.database)
