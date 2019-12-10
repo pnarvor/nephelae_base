@@ -126,7 +126,8 @@ def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
 
 def compute_bounding_box(scaledArr):
     """
-    Computes the indices where values are superior to the threshold.
+    Computes the bounds where an element is spotted. Returns the list of bounds
+    of all elements.
     Parameters
     --------
     scaledArr_data : ScaledArray
@@ -135,9 +136,8 @@ def compute_bounding_box(scaledArr):
     Returns
     ---------
     List
-        The list of tuples of all indices containing a value superior to the
-        threshold. The length of the list is equal to the value returned by
-        compute_cloud_volume.
+        The list of bounds of elements in the ScaledArray.
+        The length of the list is equal to number_of_elements.
     """
     data_labeled, number_of_elements = get_number_of_elements(scaledArr)
     list_of_boxes = []
@@ -150,6 +150,25 @@ def compute_bounding_box(scaledArr):
             range(len(mins))])
     return list_of_boxes
     
+
+def is_in_element(coords, data_labeled):
+    """
+    Evaluate if the given coords are in a element.
+
+    Parameters
+    ---------
+    coords: Tuple
+        Contains the indices to check
+    data_labeled : NdArray
+        Data with elements labeled
+
+    Returns
+    ---------
+    Boolean
+        True if coords point to an element of the data, False otherwise.
+    """
+    return data_labeled[coords] != 0
+
 def compute_cloud_volume(scaledArr_data, threshold=1e-5):
     """
     Computes the number of pixels defining the cloud. The volume is
@@ -159,7 +178,7 @@ def compute_cloud_volume(scaledArr_data, threshold=1e-5):
     ---------
     scaledArr_data : ScaledArray
         Contains the data of interest
-    threshold: number
+    threshold : number
         Gives the number where the values are nullified (0) or not (1)
     
     Returns
