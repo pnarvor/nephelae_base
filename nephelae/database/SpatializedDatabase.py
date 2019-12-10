@@ -8,6 +8,7 @@ import bisect as bi
 import pickle
 import os
 import threading
+from warnings import warn
 
 from nephelae.types import Bounds
 
@@ -441,7 +442,8 @@ class SpatializedDatabase:
                 if tag in tags:
                     return self.taggedData[tag]
             return self.taggedData['ALL']
-        
+       
+
     def find_entries(self, tags=[], keys=None,
                            sortCriteria=None, assumePositiveTime=True):
         # Making sure we have a list of tags, event with one element
@@ -477,6 +479,14 @@ class SpatializedDatabase:
         if isinstance(tags, str):
             tags = [tags]
         return self.best_search_list(tags).find_bounds(tags, keys, assumePositiveTime)
+
+
+    def last_entry(self, tag):
+        """
+        Takes a single tag as input and ouput the last entry for these tags.
+        Is fast. (no search, direct read)
+        """
+        return self.taggedData[tag].tSorted[-1].data
 
 
     def __getstate__(self):
