@@ -28,8 +28,11 @@ from nephelae.mapping  import compute_bounding_box
 from nephelae.mapping  import WindKernel
 from nephelae.mapping  import WindMapConstant
 from nephelae.mapping  import BorderIncertitude
-from nephelae.database import NephelaeDataServer
 
+from nephelae.database import NephelaeDataServer
+from nephelae.database import CloudData
+
+from scipy import ndimage
 from sklearn.gaussian_process import GaussianProcessRegressor
 
 def parameters(rct):
@@ -145,6 +148,11 @@ map0.data[map0.data < 0.0] = 0.0
 std0 = std_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
 map1 = map_gpr[329,12.5:6387.5,1837.5:2715.5,800.0:1100.0]
 inner, outer = cloud_border[329,12.5:6387.5,1837.5:2715.5,1100.0]
+x,y = ndimage.measurements.label(map0.data)
+cloud_data = CloudData(map0, x ,1)
+print(cloud_data.get_com())
+print(cloud_data.get_surface())
+print(cloud_data.get_bounding_box())
 fig, axes = plt.subplots(2,1)
 axes[0].imshow(inner.data.T)
 axes[0].contour(inner.data.T, levels=0, colors='white')
@@ -153,7 +161,6 @@ axes[1].contour(outer.data.T, levels=0, colors='white')
 coordinates = compute_com(map0)
 nb_pixels = compute_cloud_volume(map1)
 shape_bounding_box = compute_bounding_box(map1)
-print(shape_bounding_box)
 fig, axes = plt.subplots(1,1)
 plt.imshow(map0.data.T, origin='lower', interpolation=interp, extent=[12.5,
     6387.5, 1837.5, 2715.5])
