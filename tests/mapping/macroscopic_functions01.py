@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 from   matplotlib import animation
 import time
 
-
-from nephelae.array  import MacroscopicArray
 from nephelae_mesonh import MesonhVariable, MesonhDataset
 
 from nephelae.types  import Position
@@ -79,14 +77,14 @@ def parameters(rct):
     b[2].min = min(p[:,2])
     b[2].max = max(p[:,2])
     tmp = rct[p0.t,:,b[2].min:b[2].max,p0.z]
-    b[1].min = tmp.bounds[0][0]
-    b[1].max = tmp.bounds[0][-1]
-    b[2].min = tmp.bounds[1][0]
-    b[2].max = tmp.bounds[1][-1]
+    b[1].min = tmp.bounds[0].min
+    b[1].max = tmp.bounds[0].max
+    b[2].min = tmp.bounds[1].min
+    b[2].max = tmp.bounds[1].max
     print("Bounds : ", b)
     X0,Y0 = np.meshgrid(
-        np.linspace(tmp.bounds[0][0], tmp.bounds[0][-1], tmp.shape[0]),
-        np.linspace(tmp.bounds[1][0], tmp.bounds[1][-1], tmp.shape[1]),
+        np.linspace(tmp.bounds[0].min, tmp.bounds[0].max, tmp.shape[0]),
+        np.linspace(tmp.bounds[1].min, tmp.bounds[1].max, tmp.shape[1]),
         indexing='xy', copy=False)
     # xyLocations = np.array([[0]*X0.shape[0]*X0.shape[1], X0.ravel(), Y0.ravel()]).T
     print(X0.ravel())
@@ -150,11 +148,8 @@ map0.data[map0.data < 0.0] = 0.0
 std0 = std_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
 map1 = map_gpr[329,12.5:6387.5,1837.5:2715.5,800.0:1100.0]
 inner, outer = cloud_border[329,12.5:6387.5,1837.5:2715.5,1100.0]
-map0_enhanced = MacroscopicArray(map0.data, map0.dimHelper, map0.interpolation)
-print(map0_enhanced.coms())
-print(map0_enhanced.surfaces())
-print(map0_enhanced.bounding_boxes())
-print(map0_enhanced.get_blob((800, 2000)))
+cloud_data = CloudData.from_scaledArray(map0)[0]
+print(cloud_data.get_com())
 fig, axes = plt.subplots(2,1)
 axes[0].imshow(inner.data.T)
 axes[0].contour(inner.data.T, levels=0, colors='white')

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import ndimage
 
 from nephelae.types import Bounds
 class CloudData:
@@ -17,7 +18,6 @@ class CloudData:
     def get_com(self):
         if self.__com is None:
             self.__compute_com()
-        print(self.__com)
         return self.__com
     
     def get_surface(self):
@@ -34,6 +34,17 @@ class CloudData:
         if not self.__boundingBox:
             self.__compute_bounding_box()
         return self.__boundingBox
+
+    def is_in_bounding_box(self, coords):
+        return all(self.get_bounding_box()[i].isinside(coords[i]) for i in
+                range(len(coords)))
+
+    @classmethod
+    def from_scaledArray(cls, scArr):
+        dataLabeled, number_of_elements = \
+        ndimage.measurements.label(scArr.data)
+        return [CloudData(scArr, dataLabeled, i)
+                for i in range(1, number_of_elements+1)]
 
     def __compute_com(self):
         indices = tuple(np.array(self.get_locations()[i]) for i in
