@@ -26,8 +26,8 @@ class MacroscopicArray(ScaledArray):
     def bounding_boxes(self):
         return [x.get_bounding_box() for x in self.list_blobs]
 
-    def getBlob(self, coords):
-        return next(blob for blob in self.list_blobs 
-                if all(bounds.is_inside(coord) for coord in coords
-                    for bounds in blob.boundingBox))
+    def get_blob(self, coords):
+        return next((blob for blob in self.list_blobs 
+                if all(blob.get_bounding_box()[i].isinside(coords[i]) for i in
+                    range(len(coords)))), None)
 
