@@ -4,52 +4,54 @@ from nephelae.types import Bounds
 class CloudData:
     
     def __init__(self, scArr, dataLabeled, index):
-        self.scArr = scArr
-        self.dataLabeled = dataLabeled
-        self.index = index
+        self.__scArr = scArr
+        self.__dataLabeled = dataLabeled
+        self.__index = index
 
-        self.locations = None
-        self.com = None
-        self.surface = None
-        self.boundingBox = []
+        self.__locations = None
+        self.__com = None
+        self.__surface = None
+        self.__boundingBox = []
 
 
     def get_com(self):
-        if self.com is None:
+        if self.__com is None:
             self.__compute_com()
-        return self.com
+        print(self.__com)
+        return self.__com
     
     def get_surface(self):
-        if self.surface is None:
+        if self.__surface is None:
             self.__compute_surface()
-        return self.surface
+        return self.__surface
 
     def get_locations(self):
-        if self.locations is None:
+        if self.__locations is None:
             self.__compute_locations()
-        return self.locations
+        return self.__locations
 
     def get_bounding_box(self):
-        if not self.boundingBox:
+        if not self.__boundingBox:
             self.__compute_bounding_box()
-        return self.boundingBox
+        return self.__boundingBox
 
     def __compute_com(self):
         indices = tuple(np.array(self.get_locations()[i]) for i in
                 range(self.get_locations().shape[0]))
-        data = self.scArr.data[indices].ravel()
-        self.com = np.sum(self.get_locations()*data, axis=1)/np.sum(data)
+        data = self.__scArr.data[indices].ravel()
+        self.__com = np.sum(self.get_locations()*data, axis=1)/np.sum(data)
 
     def __compute_locations(self):
-        out = np.where(self.dataLabeled == self.index)
-        self.locations = np.array([X for X in out])
+        out = np.where(self.__dataLabeled == self.__index)
+        self.__locations = np.array([X for X in out])
 
     def __compute_bounding_box(self):
-        mins = self.scArr.dimHelper.to_unit(np.amin(self.get_locations(),
+        mins = self.__scArr.dimHelper.to_unit(np.amin(self.get_locations(),
             axis=1).tolist())
-        maxs = self.scArr.dimHelper.to_unit(np.amax(self.get_locations(),
+        maxs = self.__scArr.dimHelper.to_unit(np.amax(self.get_locations(),
             axis=1).tolist())
-        self.boundingBox = [Bounds(mins[i], maxs[i]) for i in range(len(mins))]
+        self.__boundingBox = [Bounds(mins[i], maxs[i]) for i in range(len(mins))]
+
 
     def __compute_surface(self):
-        self.surface = self.get_locations().shape[1]
+        self.__surface = self.get_locations().shape[1]

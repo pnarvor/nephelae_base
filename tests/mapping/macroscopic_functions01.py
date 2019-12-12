@@ -13,7 +13,9 @@ from   matplotlib import animation
 import time
 
 
+from nephelae.array  import MacroscopicArray
 from nephelae_mesonh import MesonhVariable, MesonhDataset
+
 from nephelae.types  import Position
 from nephelae.types  import Bounds
 from nephelae.types  import Gps
@@ -148,11 +150,10 @@ map0.data[map0.data < 0.0] = 0.0
 std0 = std_gpr[329,12.5:6387.5,1837.5:2715.5,1100.0]
 map1 = map_gpr[329,12.5:6387.5,1837.5:2715.5,800.0:1100.0]
 inner, outer = cloud_border[329,12.5:6387.5,1837.5:2715.5,1100.0]
-x,y = ndimage.measurements.label(map0.data)
-cloud_data = CloudData(map0, x ,1)
-print(cloud_data.get_com())
-print(cloud_data.get_surface())
-print(cloud_data.get_bounding_box())
+map0_enhanced = MacroscopicArray(map0.data, map0.dimHelper, map0.interpolation)
+print(map0_enhanced.coms())
+print(map0_enhanced.surfaces())
+print(map0_enhanced.bounding_boxes())
 fig, axes = plt.subplots(2,1)
 axes[0].imshow(inner.data.T)
 axes[0].contour(inner.data.T, levels=0, colors='white')
