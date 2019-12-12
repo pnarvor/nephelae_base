@@ -28,12 +28,40 @@ aircrafts:
                 mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
                 rctFeedback: True
                 mesonhOrigin: *mesonh_origin
+    # 201:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    # 202:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    # 203:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    # 204:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
 
 maps:
     kernels:
         lwc_kernel:
             type: 'WindKernel'
-            length_scales: [120.0, 70.0, 70.0, 60.0]
+            length_scales: [120.0, 60.0, 60.0, 60.0]
             variance: 1.0e-8
             noise_variance: 1.0e-10
     LWC:

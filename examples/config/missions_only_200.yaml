@@ -77,9 +77,62 @@ defaults:
 aircrafts:
     200:
         plugins:
+            - MesonhProbe:
+                mesonhFiles: *mesonh_files
+                mesonhVariables: ['RCT', ['UT','VT']]
+                rctFeedback: False
+                mesonhOrigin: *mesonh_origin
             - Missions:
                 Lace: *lace_defaults
                 Rosette: *rosette_defaults
             - MissionWindUpdater:
                 period: 10.0
+    # 201:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             rctFeedback: False
+    #             mesonhOrigin: *mesonh_origin
+    #         - Missions:
+    #             Lace: *lace_defaults
+    #             Rosette: *rosette_defaults
+    #         - MissionWindUpdater:
+    #             period: 10.0
+    # 202:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             rctFeedback: False
+    #             mesonhOrigin: *mesonh_origin
+    #         - Missions:
+    #             Lace: *lace_defaults
+    #             Rosette: *rosette_defaults
+    #         - MissionWindUpdater:
+    #             period: 10.0
+    # 203:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             rctFeedback: False
+    #             mesonhOrigin: *mesonh_origin
+    #         - Missions:
+    #             Lace: *lace_defaults
+    #             Rosette: *rosette_defaults
+    #         - MissionWindUpdater:
+    #             period: 10.0
+    # 204:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             rctFeedback: False
+    #             mesonhOrigin: *mesonh_origin
+    #         - Missions:
+    #             Lace: *lace_defaults
+    #             Rosette: *rosette_defaults
+    #         - MissionWindUpdater:
+    #             period: 10.0
 
