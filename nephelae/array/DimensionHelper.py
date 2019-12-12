@@ -14,35 +14,7 @@ import numpy as np
 from scipy.interpolate import griddata
 from scipy.interpolate import interp1d
 
-class DimensionBounds:
-
-
-    def __init__(self, bounds):
-
-        """
-        bounds (list[float]): list should contain min and max
-                              dimension values in first and last elements
-        """
-        self.bounds = bounds
-    
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
-        return "[min: " + str(self.min) + ", max: " + str(self.max) + "]"
-
-    def __getitem__(self, key):
-        return self.bounds[key]
-
-    def __getattr__(self, name):
-
-        if name == 'min':
-            return self.bounds[0]
-        elif name == 'max':
-            return self.bounds[-1]
-        else:
-            return self.bounds.__getattr__(name)
-
+from nephelae.types import Bounds
 
 class AffineTransform:
     
@@ -141,7 +113,7 @@ class UnitsIndexConverter:
     def bounds(self):
 
         maxSlice = self.to_unit(slice(None,None,None))
-        return DimensionBounds([maxSlice.start, maxSlice.stop])
+        return Bounds(maxSlice.start, maxSlice.stop)
 
 
     def span(self):
