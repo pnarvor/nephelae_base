@@ -50,7 +50,8 @@ class CloudData:
         indices = tuple(np.array(self.get_locations()[i]) for i in
                 range(self.get_locations().shape[0]))
         data = self.__scArr.data[indices].ravel()
-        self.__com = np.sum(self.get_locations()*data, axis=1)/np.sum(data)
+        self.__com = (np.sum(self.get_locations()*data,
+                axis=1)/np.sum(data)).tolist()
 
     def __compute_locations(self):
         out = np.where(self.__dataLabeled == self.__index)
