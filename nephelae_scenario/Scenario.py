@@ -72,9 +72,10 @@ class Scenario(Pluginable):
         self.database = self.configure_database()
 
         # To be configured in config file
+        self.windMap = WindMapConstant('Horizontal Wind', [0.0, 0.0])
         # self.windMap = WindMapConstant('Horizontal Wind', [-7.5, -0.5])
-        self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
-        self.database.add_sensor_observer(self.windMap)
+        # self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
+        # self.database.add_sensor_observer(self.windMap)
             
         if 'mesonh_files' in self.config.keys():
             self.mesonhFiles   = self.config['mesonh_files']

@@ -1,0 +1,85 @@
+---
+# local frame must be given in utm coordinates
+local_frame:
+    east:     &local_frame_east   360284.0
+    north:    &local_frame_north 4813595.0
+    alt:      &local_frame_alt         0.0
+    utm_zone: &local_frame_utm_zone    31N
+
+# flight area in local coordinates
+flight_area: &flight_area [[-10000.0, -10000.0, 185.0], [10000.0, 10000.0, 4000.0]]
+
+# database config
+database:
+    enable_save: False
+    filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
+    overwrite_existing: True
+
+mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+# Setting this to true will activate feedback to WORLD_ENV requests
+wind_feedback: False
+mesonh_origin: &mesonh_origin [0.0, -731.7, -2126.5, 0.0]
+
+aircrafts:
+    200:
+        plugins:
+            - MesonhProbe:
+                mesonhFiles: *mesonh_files
+                mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+                rctFeedback: True
+                mesonhOrigin: *mesonh_origin
+    201:
+        plugins:
+            - MesonhProbe:
+                mesonhFiles: *mesonh_files
+                mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+                rctFeedback: True
+                mesonhOrigin: *mesonh_origin
+    # 202:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    # 203:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    # 204:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+
+maps:
+    kernels:
+        lwc_kernel:
+            type: 'WindKernel'
+            # length_scales: [120.0, 60.0, 60.0, 60.0]
+            length_scales: [3000.0, 60.0, 60.0, 60.0]
+            variance: 1.0e-8
+            noise_variance: 1.0e-10
+    LWC:
+        name: 'Liquid Water'
+        type: 'GprMap'
+        kernel: 'lwc_kernel'
+        database_tags: ['RCT']
+        data_range: [0.0, 1.0e-4]
+        std_map: 'Liquid Water std' # optional
+
+    clouds:
+        name: 'Liquid Water (MesoNH)'
+        type: 'MesonhMap'
+        mesonh_variable: 'RCT'
+        origin: *mesonh_origin
+    # thermals:
+    #     name: 'Vertical Wind (MesoNH)'
+    #     type: 'MesonhMap'
+    #     mesonh_variable: 'WT'
+    #     origin: *mesonh_origin
