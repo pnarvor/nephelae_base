@@ -65,7 +65,8 @@ class Scenario(Pluginable):
                        localFrameConfig['east'],
                        localFrameConfig['north'],
                        localFrameConfig['alt'])
-        self.localFrame = NavigationRef(ref)
+        self.localFrame = NavigationRef(ref, localFrameConfig['utm_zone'],
+                localFrameConfig['utm_letter'])
         self.flightArea = self.config['flight_area']
         
         self.database = self.configure_database()
