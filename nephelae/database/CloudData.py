@@ -40,11 +40,16 @@ class CloudData:
                 range(len(coords)))
 
     @classmethod
-    def from_scaledArray(cls, scArr):
+    def from_scaledArray(cls, scArr, threshold=2e-4):
+        data_thresholded = (scArr.data > threshold) * scArr.data
         dataLabeled, number_of_elements = \
-        ndimage.measurements.label(scArr.data)
+        ndimage.measurements.label(data_thresholded)
         return [CloudData(scArr, dataLabeled, i)
-                for i in range(1, number_of_elements+1)]
+                for i in range(1, number_of_elements+1)
+                if not i in dataLabeled[0, :]
+                and not i in dataLabeled[-1, :]
+                and not i in dataLabeled[:, 0]
+                and not i in dataLabeled[:, -1]]
 
     def __compute_com(self):
         indices = tuple(np.array(self.get_locations()[i]) for i in
