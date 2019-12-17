@@ -1,5 +1,6 @@
 import threading
 import time
+import pickle
 
 from nephelae.types import NavigationRef
 from nephelae.types import Position
@@ -19,6 +20,19 @@ class NephelaeDataServer(SpatializedDatabase):
     /!\ Find better name ?
 
     """
+
+    def load(path):
+        # Have to do it this way because pickle does not seems to copy
+        # everything (investigate this) Not a proper initialization
+        loaded = pickle.load(open(path, "rb"))
+        res = NephelaeDataServer()
+        res.taggedData    = loaded.taggedData
+        res.orderedTags   = loaded.orderedTags
+        res.navFrame      = loaded.navFrame
+        res.uavIds        = loaded.uavIds
+        res.variableNames = loaded.variableNames
+        return res
+
 
     def __init__(self):
         super().__init__() 

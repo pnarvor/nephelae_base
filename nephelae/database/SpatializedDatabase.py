@@ -398,7 +398,13 @@ class SpatializedDatabase:
 
     
     def load(path):
-        return pickle.load(open(path, "rb"))
+        # Have to do it this way because pickle does not seems to copy
+        # everything (investigate this)
+        res = SpatializedDatabase()
+        loaded = pickle.load(open(path, "rb"))
+        res.taggedData  = loaded.taggedData
+        res.orderedTags = loaded.orderedTags
+        return res
 
 
     def save(database, path, force=False):
