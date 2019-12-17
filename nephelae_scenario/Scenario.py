@@ -50,6 +50,7 @@ class Scenario(Pluginable):
         self.maps          = None
         self.kernels       = None
         self.borderClasses = None
+        self.warmStart     = False
 
         self.running = False
 
@@ -115,37 +116,62 @@ class Scenario(Pluginable):
 
     def configure_database(self):
         """TODO implement the replay"""
-
-        database = NephelaeDataServer()
-        database.set_navigation_frame(self.localFrame)
+        
+        database = None
+        try:
+            self.warmStart = self.config['allow_warm_start']
+        except KeyError as e:
+            warn("No warm start configuration specified. No warm start " +
+                 "allowed byt default. Exception feedback : " + str(e))
+            self.warmStart = False
+            
         
         try:
             config = self.config['database']
         except KeyError:
             # No specific options were given to the database.
             # Leaving default behavior.
-            return database
+            if self.warmStart:
+                raise RuntimeError("Warm start enable but no database " + 
+                                   "configuration was given. Aborting.")
+            else:
+                database = NephelaeDataServer()
+                database.set_navigation_frame(self.localFrame)
+                return database
 
-        enableSave = False
         try:
             enableSave = config['enable_save']
         except KeyError:
             # No saving configuration
-            pass
+            enableSave = False
+        try:
+            filePath = config['filepath']
+        except KeyError:
+            filePath = None
+
+        # This is safe (in python spec, x and y returns false if x is false
+        # without trying to evaluate y)
+        if self.warmStart and filePath is not None and os.path.exists(filePath):
+            database = NephelaeDataServer.load(filePath)
+            self.missionT0 = database.navFrame.position.t
+            self.localFrame.position.t = self.missionT0
+        else:
+            database = NephelaeDataServer()
+        database.set_navigation_frame(self.localFrame)
 
         if enableSave:
-            try:
-                filePath = config['filepath']
-            except KeyError:
+            if filePath is None:
                 raise ValueError("Configuration file "+self.mainConfigPath+\
                     " asked for database saving but did not set a 'filepath' field.")
             try:
                 timerTick = config['timer_tick']
             except KeyError:
+                # Save database every 60.0 seconds if no tick given
                 timerTick = 60.0
             try:
                 force = config['overwrite_existing']
             except KeyError:
+                # Don;t overwrite existing database by default
                 force = False
             database.enable_periodic_save(filePath, timerTick, force)
 

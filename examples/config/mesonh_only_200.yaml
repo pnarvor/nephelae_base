@@ -8,10 +8,12 @@ local_frame:
 
 # flight area in local coordinates
 flight_area: &flight_area [[-10000.0, -10000.0, 185.0], [10000.0, 10000.0, 4000.0]]
+allow_warm_start: True
 
 # database config
 database:
     enable_save: False
+    timer_tick: 20.0
     filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
     overwrite_existing: True
 
