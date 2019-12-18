@@ -44,9 +44,7 @@ def threshold_array(arr, threshold=1e-5):
     NumpyArray
         Returns arr with binary values, depending of the threshold
     """
-    arr[arr < threshold] = 0.0
-    arr[arr >= threshold] = 1.0
-    return arr
+    return (arr > threshold)
 
 def get_number_of_elements(scaledArr):
     """
@@ -174,8 +172,6 @@ def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
     inner_border, outer_border = (scaledArr_data.data - factor *
             scaledArr_std.data, scaledArr_data.data + factor *
             scaledArr_std.data)
-    threshold_array(inner_border, threshold)
-    threshold_array(outer_border, threshold)
     return inner_border, outer_border
 
 def compute_bounding_box(scaledArr):
