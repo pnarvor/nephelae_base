@@ -5,3 +5,4 @@ __pycache__
 *stderr*
 output
 nephelae.egg-info
+*.bin
