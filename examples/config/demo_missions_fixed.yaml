@@ -79,11 +79,13 @@ aircrafts:
     200:
         plugins:
             - Missions:
+                backup_file: 'backup_200.bin'
                 Lace: *lace_defaults
                 Rosette: *rosette_defaults
     201:
         plugins:
             - Missions:
+                backup_file: 'backup_201.bin'
                 Lace: *lace_defaults
                 Rosette: *rosette_defaults
             # - MissionWindUpdater:
