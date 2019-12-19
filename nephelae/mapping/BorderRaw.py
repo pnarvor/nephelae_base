@@ -11,7 +11,7 @@ class BorderRaw(FactoryBorder):
         super().__init__(name)
         self.mapInterface = mapInterface
 
-    def compute_borders(self, arrays):
+    def at_locations(self, arrays):
         raw_data = arrays.data
         border = threshold_array(raw_data).astype(np.int32)
         eroded = ndimage.binary_erosion(border).astype(border.dtype)
@@ -19,6 +19,9 @@ class BorderRaw(FactoryBorder):
         raw_scarray = ScaledArray(border_raw, arrays.dimHelper,
                 arrays.interpolation)
         return raw_scarray
+
+    def resolution(self):
+        return self.mapInterface.resolution()
 
     def get_arrays(self, keys):
         return self.mapInterface.__getitem__(keys)

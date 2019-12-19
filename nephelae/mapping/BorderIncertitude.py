@@ -12,7 +12,7 @@ class BorderIncertitude(FactoryBorder):
         self.valueMap = valueMap
         self.stdMap = stdMap
 
-    def compute_borders(self, arrays):
+    def at_locations(self, arrays):
         thr = 2e-4
         typ = np.int32
         inner, outer = compute_cross_section_border(arrays[0],
@@ -28,6 +28,9 @@ class BorderIncertitude(FactoryBorder):
         outer_scarray = ScaledArray(border_outer, arrays[0].dimHelper,
                 arrays[0].interpolation)
         return (inner_scarray, outer_scarray)
+
+    def resolution(self):
+        return self.valueMap.resolution()
 
     def get_arrays(self, keys):
         return (self.valueMap.__getitem__(keys), self.stdMap.__getitem__(keys))
