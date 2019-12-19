@@ -46,7 +46,7 @@ def threshold_array(arr, threshold=1e-5):
     """
     return (arr > threshold)
 
-def get_number_of_elements(scaledArr):
+def get_number_of_elements(scaledArr, threshold=2e-4):
     """
     Computes the number of elements displayed on a image, using a threshold.
 
@@ -61,7 +61,8 @@ def get_number_of_elements(scaledArr):
         Returns the number of elements displayed on the image and the numpy
         array labeled associated to the data.
     """
-    return ndimage.measurements.label(scaledArr.data)
+    arr = (scaledArr.data > threshold) * scaledArr.data
+    return ndimage.measurements.label(arr)
 
 def compute_selected_element_com(coords, scaledArr):
     """
@@ -237,6 +238,5 @@ def compute_cloud_volume(scaledArr_data, threshold=1e-5):
     Number
         The number of points defining the area/volume of the cloud
     """
-    res = scaledArr_data.data
-    threshold_array(res, threshold)
-    return np.sum(res)
+    arr = threshold_array(scaledArr_data.data, threshold)
+    return np.sum(arr)
