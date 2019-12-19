@@ -5,11 +5,14 @@ import signal
 from nephelae_scenario         import Scenario
 from nephelae_paparazzi.common import IvyStop, messageInterface
 from nephelae_paparazzi.utils  import send_lwc
+from nephelae_paparazzi        import AircraftLogger
 
 configFilename = 'config/demo_missions_fixed.yaml'
 scenario = Scenario(configFilename)
 scenario.load()
 scenario.start()
+
+logger = AircraftLogger()
 
 # aircraft = scenario.aircrafts['200']
 # factory  = aircraft.missionFactories['Lace']
@@ -21,6 +24,9 @@ scenario.start()
 
 aircraft200 = scenario.aircrafts['200']
 aircraft201 = scenario.aircrafts['201']
+
+# aircraft200.add_status_observer(logger)
+# aircraft201.add_status_observer(logger)
 
 def stop():
     if scenario.running:
