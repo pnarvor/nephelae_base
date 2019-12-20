@@ -27,7 +27,7 @@ class NavigationRef:
         reference frame. 'stamp' is the mission start time.
     """
 
-    def __init__(self, position=Position(0,0,0,0), utm_zone=31):
+    def __init__(self, position=Position(0,0,0,0), utm_zone=31, utm_letter='N'):
         """
         Parameters
         ----------
@@ -44,7 +44,7 @@ class NavigationRef:
         """
         self.position = position
         self.utm_zone = utm_zone
-        
+        self.utm_letter = utm_letter
 
     def __str__(self):
         return "NavigationRef : "+str(self.position)+", utm_zone : "+str(self.utm_zone)

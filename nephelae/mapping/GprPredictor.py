@@ -207,7 +207,7 @@ class GprPredictor(MapInterface):
                     np.put(std_res, same_locations, computed_locations[1])
                     val_return = (val_res, std_res)
                 else:
-                    res = np.ones(locations.shape[0], 1)*self.kernel.mean
+                    res = np.ones((locations.shape[0], 1))*self.kernel.mean
                     np.put(res, same_locations, computed_locations)
                     val_return = (res, None)
                 
@@ -285,4 +285,4 @@ class GprPredictor(MapInterface):
         self.computeStd = state
 
     def __getitem__(self, keys):
-        return self.get_value
+        return self.get_value(keys)

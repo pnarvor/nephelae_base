@@ -12,7 +12,7 @@ from nephelae_paparazzi.plugins.loaders import load_plugins
 
 from nephelae.mapping import WindMapConstant, WindObserverMap
 from nephelae.mapping import GprPredictor, ValueMap, StdMap
-from nephelae.mapping import BorderIncertitude
+from nephelae.mapping import BorderIncertitude, BorderRaw
 
 from nephelae_mesonh import MesonhDataset, MesonhMap
 
@@ -66,7 +66,8 @@ class Scenario(Pluginable):
                        localFrameConfig['east'],
                        localFrameConfig['north'],
                        localFrameConfig['alt'])
-        self.localFrame = NavigationRef(ref)
+        self.localFrame = NavigationRef(ref, localFrameConfig['utm_zone'],
+                localFrameConfig['utm_letter'])
         self.flightArea = self.config['flight_area']
         
         self.database = self.configure_database()
@@ -94,10 +95,6 @@ class Scenario(Pluginable):
             self.load_maps(self.config['maps'])
         else:
             print("Warning : no maps defined in config file")
-
-        if 'genborders' in self.config.keys():
-            self.load_borderclasses(self.config['genborders'])
-
 
 
     def start(self):
@@ -307,6 +304,18 @@ class Scenario(Pluginable):
             else:
                 self.maps[mapId+'_std'] = StdMap(config['std_map'], gpr)
 
+        if 'border_map' in config.keys():
+            if mapId+'_border' in self.maps.keys():
+                warn("The map '"+mapId+"_std' id is already defined. Cannot "+
+                     "instanciate '"+config['border_map']+"' map.")
+            else:
+                if mapId+'_std' in self.maps.keys():
+                    self.maps[mapId+'_border'] = BorderIncertitude(
+                            config['border_map'], self.maps[mapId],
+                            self.maps[mapId+'_std'])
+                else:
+                    self.maps[mapId+'_border'] = BorderRaw(config['border_map'],
+                            self.maps[mapId])
 
     def load_kernels(self, config):
         """
@@ -337,20 +346,3 @@ class Scenario(Pluginable):
 
             # Kernel instanciation
             self.kernels[key] = KernelTypes[kernelConfig['type']](**params)
-
-    def load_borderclasses(self, config):
-        config = ensure_dictionary(config)
-        self.borderClasses = {}
-        for key in config:
-            borderConfig = ensure_dictionary(config[key])
-            if borderConfig['type'] == 'BorderIncertitude':
-                if borderConfig['map_id']+'_std' in self.maps.keys():
-                    self.borderClasses[key] = \
-                    BorderIncertitude(borderConfig['name'],
-                            self.maps[borderConfig['map_id']],
-                            self.maps[borderConfig['map_id']+'_std'])
-                else:
-                    raise ValueError("This map_id has no associated std_map," +
-                    "cannot instanciate this BorderCloud")
-            else:
-                raise ValueError("No known type")
