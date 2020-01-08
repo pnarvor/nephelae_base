@@ -73,8 +73,8 @@ class Scenario(Pluginable):
         self.database = self.configure_database()
 
         # To be configured in config file
-        self.windMap = WindMapConstant('Horizontal Wind', [0.0, 0.0])
-        # self.windMap = WindMapConstant('Horizontal Wind', [-7.5, -0.5])
+        # self.windMap = WindMapConstant('Horizontal Wind', [0.0, 0.0])
+        self.windMap = WindMapConstant('Horizontal Wind', [-7.5, -0.5])
         # self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
         # self.database.add_sensor_observer(self.windMap)
             
@@ -82,11 +82,6 @@ class Scenario(Pluginable):
             self.mesonhFiles   = self.config['mesonh_files']
             self.mesonhDataset = MesonhDataset(self.mesonhFiles)
        
-        if 'aircrafts' in self.config.keys():
-            self.load_aircrafts(self.config['aircrafts'])
-        else:
-            print("Warning : no aircrafts defined in config file")
-
         if 'wind_feedback' in self.config.keys():
             if self.config['wind_feedback']:
                 self.load_plugin(WindSimulation, self.mesonhFiles)
@@ -95,6 +90,11 @@ class Scenario(Pluginable):
             self.load_maps(self.config['maps'])
         else:
             print("Warning : no maps defined in config file")
+
+        if 'aircrafts' in self.config.keys():
+            self.load_aircrafts(self.config['aircrafts'])
+        else:
+            print("Warning : no aircrafts defined in config file")
 
 
     def start(self):
@@ -212,6 +212,9 @@ class Scenario(Pluginable):
         # find better way
         if hasattr(aircraft, 'windMap'):
             aircraft.windMap = self.windMap
+
+        if hasattr(aircraft, 'mapWhereCenterIs'):
+            aircraft.mapWhereCenterIs = self.maps[aircraft.mapWhereCenterIs]
 
         self.aircrafts[aircraftId] = aircraft
 
