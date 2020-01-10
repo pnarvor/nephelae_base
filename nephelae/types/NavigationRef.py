@@ -27,7 +27,7 @@ class NavigationRef:
         reference frame. 'stamp' is the mission start time.
     """
 
-    def __init__(self, position=Position(0,0,0,0), utm_zone=31, utm_letter='N'):
+    def __init__(self, position=Position(0,0,0,0), utm_zone='31N'):
         """
         Parameters
         ----------
@@ -38,16 +38,19 @@ class NavigationRef:
             position.y : UTM north coordinate.
             position.z : Altitude (from sea level).
 
-        utm_zone : str?, int?
-            UTM zone of the local frame (NOT USED, can be omited without
-            consequences).
+        utm_zone : str
+            HAS to be of the format "number [1-60]"+"letter"
         """
-        self.position = position
-        self.utm_zone = utm_zone
-        self.utm_letter = utm_letter
+        self.position   = position
+        self.utm_zone   = utm_zone[0:2]
+        self.utm_zone   = utm_zone
+        self.utm_number = int(utm_zone[:-1])
+        self.utm_letter = self.utm_zone[-1].upper()
+
 
     def __str__(self):
-        return "NavigationRef : "+str(self.position)+", utm_zone : "+str(self.utm_zone)
+        return "NavigationRef : " + str(self.position) +\
+                ", utm_zone : " + str(self.utm_zone) + self.utm_letter
 
 
     def __getattr__(self, name):
