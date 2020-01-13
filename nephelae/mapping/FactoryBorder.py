@@ -4,8 +4,8 @@ from .MapInterface import MapInterface
 
 class FactoryBorder(MapInterface):
 
-    def __init__(self, name, sampleSize=1):
-        super().__init__(name)
+    def __init__(self, name, threshold=0, sampleSize=1):
+        super().__init__(name, threshold)
         self.sampleSize = sampleSize
 
     @abc.abstractmethod

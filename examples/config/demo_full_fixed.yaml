@@ -152,7 +152,9 @@ maps:
         kernel: 'lwc_kernel'
         database_tags: ['RCT']
         data_range: [0.0, 1.0e-4]
+        threshold: 2.0e-4
         std_map: 'Liquid Water std' # optional
+        border_map: 'Liquid Water border' # optional
 
     clouds:
         name: 'Liquid Water (MesoNH)'

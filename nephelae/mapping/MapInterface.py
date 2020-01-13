@@ -33,7 +33,7 @@ class MapInterface(abc.ABC):
         A unique identifer for this map instance.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, threshold=0):
         """
         Parameters
         ----------
@@ -43,6 +43,7 @@ class MapInterface(abc.ABC):
         """
 
         self.name = name
+        self.threshold = threshold
 
 
     @abc.abstractmethod

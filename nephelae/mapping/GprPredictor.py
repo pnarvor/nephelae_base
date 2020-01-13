@@ -51,7 +51,8 @@ class GprPredictor(MapInterface):
     See nephelae.mapping.MapInterface for other methods.
     """
 
-    def __init__(self, database, databaseTags, kernel, updateRange=True):
+    def __init__(self, name, database, databaseTags, kernel, updateRange=True,
+            threshold=0):
 
         """
         name : str
@@ -66,6 +67,7 @@ class GprPredictor(MapInterface):
         kernel : sklearn.gaussian_process.kernel.Kernel derived type
             Kernel used in GPR.
         """
+        super().__init__(name, threshold=threshold)
         self.database       = database
         self.databaseTags   = databaseTags
         self.kernel         = kernel

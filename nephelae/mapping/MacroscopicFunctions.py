@@ -31,7 +31,7 @@ def compute_com(scaledArr):
         res = scaledArr.dimHelper.to_unit(center_of_mass)
     return res
 
-def threshold_array(arr, threshold=1e-5):
+def threshold_array(arr, threshold=2e-4):
     """
     Thresholds an array, returning a binary array
 

@@ -7,14 +7,14 @@ from .FactoryBorder import FactoryBorder
 from .MacroscopicFunctions import threshold_array
 
 class BorderRaw(FactoryBorder):
-    def __init__(self, name, mapInterface, thr=2e-4):
-        super().__init__(name)
+    def __init__(self, name, mapInterface):
+        super().__init__(name, threshold=mapInterface.threshold)
         self.mapInterface = mapInterface
-        self.thr = thr
 
     def at_locations(self, arrays):
         raw_data = arrays.data
-        border = threshold_array(raw_data, threshold=self.thr).astype(np.int32)
+        border = threshold_array(raw_data, threshold=self.threshold).astype(
+                np.int32)
         eroded = ndimage.binary_erosion(border).astype(border.dtype)
         border_raw = np.bitwise_xor(border, eroded)
         raw_scarray = ScaledArray(border_raw, arrays.dimHelper,

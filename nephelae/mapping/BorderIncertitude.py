@@ -7,18 +7,18 @@ from .FactoryBorder import FactoryBorder
 from .MacroscopicFunctions import compute_cross_section_border, threshold_array
 
 class BorderIncertitude(FactoryBorder):
-    def __init__(self, name, valueMap, stdMap, thr=2e-4):
-        super().__init__(name)
+    def __init__(self, name, valueMap, stdMap):
+        super().__init__(name, threshold=valueMap.threshold)
+        print(self.threshold)
         self.valueMap = valueMap
         self.stdMap = stdMap
-        self.thr = thr
 
     def at_locations(self, arrays):
         typ = np.int32
         inner, outer = compute_cross_section_border(arrays[0],
-                arrays[1], factor=1, threshold=self.thr)
-        thresholded_inner = threshold_array(inner, threshold=self.thr)
-        thresholded_outer = threshold_array(outer, threshold=self.thr)
+                arrays[1], factor=1, threshold=self.threshold)
+        thresholded_inner = threshold_array(inner, threshold=self.threshold)
+        thresholded_outer = threshold_array(outer, threshold=self.threshold)
         eroded_inner = ndimage.binary_erosion(thresholded_inner).astype(typ)
         eroded_outer = ndimage.binary_erosion(thresholded_outer).astype(typ)
         border_inner = np.bitwise_xor(thresholded_inner, eroded_inner)
