@@ -64,7 +64,7 @@ def get_number_of_elements(scaledArr, threshold=2e-4):
     arr = (scaledArr.data > threshold) * scaledArr.data
     return ndimage.measurements.label(arr)
 
-def compute_selected_element_com(coords, scaledArr):
+def compute_selected_element_com(coords, scaledArr, threshold):
     """
     Computes the center of mass of a selected element, using a tuple of
     coordinates. Return None if there is no center of mass.
@@ -81,7 +81,8 @@ def compute_selected_element_com(coords, scaledArr):
         associated with the map.
     """
     res = None
-    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr,
+            threshold)
     if is_in_element(coords, data_labeled):
         out = np.where(data_labeled == data_labeled[coords])
         locations = np.array([X for X in out])
@@ -92,7 +93,7 @@ def compute_selected_element_com(coords, scaledArr):
         res = scaledArr.dimHelper.to_unit(center_of_mass)
     return res
 
-def compute_selected_element_volume(coords, scaledArr):
+def compute_selected_element_volume(coords, scaledArr, threshold=2e-4):
     """
     Computes the number of pixels defining the cloud, depending of the
     coordinates.
@@ -112,13 +113,14 @@ def compute_selected_element_volume(coords, scaledArr):
         element associated with the coordinates.
     """
     res = None
-    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr,
+            threshold)
     if is_in_element(coords, data_labeled):
         out = np.where(data_labeled == data_labeled[coords])
         res = len(out[0])
     return res
 
-def compute_list_of_coms(scaledArr):
+def compute_list_of_coms(scaledArr, threshold):
     """
     Computes all the centers of elements displayed on a map. Returns None if
     there is no element.
@@ -134,7 +136,8 @@ def compute_list_of_coms(scaledArr):
         Returns all tuples of coordinates of all the elements displayed on the
         map
     """
-    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr,
+            threshold)
     list_of_coms = []
     for i in range(1, number_of_elements+1):
         out = np.where(data_labeled == i)
@@ -148,7 +151,7 @@ def compute_list_of_coms(scaledArr):
     return list_of_coms
 
 def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
-        threshold=1e-5):
+        threshold=2e-4):
     """
     Computes the border of the scaledArr, using a threshold, and returns inner
     and outer borders, using std values with a certain confidence (given by the
@@ -175,7 +178,7 @@ def compute_cross_section_border(scaledArr_data, scaledArr_std, factor=1,
             scaledArr_std.data)
     return inner_border, outer_border
 
-def compute_bounding_box(scaledArr):
+def compute_bounding_box(scaledArr, threshold):
     """
     Computes the bounds where an element is spotted. Returns the list of bounds
     of all elements.
@@ -191,7 +194,8 @@ def compute_bounding_box(scaledArr):
         The list of bounds of elements in the ScaledArray.
         The length of the list is equal to number_of_elements.
     """
-    data_labeled, number_of_elements = get_number_of_elements(scaledArr)
+    data_labeled, number_of_elements = get_number_of_elements(scaledArr,
+            threshold)
     list_of_boxes = []
     for i in range(1, number_of_elements+1):
         out = np.where(data_labeled == i)
