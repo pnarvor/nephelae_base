@@ -9,7 +9,6 @@ from .MacroscopicFunctions import compute_cross_section_border, threshold_array
 class BorderIncertitude(FactoryBorder):
     def __init__(self, name, valueMap, stdMap):
         super().__init__(name, threshold=valueMap.threshold)
-        print(self.threshold)
         self.valueMap = valueMap
         self.stdMap = stdMap
 

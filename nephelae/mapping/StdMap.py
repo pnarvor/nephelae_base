@@ -9,7 +9,7 @@ class StdMap(MapInterface):
     def __init__(self, name, gpr, sampleSize=1):
         if not isinstance(gpr, GprPredictor):
             raise ValueError('Gpr MUST be a GprPredictor type')
-        super().__init__(name, threshold=gpr.threshold)
+        super().__init__(name, threshold=np.sqrt(gpr.kernel.variance))
         self.sampleSize = sampleSize
         self.gpr = gpr
         self.gpr.set_compute_std(True)
