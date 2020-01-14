@@ -51,8 +51,8 @@ class GprPredictor(MapInterface):
     See nephelae.mapping.MapInterface for other methods.
     """
 
-    def __init__(self, name, database, databaseTags, kernel, updateRange=True,
-            threshold=0):
+    def __init__(self, name, database, databaseTags, kernel,
+            dataRange=(Bounds(0, 0),), updateRange=True, threshold=0):
 
         """
         name : str
@@ -81,7 +81,7 @@ class GprPredictor(MapInterface):
         self.getItemLock    = threading.Lock()
         self.computeStd     = False
         self.updateRange    = updateRange
-        self.dataRange      = []
+        self.dataRange      = dataRange
 
     
     def at_locations(self, locations, locBounds=None):
@@ -224,7 +224,8 @@ class GprPredictor(MapInterface):
                         Max = [Max]
                 
                     if len(Min) != len(self.dataRange):
-                        self.dataRange = [Bounds(m, M) for m,M in zip(Min,Max)]
+                        self.dataRange = tuple(Bounds(m, M) for m,M in
+                                zip(Min,Max))
                     else:
                         for b,m,M in zip(self.dataRange, Min, Max):
                             b.update(m)

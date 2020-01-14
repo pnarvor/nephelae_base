@@ -288,22 +288,19 @@ class Scenario(Pluginable):
                  "Cannot instanciate '"+config['name']+"' map.")
             return
         
-        isThresholdDefined = 'threshold' in config.keys()
-        
-        if isThresholdDefined:
-            gpr = GprPredictor(config['name'], self.database,
-                           config['database_tags'],
-                           self.kernels[config['kernel']],
-                           threshold=config['threshold'])
-        else:
-            gpr = GprPredictor(config['name'], self.database,
-                           config['database_tags'],
-                           self.kernels[config['kernel']])
+        gpr = GprPredictor(config['name'], self.database,
+                        config['database_tags'],
+                        self.kernels[config['kernel']])
+
+        if 'threshold' in config.keys():
+            gpr.threshold = config['threshold']
+
+        if 'data_range' in config.keys():
+            gpr.dataRange = (Bounds(config['data_range'][0],
+                config['data_range'][1]),)
+            gpr.updateRange = False
 
         self.maps[mapId] = ValueMap(config['name'], gpr)
-        if 'data_range' in config.keys():
-            rng = config['data_range']
-            self.maps[mapId].dataRange = (Bounds(rng[0], rng[1]),)
 
         if 'std_map' in config.keys():
             # If std_map if defined in the config, creating a new StdMap with

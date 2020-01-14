@@ -28,6 +28,9 @@ class ValueMap(MapInterface):
     def resolution(self):
         return self.gpr.kernel.resolution()
 
+    def range(self):
+        return self.gpr.range()
+
     def sample_size(self):
         return self.sampleSize
     
