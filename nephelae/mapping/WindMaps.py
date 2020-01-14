@@ -91,8 +91,8 @@ class WindObserverMap(WindMapConstant):
     def __init__(self, name, sampleName=str(['UT','VT']),
                  defaultWindValue=np.array([0.0,0.0]),
                  maxSamples=30, minSamples=5,
-                 resolution=[50.0,50.0,50.0,50.0]):
-        super().__init__(name, defaultWindValue, resolution)
+                 resolution=[50.0,50.0,50.0,50.0], threshold=0):
+        super().__init__(name, defaultWindValue, resolution, threshold=threshold)
 
         self.sampleName  = sampleName
         self.windSamples = []

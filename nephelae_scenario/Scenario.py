@@ -257,7 +257,10 @@ class Scenario(Pluginable):
         # Populating parameters for MesonhMap init
         params = {'name': config['name'],
                   'atm' : self.mesonhDataset,
-                  'mesonhVar': config['mesonh_variable']}
+                  'mesonhVar': config['mesonh_variable'],
+                  'threshold': (config['threshold'] if 'threshold' in
+                      config.keys() else 0)}
+
         if 'interpolation' in config.keys():
             params['interpolation'] = config['interpolation']
         if 'origin' in config.keys():
