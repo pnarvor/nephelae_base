@@ -73,8 +73,13 @@ class Scenario(Pluginable):
 
         # To be configured in config file
         # self.windMap = WindMapConstant('Horizontal Wind', [0.0, 0.0])
-        self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
-        self.database.add_sensor_observer(self.windMap)
+        # self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
+        if 'wind_map' in self.config.keys():
+            self.load_wind_map(self.config['wind_map'])
+        else:
+            raise KeyError('No wind map detected ! Wind maps types must be' +
+                    'declared using wind_map as yaml keyword.')
+        
             
         if 'mesonh_files' in self.config.keys():
             self.mesonhFiles   = self.config['mesonh_files']
@@ -173,6 +178,43 @@ class Scenario(Pluginable):
 
         return database
 
+    def load_wind_map(self, config):
+        """
+        Instanciate WindMaps objects. These objects includes WindMapConstant and
+        WindObserverMap.
+        """
+        config = ensure_dictionary(config)
+        keys = config.keys()
+        params = {'name': config['name']}
+        if config['type'] == 'WindMapConstant':
+            if 'wind' in keys:
+                params['wind'] = config['wind']
+            if 'resolution' in keys:
+                params['resolution'] = config['resolution']
+            if 'threshold' in keys:
+                params['threshold'] = config['threshold']
+
+            self.windMap = WindMapConstant(**params)
+        elif config['type'] == 'WindObserverMap':
+            if 'sampleName' in keys:
+                params['sampleName'] = str(config['sampleName'])
+            if 'wind' in keys:
+                params['defaultWindValue'] = config['wind']
+            if 'maxSamples' in keys:
+                params['maxSamples'] = config['maxSamples']
+            if 'minSamples' in keys:
+                params['minSamples'] = config['minSamples']
+            if 'resolution' in keys:
+                params['resolution'] = config['resolution']
+            if 'threshold' in keys:
+                params['threshold'] = config['threshold']
+
+            self.windMap = WindObserverMap(**params)
+            self.database.add_sensor_observer(self.windMap)
+        else:
+            raise ValueError(config['type'] + " is not a valid map type. "+
+                     "Cannot instanciate '" + config['name'] + "'.")
+        pass
     
     def load_aircrafts(self, config):
         """

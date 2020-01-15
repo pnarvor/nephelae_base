@@ -16,9 +16,9 @@ class WindMapConstant(MapInterface):
 
     """
 
-    def __init__(self, variableName, wind=[0.0,0.0],
+    def __init__(self, name, wind=[0.0,0.0],
                  resolution=[50.0,50.0,50.0,50.0], threshold=0):
-        super().__init__(variableName, threshold=threshold)
+        super().__init__(name, threshold=threshold)
         self.wind  = np.array(wind)
         self.resol = resolution
 

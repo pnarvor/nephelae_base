@@ -13,13 +13,18 @@ allow_warm_start: True
 # database config
 database:
     enable_save: False
-    filepath: '/home/pnarvor/work/nephelae/data/temp/default.neph'
+    filepath: '/home/fseguin/work/nephelae_data/default.neph'
     overwrite_existing: True
 
-# mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
-mesonh_files:  &mesonh_files '/media/pnarvor/TOSHIBA EXT/nephelae-data/bomex_hf.nc'
+mesonh_files:  &mesonh_files '/home/fseguin/work/nephelae_data/MesoNH02/bomex_hf.nc'
 # Setting this to true will activate feedback to WORLD_ENV requests
 wind_feedback: False
+
+wind_map:
+    type: 'WindObserverMap'
+    name: 'Horizontal Wind'
+    sampleName: ['UT', 'VT']
+
 mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
 # mesonh_origin: &mesonh_origin [0.0, -731.7, -2126.5, 0.0]
 
@@ -93,21 +98,19 @@ aircrafts:
                 mapWhereCenterIs: 'LWC'
             - MissionWindUpdater:
                 period: 10.0
-    201:
-        plugins:
-            - MesonhProbe:
-                mesonhFiles: *mesonh_files
-                mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
-                rctFeedback: True
-                mesonhOrigin: *mesonh_origin
-            - Missions:
-                backup_file: 'backup_201.bin'
-                Lace: *lace_defaults
-                Rosette: *rosette_defaults
-            - CloudCenterTracker:
-                mapWhereCenterIs: 'LWC'
-            - MissionWindUpdater:
-                period: 10.0
+    # 201:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    #         - Missions:
+    #             backup_file: 'backup_201.bin'
+    #             Lace: *lace_defaults
+    #             Rosette: *rosette_defaults
+    #         # - MissionWindUpdater:
+    #         #     period: 10.0
     # 202:
     #     plugins:
     #         - MesonhProbe:
