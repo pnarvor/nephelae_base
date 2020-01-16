@@ -6,6 +6,8 @@ import sklearn.gaussian_process.kernels as gpk
 from   scipy.spatial.distance import cdist
 from   copy import deepcopy
 
+from nephelae.types import DeepcopyGuard
+
 class NephKernel(gpk.Kernel):
 
     """
@@ -40,7 +42,8 @@ class NephKernel(gpk.Kernel):
 
     """
 
-    def __init__(self, lengthScale, variance, noiseVariance):
+    def __init__(self, lengthScale, variance, noiseVariance,
+                       shallowParameters=DeepcopyGuard()):
 
         """
         Parameters
@@ -58,10 +61,25 @@ class NephKernel(gpk.Kernel):
             Variance of the measure noise (usually sensor noise, or used as a
             smoothing parameter). See a GPR tutorial for more info.
         """
+        super().__init__()
 
         self.lengthScales  = lengthScale
         self.variance      = variance
         self.noiseVariance = noiseVariance
+        self.shallowParameters = shallowParameters
+        for key in self.shallowParameters.parameters.keys():
+            setattr(self, key, self.shallowParameters.parameters[key])
+
+
+    def get_params(self, deep=True):
+
+        """
+        To please sklearn and avoid issues with self.shallowParameters
+        """
+        return {'lengthScales'     : self.lengthScales,
+                'variance'         : self.variance,
+                'noiseVariance'    : self.noiseVariance,
+                'shallowParameters': self.shallowParameters}
 
 
     def __call__(self, X, Y=None):
@@ -171,7 +189,8 @@ class WindKernel(NephKernel):
 
     """
 
-    def __init__(self, lengthScales, variance, noiseVariance, windMap, mean=0):
+    def __init__(self, lengthScales, variance, noiseVariance, mean=0,
+                       shallowParameters={'windMap':None}):
 
         """
         Parameters
@@ -180,9 +199,20 @@ class WindKernel(NephKernel):
             A class able to return a wind estimation at a given location.
         """
 
-        super().__init__(lengthScales, variance, noiseVariance)
-        self.windMap = windMap
+        super().__init__(lengthScales, variance, noiseVariance,
+                         shallowParameters)
         self.mean = mean
+
+
+    def get_params(self, deep=True):
+
+        """
+        To please sklearn and avoid issues with self.shallowParameters
+        """
+
+        res = super().get_params()
+        res['mean'] = self.mean
+        return res
 
     
     def __call__(self, X, Y=None):
@@ -262,28 +292,6 @@ class WindKernel(NephKernel):
         #     print("Y is no X:\n", res)
         # return res
 
-
-    def __deepcopy__(self, memo):
-
-        """For compatibility with sklearn
-
-        sklearn does a deepcopy of the kernel, which in sklearn implementation
-        is not costly. However in this specific implementation, the kernel
-        contains a reference a of full database. This method overrides the
-        deepcopy of the WindMap attribute to avoid the full deepcopy of
-        the database.
-
-        /!\ This method may not behave as intended. Check it.
-        """
-        print("Deepcopy was called ################################################################################") 
-        # Forbidding deepcopy of self.windMap
-        # scikit-learn will deepcopy the kernel and if the windMap is a 
-        # GprPredictor it contains a reference to a databasei, which will
-        # be deep-copied alongside the kernel. We don't want that.
-        other = WindKernel(deepcopy(self.lengthScales, memo),
-                           deepcopy(self.variance, memo),
-                           deepcopy(self.noiseVariance, memo),
-                           self.windMap)
 
 
 

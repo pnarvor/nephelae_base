@@ -4,6 +4,7 @@ import time
 from warnings import warn
 
 from nephelae.types             import NavigationRef, Position, Pluginable, Bounds
+from nephelae.types             import Bounds, DeepcopyGuard
 from nephelae.database          import NephelaeDataServer
 
 from nephelae_paparazzi         import Aircraft
@@ -391,10 +392,14 @@ class Scenario(Pluginable):
             params['lengthScales']  = kernelConfig['length_scales']
             params['variance']      = kernelConfig['variance']
             params['noiseVariance'] = kernelConfig['noise_variance']
+
+            shallowParams = {} # this is because of sklean clone function
             if 'mean' in kernelConfig.keys():
-                params['mean']      = kernelConfig['mean']
+                shallowParams['mean']      = kernelConfig['mean']
             if kernelConfig['type'] == 'WindKernel':
-                params['windMap'] = self.windMap
+                shallowParams['windMap'] = self.windMap
+            if len(shallowParams) > 0:
+                params['shallowParameters'] = DeepcopyGuard(**shallowParams)
 
             # Kernel instanciation
             self.kernels[key] = KernelTypes[kernelConfig['type']](**params)
