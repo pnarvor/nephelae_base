@@ -2,12 +2,13 @@ import numpy as np
 from sklearn.gaussian_process import kernels as gpk
 
 from nephelae.types import Bounds
+from nephelae.types import MultiObserverSubject
 
 from .MapInterface import MapInterface
 from .GprPredictor import GprPredictor
 from .GprKernel    import WindKernel
 
-class WindMapConstant(MapInterface):
+class WindMapConstant(MapInterface, MultiObserverSubject):
 
     """WindMapConstant
     Derived from nephelae.mapping.MapInterface
@@ -18,9 +19,11 @@ class WindMapConstant(MapInterface):
 
     def __init__(self, name, wind=[0.0,0.0],
                  resolution=[50.0,50.0,50.0,50.0], threshold=0):
-        super().__init__(name, threshold=threshold)
+        MapInterface.__init__(self, name, threshold=threshold)
+        MultiObserverSubject.__init__(self, ['send_new_wind'])
         self.wind  = np.array(wind)
         self.resol = resolution
+        self.add_notification_method('send_new_wind')
 
 
     def at_locations(self, locations):
@@ -48,6 +51,16 @@ class WindMapConstant(MapInterface):
 
     def get_wind(self):
         return self.wind
+
+    def set_wind(self, wind):
+        self.wind = np.array(wind)
+        self.send_new_wind(self.wind.tolist())
+
+    def add_wind_observer(self, observer):
+        self.attach_observer(observer, 'send_new_wind')
+    
+    def remove_wind_observer(self, observer):
+        self.detach_observer(observer, 'send_new_wind')
 
 class WindObserverMap(WindMapConstant):
 
@@ -108,13 +121,13 @@ class WindObserverMap(WindMapConstant):
         if not self.windSamples:
             # If wind sample is empty, this is the first sample we receive.
             # Setting self.wind to this value is better than default.
-            self.wind = sample.data[0]
+            self.set_wind(sample.data[0])
 
         self.windSamples.append(sample.data[0])
         if len(self.windSamples) >= self.maxSamples:
             # Updating wind only when maxSamples is reached
             # To update at each sample, set maxSamples-minSamples=1
-            self.wind = np.array(self.windSamples).mean(axis=0)
+            self.set_wind(np.array(self.windSamples).mean(axis=0))
             # Removing old data
             self.windSamples[0:len(self.windSamples) - self.minSamples] = []
 

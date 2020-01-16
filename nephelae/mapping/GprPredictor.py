@@ -195,7 +195,6 @@ class GprPredictor(MapInterface):
                     )))[0]
                 
                 selected_locations = locations[same_locations]
-                
                 self.gprProc.fit(trainLocations, trainValues)
                 computed_locations = self.gprProc.predict(
                         selected_locations, return_std=self.computeStd)

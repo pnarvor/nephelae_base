@@ -77,7 +77,7 @@ class Scenario(Pluginable):
         if 'wind_map' in self.config.keys():
             self.load_wind_map(self.config['wind_map'])
         else:
-            raise KeyError('No wind map detected ! Wind maps types must be' +
+            raise KeyError('No wind map detected ! Wind maps types MUST be' +
                     'declared using wind_map as yaml keyword.')
         
             
