@@ -36,7 +36,7 @@ data_views:
         name:          'Liquid Water Content'
         unit:          'kg/kg'
         type:           'DataServerTaggedView'
-        database_tags: ['LWC']
+        database_tags: ['RCT']
     WT:
         name:          'Vertical Wind'
         unit:          'm/s'
@@ -180,7 +180,7 @@ maps:
         name: 'Liquid Water'
         type: 'GprMap'
         kernel: 'lwc_kernel'
-        database_tags: ['RCT']
+        data_view: 'LWC'
         data_range: [0.0, 1.0e-4]
         threshold: 2.0e-4
         std_map: 'Liquid Water std' # optional

@@ -366,10 +366,15 @@ class Scenario(Pluginable):
             warn("No kernel '"+config['kernel']+" defined. " +
                  "Cannot instanciate '"+config['name']+"' map.")
             return
-        
-        gpr = GprPredictor(config['name'], self.database,
-                        config['database_tags'],
-                        self.kernels[config['kernel']])
+
+        if config['data_view'] not in self.dataViews.keys():
+            warn("No data_view '"+config['data_view']+" defined. " +
+                 "Cannot instanciate '"+config['name']+"' map.")
+            return
+
+        gpr = GprPredictor(config['name'],
+                           self.dataViews[config['data_view']],
+                           self.kernels[config['kernel']])
 
         if 'threshold' in config.keys():
             gpr.threshold = config['threshold']

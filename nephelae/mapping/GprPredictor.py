@@ -24,6 +24,9 @@ class GprPredictor(MapInterface):
     databaseTags : list(str,...)
         Tags used to retrieve from the database relevant data to build the map.
 
+    databaseView : nephelae.database.DataServerTaggedView
+        Data view used to access the database
+
     kernel : sklearn.gaussian_process.kernel.Kernel derived type
         Kernel used in GPR. See here for more details :
         https://scikit-learn.org/stable/modules/classes.html#module-sklearn.gaussian_process
@@ -51,7 +54,7 @@ class GprPredictor(MapInterface):
     See nephelae.mapping.MapInterface for other methods.
     """
 
-    def __init__(self, name, database, databaseTags, kernel,
+    def __init__(self, name, databaseView, kernel,
             dataRange=(Bounds(0, 0),), updateRange=True, threshold=0):
 
         """
@@ -68,8 +71,7 @@ class GprPredictor(MapInterface):
             Kernel used in GPR.
         """
         super().__init__(name, threshold=threshold)
-        self.database       = database
-        self.databaseTags   = databaseTags
+        self.databaseView   = databaseView
         self.kernel         = kernel
         self.gprProc = GaussianProcessRegressor(self.kernel,
                 alpha=0.0,
@@ -134,8 +136,7 @@ class GprPredictor(MapInterface):
                 locBounds[3].max = locBounds[3].max + kernelSpan[3]
             
             samples = [entry.data for entry in \
-                    self.database[self.databaseTags]\
-                    (assumePositiveTime=False)\
+                    self.databaseView(assumePositiveTime=False)\
                     [locBounds[0].min:locBounds[0].max,
                     locBounds[1].min:locBounds[1].max,
                     locBounds[2].min:locBounds[2].max,
