@@ -6,6 +6,7 @@ from warnings import warn
 from nephelae.types             import NavigationRef, Position, Pluginable, Bounds
 from nephelae.types             import Bounds, DeepcopyGuard
 from nephelae.database          import NephelaeDataServer
+from nephelae.database          import DataServerView, DataServerTaggedView
 
 from nephelae_paparazzi         import Aircraft
 from nephelae_paparazzi.plugins import WindSimulation
@@ -44,6 +45,7 @@ class Scenario(Pluginable):
         self.missionT0     = None
         self.localFrame    = None
         self.flightArea    = None
+        self.dataViews     = {}
         self.aircrafts     = {}
         self.database      = None
         self.mesonhFiles   = None
@@ -71,6 +73,11 @@ class Scenario(Pluginable):
         self.flightArea = self.config['flight_area']
         
         self.database = self.configure_database()
+
+        if 'data_views' in self.config.keys():
+            self.load_data_views(self.config['data_views'])
+        else:
+            print("Warning : no data_views defined in config file")
 
         # To be configured in config file
         # self.windMap = WindMapConstant('Horizontal Wind', [0.0, 0.0])
@@ -216,6 +223,32 @@ class Scenario(Pluginable):
             raise ValueError(config['type'] + " is not a valid map type. "+
                      "Cannot instanciate '" + config['name'] + "'.")
         pass
+
+    
+    def load_data_views(self, config):
+        """
+        Instanciate DataServerViews objects. This defines which data can be
+        read from the database by other components.
+        """
+        config = ensure_dictionary(config)
+        for key in config:
+            viewConfig = config[key]
+            if viewConfig['type'] == 'DataServerView':
+                self.dataViews[key] = DataServerView(self.database,
+                                                     name=viewConfig['name'])
+            elif viewConfig['type'] == 'DataServerTaggedView':
+                if 'unit' not in viewConfig.keys():
+                    viewConfig['unit'] = 'NA'
+                self.dataViews[key] = \
+                    DataServerTaggedView(self.database,
+                                         tags=viewConfig['database_tags'],
+                                         name=viewConfig['name'],
+                                         unit=viewConfig['unit'])
+                                
+
+
+
+
     
     def load_aircrafts(self, config):
         """

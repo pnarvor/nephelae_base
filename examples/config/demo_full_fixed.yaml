@@ -28,6 +28,26 @@ wind_map:
 mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
 # mesonh_origin: &mesonh_origin [0.0, -731.7, -2126.5, 0.0]
 
+data_views:
+    full:
+        name:          'All data'
+        type:          'DataServerView'
+    LWC:
+        name:          'Liquid Water Content'
+        unit:          'kg/kg'
+        type:           'DataServerTaggedView'
+        database_tags: ['LWC']
+    WT:
+        name:          'Vertical Wind'
+        unit:          'm/s'
+        type:           'DataServerTaggedView'
+        database_tags: ['WT']
+    THT:
+        name:          'Temperature'
+        unit:          'K?'
+        type:           'DataServerTaggedView'
+        database_tags: ['THT']
+
 # Default fields. Used to define yaml aliases, to define values in one single place.
 defaults:
     start: &start_defaults

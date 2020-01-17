@@ -12,11 +12,13 @@ class DataServerView:
 
     """
 
-    def __init__(self, database):
+    def __init__(self, database, name='', unit='NA'):
         self.database = database
+        self.name     = name
+        self.unit     = unit
+
         self.observerSet   = MultiObserverSubject(
             ['add_gps', 'add_sample', 'add_status'])
-
         self.database.add_gps_observer(self)
         self.database.add_sensor_observer(self)
         self.database.add_status_observer(self)
@@ -59,9 +61,9 @@ class DataServerTaggedView(DataServerView):
     tags, are given as initialization parameters.
     """
 
-    def __init__(self, database, tags, defaultSortCriteria=None,
-                       assumePositiveTime=True):
-        super().__init__(database)
+    def __init__(self, database, tags, name='', unit='NA',
+                       defaultSortCriteria=None, assumePositiveTime=True):
+        super().__init__(database, name, unit)
         
         self.tags                = tags
         self.defaultSortCriteria = defaultSortCriteria
