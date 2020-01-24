@@ -6,7 +6,7 @@ from nephelae_scenario         import Scenario
 from nephelae_paparazzi.common import IvyStop, messageInterface
 from nephelae_paparazzi.utils  import send_lwc
 
-configFilename = '/home/pnarvor/work/nephelae/files-config/mission_only_200.yaml'
+configFilename = 'config/demo_full_fixed.yaml'
 scenario = Scenario(configFilename)
 scenario.load()
 scenario.start()

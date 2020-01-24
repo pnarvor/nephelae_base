@@ -9,6 +9,7 @@ local_frame:
 # flight area in local coordinates
 flight_area: &flight_area [[-10000.0, -10000.0, 185.0], [10000.0, 10000.0, 4000.0]]
 allow_warm_start: True
+# allow_warm_start: False
 
 # database config
 database:
@@ -16,7 +17,9 @@ database:
     filepath: '/home/fseguin/work/nephelae_data/default.neph'
     overwrite_existing: True
 
-mesonh_files:  &mesonh_files '/home/fseguin/work/nephelae_data/MesoNH02/bomex_hf.nc'
+# mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
+mesonh_files:  &mesonh_files '/media/pnarvor/nephelae-data/MesoNH/bomex_hf.nc'
+# mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
 # Setting this to true will activate feedback to WORLD_ENV requests
 wind_feedback: False
 
@@ -25,7 +28,8 @@ wind_map:
     name: 'Horizontal Wind'
     sampleName: ['UT', 'VT']
 
-mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
+# mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
+mesonh_origin: &mesonh_origin [200.0, 8000.0, -1000.0, 100.0]
 # mesonh_origin: &mesonh_origin [0.0, -731.7, -2126.5, 0.0]
 
 # Default fields. Used to define yaml aliases, to define values in one single place.
@@ -39,6 +43,11 @@ defaults:
         - defaults: &circle_radius_defaults
             - DefaultValue: [80.0]
             - SimpleBounds: [[*circle_radius_min, *circle_radius_max]]
+    altitude:
+        - &altitude_min  185.0
+        - &altitude_max 4000.0
+        - defaults: &altitude_defaults
+            - SimpleBounds: [[*altitude_min, *altitude_max]]
     drift:
         - &xdrift_min -10.0
         - &xdrift_max  10.0
@@ -82,7 +91,34 @@ defaults:
             hdrift: *hdrift_defaults
             zdrift: *zdrift_defaults
 
+    spiral3d: &spiral3d_defaults
+        parameters:
+            start: *start_defaults
+            alt_stop: *altitude_defaults
+            radius_start: *circle_radius_defaults
+            radius_stop:  *circle_radius_defaults
+            drift: *drift_defaults
+        updatables:
+            hdrift: *hdrift_defaults
+            zdrift: *zdrift_defaults
+
 aircrafts:
+    # 9:
+    #     plugins:
+    #         - MesonhProbe:
+    #             mesonhFiles: *mesonh_files
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
+    #             rctFeedback: True
+    #             mesonhOrigin: *mesonh_origin
+    #         - Missions:
+    #             backup_file: 'backup_200.bin'
+    #             Lace: *lace_defaults
+    #             Rosette: *rosette_defaults
+    #             Spiral3D: *spiral3d_defaults
+    #         - CloudCenterTracker:
+    #             mapWhereCenterIs: 'LWC'
+    #         - MissionWindUpdater:
+    #             period: 10.0
     200:
         plugins:
             - MesonhProbe:
@@ -94,6 +130,7 @@ aircrafts:
                 backup_file: 'backup_200.bin'
                 Lace: *lace_defaults
                 Rosette: *rosette_defaults
+                Spiral3D: *spiral3d_defaults
             - CloudCenterTracker:
                 mapWhereCenterIs: 'LWC'
             - MissionWindUpdater:
@@ -109,44 +146,30 @@ aircrafts:
     #             backup_file: 'backup_201.bin'
     #             Lace: *lace_defaults
     #             Rosette: *rosette_defaults
+    #             Spiral3D: *spiral3d_defaults
     #         # - MissionWindUpdater:
     #         #     period: 10.0
     # 202:
     #     plugins:
     #         - MesonhProbe:
     #             mesonhFiles: *mesonh_files
-    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
     #             rctFeedback: False
     #             mesonhOrigin: *mesonh_origin
-    #         - Missions:
-    #             Lace: *lace_defaults
-    #             Rosette: *rosette_defaults
-    #         - MissionWindUpdater:
-    #             period: 10.0
     # 203:
     #     plugins:
     #         - MesonhProbe:
     #             mesonhFiles: *mesonh_files
-    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
     #             rctFeedback: False
     #             mesonhOrigin: *mesonh_origin
-    #         - Missions:
-    #             Lace: *lace_defaults
-    #             Rosette: *rosette_defaults
-    #         - MissionWindUpdater:
-    #             period: 10.0
     # 204:
     #     plugins:
     #         - MesonhProbe:
     #             mesonhFiles: *mesonh_files
-    #             mesonhVariables: ['RCT', ['UT','VT']]
+    #             mesonhVariables: ['RCT', 'WT', 'THT', ['UT','VT']]
     #             rctFeedback: False
     #             mesonhOrigin: *mesonh_origin
-    #         - Missions:
-    #             Lace: *lace_defaults
-    #             Rosette: *rosette_defaults
-    #         - MissionWindUpdater:
-    #             period: 10.0
 
 maps:
     kernels:
