@@ -75,8 +75,14 @@ class ObserverSubject:
 
         self.notifyMethodName = notifyMethodName
         self.observers = {}
-        setattr(self, notifyMethodName,
-                lambda *args, **kwargs: self.do_notify(*args, **kwargs))
+
+        # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+        # Check if commenting this did not break anything (and propagate to
+        # Multioberserver subject (it will break for MUltiobserver subject))
+        # setattr(self, notifyMethodName,
+        #         lambda *args, **kwargs: self.do_notify(*args, **kwargs))
+        # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+
         self.lock = threading.Lock()
  
 
