@@ -28,6 +28,7 @@ scenario = Scenario(configFilename)
 scenario.load()
 scenario.start()
 
+gpr = scenario.maps['LWC']
 
 
 

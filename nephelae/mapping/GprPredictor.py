@@ -51,8 +51,10 @@ class GprPredictor(MapInterface):
     See nephelae.mapping.MapInterface for other methods.
     """
 
-    def __init__(self, name, database, databaseTags, kernel,
-            dataRange=(Bounds(0, 0),), updateRange=True, threshold=0):
+    # def __init__(self, name, database, databaseTags, kernel,
+    #         dataRange=(Bounds(0, 0),), updateRange=True, threshold=0):
+    def __init__(self, name, dataview, kernel,
+                 dataRange=(Bounds(0, 0),), updateRange=True, threshold=0):
 
         """
         name : str
@@ -68,8 +70,9 @@ class GprPredictor(MapInterface):
             Kernel used in GPR.
         """
         super().__init__(name, threshold=threshold)
-        self.database       = database
-        self.databaseTags   = databaseTags
+        # self.database       = database
+        # self.databaseTags   = databaseTags
+        self.dataview       = dataview
         self.kernel         = kernel
         self.gprProc = GaussianProcessRegressor(self.kernel,
                 alpha=0.0,
@@ -133,13 +136,17 @@ class GprPredictor(MapInterface):
                 locBounds[3].min = locBounds[3].min - kernelSpan[3]
                 locBounds[3].max = locBounds[3].max + kernelSpan[3]
             
-            samples = [entry.data for entry in \
-                    self.database[self.databaseTags]\
-                    (assumePositiveTime=False)\
-                    [locBounds[0].min:locBounds[0].max,
-                    locBounds[1].min:locBounds[1].max,
-                    locBounds[2].min:locBounds[2].max,
-                    locBounds[3].min:locBounds[3].max]]
+            # samples = [entry.data for entry in \
+            #         self.database[self.databaseTags]\
+            #         (assumePositiveTime=False)\
+            #         [locBounds[0].min:locBounds[0].max,
+            #         locBounds[1].min:locBounds[1].max,
+            #         locBounds[2].min:locBounds[2].max,
+            #         locBounds[3].min:locBounds[3].max]]
+            samples = self.dataview[locBounds[0].min:locBounds[0].max,
+                                    locBounds[1].min:locBounds[1].max,
+                                    locBounds[2].min:locBounds[2].max,
+                                    locBounds[3].min:locBounds[3].max]
             
             if len(samples) < 1:
                  return (np.ones((locations.shape[0], 1))*self.kernel.mean,

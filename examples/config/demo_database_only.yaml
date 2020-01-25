@@ -30,7 +30,7 @@ wind_map:
     sampleName: ['UT', 'VT']
 
 data_views:
-    RCT:
+    LWC:
         type: DatabaseView
         tags: ['RCT']
 
@@ -152,6 +152,7 @@ maps:
         type: 'GprMap'
         kernel: 'lwc_kernel'
         database_tags: ['RCT']
+        data_view: 'LWC'
         data_range: [0.0, 1.0e-4]
         threshold: 2.0e-4
         std_map: 'Liquid Water std' # optional

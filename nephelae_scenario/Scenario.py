@@ -47,6 +47,7 @@ class Scenario(Pluginable):
         self.flightArea    = None
         self.aircrafts     = {}
         self.database      = None
+        self.dataviews     = {}
         self.mesonhFiles   = None
         self.mesonhDataset = None
         self.maps          = None
@@ -190,11 +191,10 @@ class Scenario(Pluginable):
         Instanciate DataServerViews objects. This defines which data can be
         read from the database by other components.
         """
-        self.dataViews = {}
         config = ensure_dictionary(config)
         for key in config:
             if config[key]['type'] == 'DatabaseView':
-                self.dataViews[key] = dataviews.DatabaseView(self.database,
+                self.dataviews[key] = dataviews.DatabaseView(self.database,
                                                    config[key]['tags'])
             else:
                 raise KeyError("Unknown data_view type")
@@ -355,9 +355,11 @@ class Scenario(Pluginable):
                  "Cannot instanciate '"+config['name']+"' map.")
             return
         
-        gpr = GprPredictor(config['name'], self.database,
-                        config['database_tags'],
-                        self.kernels[config['kernel']])
+        # gpr = GprPredictor(config['name'], self.database,
+        #                 config['database_tags'],
+        #                 self.kernels[config['kernel']])
+        gpr = GprPredictor(config['name'], self.dataviews[config['data_view']],
+                           self.kernels[config['kernel']])
 
         if 'threshold' in config.keys():
             gpr.threshold = config['threshold']
