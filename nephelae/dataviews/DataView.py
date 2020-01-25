@@ -38,7 +38,9 @@ class DataView(ObserverSubject):
         self.sample_notified You probably don't wan't to touch this.
         Reimplement self.sample_notified instead.
         """
-        self.do_notify(self.process_notified_sample(sample))
+        processedSample = self.process_notified_sample(sample)
+        if processedSample is not None:
+            self.do_notify(processedSample)
 
 
     def __getitem__(self, keys):
