@@ -8,8 +8,8 @@ local_frame:
 
 # flight area in local coordinates
 flight_area: &flight_area [[-10000.0, -10000.0, 185.0], [10000.0, 10000.0, 4000.0]]
-allow_warm_start: True
-# allow_warm_start: False
+# allow_warm_start: True
+allow_warm_start: False
 
 # database config
 database:
@@ -28,6 +28,11 @@ wind_map:
     type: 'WindObserverMap'
     name: 'Horizontal Wind'
     sampleName: ['UT', 'VT']
+
+data_views:
+    RCT:
+        type: DatabaseView
+        tags: ['RCT']
 
 mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
 

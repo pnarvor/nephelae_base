@@ -6,6 +6,7 @@ from warnings import warn
 from nephelae.types             import NavigationRef, Position, Pluginable, Bounds
 from nephelae.types             import Bounds, DeepcopyGuard
 from nephelae.database          import NephelaeDataServer
+from nephelae                   import dataviews
 
 from nephelae_paparazzi         import Aircraft
 from nephelae_paparazzi.plugins import WindSimulation
@@ -72,6 +73,11 @@ class Scenario(Pluginable):
         
         self.database = self.configure_database()
 
+        if 'data_views' in self.config.keys():
+            self.load_data_views(self.config['data_views'])
+        else:
+            print("Warning : no data_views defined in config file.")
+
         # To be configured in config file
         # self.windMap = WindMapConstant('Horizontal Wind', [0.0, 0.0])
         # self.windMap = WindObserverMap('Horizontal Wind', sampleName=str(['UT','VT']))
@@ -80,8 +86,7 @@ class Scenario(Pluginable):
         else:
             raise KeyError('No wind map detected ! Wind maps types MUST be' +
                     'declared using wind_map as yaml keyword.')
-        
-            
+
         if 'mesonh_files' in self.config.keys():
             self.mesonhFiles   = self.config['mesonh_files']
             self.mesonhDataset = MesonhDataset(self.mesonhFiles)
@@ -178,6 +183,22 @@ class Scenario(Pluginable):
             database.enable_periodic_save(filePath, timerTick, force)
 
         return database
+
+
+    def load_data_views(self, config):
+        """
+        Instanciate DataServerViews objects. This defines which data can be
+        read from the database by other components.
+        """
+        self.dataViews = {}
+        config = ensure_dictionary(config)
+        for key in config:
+            if config[key]['type'] == 'DatabaseView':
+                self.dataViews[key] = dataviews.DatabaseView(self.database,
+                                                   config[key]['tags'])
+            else:
+                raise KeyError("Unknown data_view type")
+
 
     def load_wind_map(self, config):
         """
