@@ -4,4 +4,5 @@
 # pre-processing (sensor calibration...), while being able to change their
 # behavior online.
 
-from .DataView import DataView
+from .DataView     import DataView
+from .DatabaseView import DatabaseView
