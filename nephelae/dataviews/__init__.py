@@ -6,3 +6,8 @@
 
 from .DataView     import DataView
 from .DatabaseView import DatabaseView
+from .Function     import Function
+
+
+
+

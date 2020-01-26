@@ -31,8 +31,11 @@ wind_map:
 
 data_views:
     LWC:
-        type: DatabaseView
+        type: 'DatabaseView'
         tags: ['RCT']
+    function:
+        type: 'Function'
+        parents: ['LWC']
 
 mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
 

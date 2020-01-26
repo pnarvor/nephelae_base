@@ -193,12 +193,33 @@ class Scenario(Pluginable):
         """
         config = ensure_dictionary(config)
         for key in config:
-            if config[key]['type'] == 'DatabaseView':
-                self.dataviews[key] = dataviews.DatabaseView(self.database,
-                                                   config[key]['tags'])
-            else:
-                raise KeyError("Unknown data_view type")
+            self.load_data_view(key, config)
+    
 
+    def load_data_view(self, key, config):
+        """
+        Load a single view (can trigger nloading of parent views).
+        """
+        # Ignore if already loaded.
+        if key in self.dataviews.keys():
+            return
+        
+        # Load parents of current view (before curren view)>
+        if 'parents' in config[key]:
+            for parentId in config[key]['parents']:
+                self.load_data_view(parentId, config)
+        
+        # Load current view.
+        if config[key]['type'] == 'DatabaseView':
+            self.dataviews[key] = dataviews.DatabaseView(self.database,
+                                               config[key]['tags'])
+        elif config[key]['type'] == 'Function':
+            self.dataviews[key] = dataviews.Function(
+                parents=[self.dataviews[parentId]
+                         for parentId in config[key]['parents']])
+        else:
+            raise KeyError("Unknown data_view type")
+        
 
     def load_wind_map(self, config):
         """
