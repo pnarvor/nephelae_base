@@ -219,7 +219,11 @@ class Scenario(Pluginable):
                 self.load_data_view(parentId, config)
         
         # Load current view.
-        if config[key]['type'] == 'DatabaseView':
+        if config[key]['type'] == 'DataView':
+            self.dataviews[key] = dataviews.DataView(
+                parents=[self.dataviews[parentId]
+                         for parentId in config[key]['parents']])
+        elif config[key]['type'] == 'DatabaseView':
             self.dataviews[key] = dataviews.DatabaseView(self.database,
                                                config[key]['tags'])
         elif config[key]['type'] == 'TimeView':
