@@ -213,6 +213,10 @@ class Scenario(Pluginable):
         if config[key]['type'] == 'DatabaseView':
             self.dataviews[key] = dataviews.DatabaseView(self.database,
                                                config[key]['tags'])
+        elif config[key]['type'] == 'TimeView':
+            self.dataviews[key] = dataviews.TimeView(
+                parents=[self.dataviews[parentId]
+                         for parentId in config[key]['parents']])
         elif config[key]['type'] == 'Function':
             self.dataviews[key] = dataviews.Function(
                 parents=[self.dataviews[parentId]
