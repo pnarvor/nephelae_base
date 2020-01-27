@@ -14,6 +14,8 @@ class DataView(ObserverSubject):
     TODOs : mission-like updatable parameters ?
     """
 
+    parameterNames = []
+
     def __init__(self, parents=[]):
 
         """
@@ -73,5 +75,19 @@ class DataView(ObserverSubject):
         """
         return samples
         
+
+    def get_parameters(self):
+        """Return a dictionary with parameter names and their values"""
+        
+        params = {}
+        for name in self.parameterNames:
+            params[name] = getattr(self, name)
+        return params
+
+
+    def set_parameters(self, **params):
+        """Set a parameter value (with check)"""
+        for param in params:
+            setattr(self, param, params[param])
 
 
