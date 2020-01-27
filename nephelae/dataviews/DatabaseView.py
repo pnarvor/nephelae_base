@@ -1,3 +1,5 @@
+import copy
+
 from .DataView import DataView
 
 class DatabaseView(DataView):
@@ -45,7 +47,7 @@ class DatabaseView(DataView):
         # given between the brackets, keys is not a tuple.
         if isinstance(keys, (slice, float, int)):
             keys = (keys,)
-        return [entry.data for entry in
+        return [copy.deepcopy(entry.data) for entry in
                 self.database.find_entries(tags=self.searchTags, keys=keys)]
 
     
@@ -62,6 +64,6 @@ class DatabaseView(DataView):
         if not all([tag in sampleTags for tag in self.searchTags]):
             return None
         else:
-            return sample
+            return copy.deepcopy(sample)
 
 
