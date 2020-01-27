@@ -39,12 +39,14 @@ data_views:
     THT:
         type: 'DatabaseView'
         tags: ['THT']
+    LWC_scaling0:
+        type: 'Scaling'
+        gain: 2.0
+        offset: 1.0
+        parents: ['LWC']
     displayed0:
         type:      'TimeView'
-        parents:   ['LWC', 'WT', 'THT']
-    function:
-        type: 'Function'
-        parents: ['LWC']
+        parents:   ['LWC_scaling0', 'WT', 'THT']
     displayable: ['displayed0']
 
 mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]

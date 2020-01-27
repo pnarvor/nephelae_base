@@ -230,6 +230,19 @@ class Scenario(Pluginable):
             self.dataviews[key] = dataviews.Function(
                 parents=[self.dataviews[parentId]
                          for parentId in config[key]['parents']])
+        elif config[key]['type'] == 'Scaling':
+            if 'gain' in config[key].keys():
+                gain = config[key]['gain']
+            else:
+                gain = 1.0
+            if 'offset' in config[key].keys():
+                offset = config[key]['offset']
+            else:
+                offset = 0.0
+            self.dataviews[key] = dataviews.Scaling(
+                gain=float(gain), offset=float(offset),
+                parents=[self.dataviews[parentId]
+                         for parentId in config[key]['parents']])
         else:
             raise KeyError("Unknown data_view type")
 

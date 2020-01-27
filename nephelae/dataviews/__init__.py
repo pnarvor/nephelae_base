@@ -8,6 +8,7 @@ from .DataView     import DataView
 from .DatabaseView import DatabaseView
 from .TimeView     import TimeView
 from .Function     import Function
+from .Scaling      import Scaling
 
 
 
