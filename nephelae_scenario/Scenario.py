@@ -191,6 +191,7 @@ class Scenario(Pluginable):
         Instanciate DataServerViews objects. This defines which data can be
         read from the database by other components.
         """
+        self.displayedViews = []
         config = ensure_dictionary(config)
         for key in config:
             self.load_data_view(key, config)
@@ -200,6 +201,14 @@ class Scenario(Pluginable):
         """
         Load a single view (can trigger nloading of parent views).
         """
+
+        if key == 'displayable':
+            if isinstance(config[key], str):
+                self.displayedViews = [config[key]]
+            else:
+                self.displayedViews = config[key]
+            return
+
         # Ignore if already loaded.
         if key in self.dataviews.keys():
             return
@@ -223,7 +232,7 @@ class Scenario(Pluginable):
                          for parentId in config[key]['parents']])
         else:
             raise KeyError("Unknown data_view type")
-        
+
 
     def load_wind_map(self, config):
         """

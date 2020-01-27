@@ -37,10 +37,10 @@ gpr      = scenario.maps['LWC']
 timeview = scenario.dataviews['LWC_time']
 
 # timeview.attach_observer(logger)
-for i in range(10):
-    time.sleep(2)
-    for sample in timeview[-5:]:
-        print(sample) 
+# for i in range(10):
+#     time.sleep(2)
+#     for sample in timeview[-5:]:
+#         print(sample) 
 
 
 

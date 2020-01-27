@@ -33,12 +33,19 @@ data_views:
     LWC:
         type: 'DatabaseView'
         tags: ['RCT']
-    LWC_time:
-        type: 'TimeView'
-        parents: ['LWC']
+    WT:
+        type: 'DatabaseView'
+        tags: ['WT']
+    THT:
+        type: 'DatabaseView'
+        tags: ['THT']
+    displayed0:
+        type:      'TimeView'
+        parents:   ['LWC', 'WT', 'THT']
     function:
         type: 'Function'
         parents: ['LWC']
+    displayable: ['displayed0']
 
 mesonh_origin: &mesonh_origin [0.0, 0.0, 0.0, 0.0]
 
