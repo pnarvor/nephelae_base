@@ -18,8 +18,8 @@ database:
     overwrite_existing: True
 
 # mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/nephelae-remote/MesoNH02/bomex_hf.nc'
-mesonh_files:  &mesonh_files '/media/pnarvor/nephelae-data/MesoNH/bomex_hf.nc'
-# mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
+# mesonh_files:  &mesonh_files '/media/pnarvor/nephelae-data/MesoNH/bomex_hf.nc'
+mesonh_files:  &mesonh_files '/home/pnarvor/work/nephelae/data/MesoNH-2019-02/REFHR.1.ARMCu.4D.nc'
 # Setting this to true will activate feedback to WORLD_ENV requests
 wind_feedback: True
 
@@ -135,6 +135,8 @@ aircrafts:
                 mapWhereCenterIs: 'LWC'
             - MissionWindUpdater:
                 period: 10.0
+            - CloudSensor
+            - MeteoStick
     # 201:
     #     plugins:
     #         - MesonhProbe:

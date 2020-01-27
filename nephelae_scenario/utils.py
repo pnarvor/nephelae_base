@@ -59,6 +59,8 @@ def ensure_list(config):
                         "in your configuration file ?\n" + str(config))
 
     for element in config:
+        if isinstance(element, str):
+            continue
         if not isinstance(element, dict):
             raise ValueError("Parsing error in the configuration file.\n" +
                              str(element))
