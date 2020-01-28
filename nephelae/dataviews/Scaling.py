@@ -16,8 +16,6 @@ class Scaling(Function):
         super().__init__(parents)
         self.gain   = gain
         self.offset = offset
-        print("Gain   : ", type(self.gain), self.gain)
-        print("Offset : ", type(self.offset), self.offset)
 
     
     def process_sample(self, sample):
