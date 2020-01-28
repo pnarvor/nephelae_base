@@ -1,3 +1,5 @@
+import threading
+
 from nephelae.types import ObserverSubject
 
 class DataView(ObserverSubject):
@@ -31,6 +33,7 @@ class DataView(ObserverSubject):
         self.parents = parents
         for parent in self.parents:
             parent.attach_observer(self)
+        self.parametersLock = threading.Lock()
 
     
     def add_sample(self, sample):
@@ -79,15 +82,17 @@ class DataView(ObserverSubject):
     def get_parameters(self):
         """Return a dictionary with parameter names and their values"""
         
-        params = {}
-        for name in self.parameterNames:
-            params[name] = getattr(self, name)
-        return params
+        with self.parametersLock:
+            params = {}
+            for name in self.parameterNames:
+                params[name] = getattr(self, name)
+            return params
 
 
     def set_parameters(self, **params):
         """Set a parameter value (with check)"""
-        for param in params:
-            setattr(self, param, params[param])
+        with self.parametersLock:
+            for param in params:
+                setattr(self, param, params[param])
 
 

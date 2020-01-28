@@ -16,11 +16,13 @@ class Function(DataView):
 
     
     def process_notified_sample(self, sample):
-        return self.process_sample(sample)
+        with self.parametersLock:
+            return self.process_sample(sample)
 
 
     def process_fetched_samples(self, samples):
-        return [self.process_sample(sample) for sample in samples]
+        with self.parametersLock:
+            return [self.process_sample(sample) for sample in samples]
 
 
     def process_sample(self, sample):
