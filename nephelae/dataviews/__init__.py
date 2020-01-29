@@ -4,12 +4,12 @@
 # pre-processing (sensor calibration...), while being able to change their
 # behavior online.
 
-from .DataView     import DataView
-from .DatabaseView import DatabaseView
-from .TimeView     import TimeView
-from .Function     import Function
-from .Scaling      import Scaling
-
+from .DataView            import DataView
+from .DatabaseView        import DatabaseView
+from .TimeView            import TimeView
+from .Function            import Function
+from .Scaling             import Scaling
+from .HumidityCalibration import HumidityCalibration
 
 
 

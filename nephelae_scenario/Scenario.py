@@ -247,6 +247,23 @@ class Scenario(Pluginable):
                 gain=float(gain), offset=float(offset),
                 parents=[self.dataviews[parentId]
                          for parentId in config[key]['parents']])
+        elif config[key]['type'] == 'HumidityCalibration':
+            try:
+                lt = config[key]['lt']
+                gain_1 = config[key]['gain_1']
+                gain_2 = config[key]['gain_2']
+                offset_1 = config[key]['offset_1']
+                offset_2 = config[key]['offset_2']
+            except KeyError as e:
+                print('Data missing for the creation of HumidityCalibration')
+                raise e
+            self.dataviews[key] = dataviews.HumidityCalibration(
+                lt=float(lt),
+                gain_1=float(gain_1), offset_1=float(offset_1),
+                gain_2=float(gain_2), offset_2=float(offset_2),
+                parents=[self.dataviews[parentId] 
+                    for parentId in config[key]['parents']]
+            )
         else:
             raise KeyError("Unknown data_view type")
 

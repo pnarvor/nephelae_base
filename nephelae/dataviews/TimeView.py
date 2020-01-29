@@ -24,10 +24,8 @@ class TimeView(DataView):
             keys = (keys,)
         keys = list(keys)
         while len(keys) <= 4:
-            print(keys)
             keys.append(slice(None))
         newKeys = (self.process_time_key(keys[0]), keys[1], keys[2], keys[3])
-        print(newKeys)
         output = super().__getitem__(newKeys)
         output.sort(key=lambda x: x.position.t)
         return output
