@@ -8,6 +8,7 @@ setup(name='nephelae',
       author_email='pnarvor@laas.fr',
       licence='bsd3',
       packages=find_packages(include=['nephelae*']),
+      scripts=['exe/database_to_ascii.py'],
       install_requires=[
         'numpy',
         'scipy',

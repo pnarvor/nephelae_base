@@ -40,6 +40,7 @@ class SensorSample:
         self.position     = position
         self.data         = data
 
+
     def __str__(self):
         return ("SensorSample:"+
                 "\n  variable name : " + str(self.variableName) +
@@ -47,6 +48,21 @@ class SensorSample:
                 "\n  timeStamp     : " + str(self.timeStamp) +
                 "\n  position      : " + str(self.position) +
                 "\n  data          : " + str(self.data) + "\n")
+
+
+    def one_line_str(self):
+        output = "SensorSample_" + self.producer + ", " +\
+                 self.variableName               + ", " +\
+                 str(self.position.t)            + ", " +\
+                 str(self.position.x)            + ", " +\
+                 str(self.position.y)            + ", " +\
+                 str(self.position.z)
+        for value in self.data:
+            output = output + ", " + str(value)
+        return output
+
+
+
 
 
 

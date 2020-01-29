@@ -53,6 +53,15 @@ class NavigationRef:
                 ", utm_zone : " + str(self.utm_zone) + self.utm_letter
 
 
+    def one_line_str(self):
+        return "NavigationRef, " +\
+                str(self.position.t) + ", " +\
+                str(self.position.x) + ", " +\
+                str(self.position.y) + ", " +\
+                str(self.position.z) + ", " +\
+                str(self.utm_zone)
+
+
     def __getattr__(self, name):
         """
         Retrieve either 'stamp', 'utm_east', 'utm_north' or 'alt' of

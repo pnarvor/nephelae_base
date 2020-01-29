@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import medfilt
 
 t0 = time.time()
-database = NephelaeDataServer.load('/home/pnarvor/work/nephelae/data/barbados/logs/flight_01_28_02/database/database01.neph')
+database = NephelaeDataServer.load('/home/pnarvor/work/nephelae/data/barbados/logs/flight_01_28_01/database/database01.neph')
 print("Loading time : ", time.time() - t0)
 
 t0 = time.time()
@@ -49,10 +49,10 @@ data_channel_1_12 = [sample.data[0] for sample in channel1_12]
 
 
 fig, axes = plt.subplots(4,1, sharex=True)
-# axes[0].plot(t_12, medfilt(data_channel_1_12, 5), label='cloud_channel_1_12_median_5')
-# axes[0].plot(t_12, medfilt(data_channel_1_12, 3), label='cloud_channel_1_12_median_3')
 axes[0].plot(t_12, data_channel_0_12, label='cloud_channel_0_12')
 axes[0].plot(t_12, data_channel_1_12, label='cloud_channel_1_12')
+axes[0].plot(t_12, medfilt(data_channel_1_12, 5), label='cloud_channel_1_12_median_5')
+axes[0].plot(t_12, medfilt(data_channel_1_12, 3), label='cloud_channel_1_12_median_3')
 axes[0].legend(loc="upper right")
 axes[0].grid()
 axes[0].set_xlabel('Time (s)')
