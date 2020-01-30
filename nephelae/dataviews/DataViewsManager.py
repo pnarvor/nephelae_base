@@ -1,6 +1,7 @@
 # from .DataView import DataView
 
 from . import types
+from . import DataViewGraph
 
 class DataViewManager:
 
@@ -17,9 +18,8 @@ class DataViewManager:
 
     def from_yaml_config(config, database=None):
         
-        manager = DataViewManager(database=database)
-        for key in config:
-            manager.load_data_view(key, config)
+        manager = DataViewManager()
+        manager.load_yaml_config(config, database)
         return manager
 
 
@@ -27,6 +27,7 @@ class DataViewManager:
         self.dataviews      = dataviews
         self.displayedViews = displayedViews
         self.database       = database
+        self.update_dataview_graph()
         
 
     def keys(self):
@@ -35,6 +36,13 @@ class DataViewManager:
 
     def __getitem__(self, key):
         return self.dataviews[key]
+
+
+    def load_yaml_config(self, config, database=None):
+        self.database = database
+        for key in config:
+            self.load_data_view(key, config)
+        self.update_dataview_graph()
 
 
     def load_data_view(self, key, config):
@@ -107,6 +115,10 @@ class DataViewManager:
         else:
             raise KeyError("Unknown data_view type")
 
+
+    def update_dataview_graph(self):
+        if len(self.dataviews) > 0:
+            self.viewGraph = DataViewGraph(self.dataviews)
 
 
 

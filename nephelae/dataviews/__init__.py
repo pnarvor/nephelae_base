@@ -4,9 +4,11 @@
 # pre-processing (sensor calibration...), while being able to change their
 # behavior online.
 
-from .DataViewsManager    import DataViewManager
-
 from . import types
+
+from .DataViewGraph import DataViewGraph
+
+from .DataViewsManager import DataViewManager
 
 
 

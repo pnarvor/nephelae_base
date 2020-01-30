@@ -1,4 +1,5 @@
 import threading
+from warnings import warn
 
 from nephelae.types import ObserverSubject
 
@@ -29,13 +30,32 @@ class DataView(ObserverSubject):
         # all Dataviews are add_sample observers AND observable (this is how
         # the processing pipeline is built).
         super().__init__('add_sample')
-
-        self.parents = parents
-        for parent in self.parents:
-            parent.attach_observer(self)
+        
+        self.parents = []
+        for parent in parents:
+            self.add_parent(parent)
         self.parametersLock = threading.Lock()
 
+
+    def add_parent(self, parent):
+        if not self.has_parent(parent):
+            self.parents.append(parent)
+            parent.attach_observer(self)
+
     
+    def remove_parent(self, parent):
+        if self.has_parent(parent):
+            self.parents.remove(parent)
+        try:
+            parent.detach_observer(self)
+        except KeyError as e:
+            warn("DataView self was not attached to this parent")
+    
+
+    def has_parent(self, parent):
+        return parent in self.parents
+    
+
     def add_sample(self, sample):
         """
         This is the method called by a parent notifying a sample. Will notify
