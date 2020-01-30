@@ -16,7 +16,8 @@ setup(name='nephelae',
         'matplotlib',
         'scikit-learn',
         'sh',
-        'PyYAML'
+        'PyYAML',
+        'pillow'
       ],
       zip_safe=False)
 
