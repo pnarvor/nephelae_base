@@ -6,7 +6,11 @@ from warnings import warn
 from nephelae.types             import NavigationRef, Position, Pluginable, Bounds
 from nephelae.types             import Bounds, DeepcopyGuard
 from nephelae.database          import NephelaeDataServer
-from nephelae                   import dataviews
+try:
+    from nephelae.dataviews         import DataViewManager
+except Exception as e:
+    print("###### ERROR:", e)
+    raise e
 
 from nephelae_paparazzi         import Aircraft
 from nephelae_paparazzi.plugins import WindSimulation
@@ -75,7 +79,9 @@ class Scenario(Pluginable):
         self.database = self.configure_database()
 
         if 'data_views' in self.config.keys():
-            self.load_data_views(self.config['data_views'])
+            self.dataviews = \
+                DataViewManager.from_yaml_config(self.config['data_views'],
+                                                  self.database)
         else:
             print("Warning : no data_views defined in config file.")
 
@@ -186,88 +192,6 @@ class Scenario(Pluginable):
         return database
 
 
-    def load_data_views(self, config):
-        """
-        Instanciate DataServerViews objects. This defines which data can be
-        read from the database by other components.
-        """
-        self.displayedViews = []
-        config = ensure_dictionary(config)
-        for key in config:
-            self.load_data_view(key, config)
-    
-
-    def load_data_view(self, key, config):
-        """
-        Load a single view (can trigger nloading of parent views).
-        """
-
-        if key == 'displayable':
-            if isinstance(config[key], str):
-                self.displayedViews = [config[key]]
-            else:
-                self.displayedViews = config[key]
-            return
-
-        # Ignore if already loaded.
-        if key in self.dataviews.keys():
-            return
-        
-        # Load parents of current view (before curren view)>
-        if 'parents' in config[key]:
-            for parentId in config[key]['parents']:
-                self.load_data_view(parentId, config)
-        
-        # Load current view.
-        if config[key]['type'] == 'DataView':
-            self.dataviews[key] = dataviews.DataView(
-                parents=[self.dataviews[parentId]
-                         for parentId in config[key]['parents']])
-        elif config[key]['type'] == 'DatabaseView':
-            self.dataviews[key] = dataviews.DatabaseView(self.database,
-                                               config[key]['tags'])
-        elif config[key]['type'] == 'TimeView':
-            self.dataviews[key] = dataviews.TimeView(
-                parents=[self.dataviews[parentId]
-                         for parentId in config[key]['parents']])
-        elif config[key]['type'] == 'Function':
-            self.dataviews[key] = dataviews.Function(
-                parents=[self.dataviews[parentId]
-                         for parentId in config[key]['parents']])
-        elif config[key]['type'] == 'Scaling':
-            if 'gain' in config[key].keys():
-                gain = config[key]['gain']
-            else:
-                gain = 1.0
-            if 'offset' in config[key].keys():
-                offset = config[key]['offset']
-            else:
-                offset = 0.0
-            self.dataviews[key] = dataviews.Scaling(
-                gain=float(gain), offset=float(offset),
-                parents=[self.dataviews[parentId]
-                         for parentId in config[key]['parents']])
-        elif config[key]['type'] == 'HumidityCalibration':
-            try:
-                lt = config[key]['lt']
-                gain_1 = config[key]['gain_1']
-                gain_2 = config[key]['gain_2']
-                offset_1 = config[key]['offset_1']
-                offset_2 = config[key]['offset_2']
-            except KeyError as e:
-                print('Data missing for the creation of HumidityCalibration')
-                raise e
-            self.dataviews[key] = dataviews.HumidityCalibration(
-                lt=float(lt),
-                gain_1=float(gain_1), offset_1=float(offset_1),
-                gain_2=float(gain_2), offset_2=float(offset_2),
-                parents=[self.dataviews[parentId] 
-                    for parentId in config[key]['parents']]
-            )
-        else:
-            raise KeyError("Unknown data_view type")
-
-
     def load_wind_map(self, config):
         """
         Instanciate WindMaps objects. These objects includes WindMapConstant and
@@ -277,6 +201,7 @@ class Scenario(Pluginable):
         keys = config.keys()
         params = {'name': config['name']}
         if config['type'] == 'WindMapConstant':
+        
             if 'wind' in keys:
                 params['wind'] = config['wind']
             if 'resolution' in keys:
