@@ -18,3 +18,5 @@ from .ObserverPattern import MultiObserverSubject
 from .Pluginable      import Pluginable
 
 from .DeepcopyGuard import DeepcopyGuard
+
+from .DataContainer import TimedData
