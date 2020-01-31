@@ -118,17 +118,17 @@ class DataViewManager:
                 energyTags   = config[key]['energy_tags']
                 alpha        = float(config[key]['alpha'])
                 beta         = float(config[key]['beta'])
-                scale        = float(config[key]['scale'])
+                scaling      = float(config[key]['scaling'])
                 lengthMedian = int(config[key]['lengthMedian'])
             except KeyError as e:
                 print('Data missing for the creation of CloudSensorProcessing')
                 raise e
             self.dataviews[key] = types.CloudSensorProcessing(
-                lt=float(lt),
-                gain_1=float(gain_1), offset_1=float(offset_1),
-                gain_2=float(gain_2), offset_2=float(offset_2),
-                parents=[self.dataviews[parentId] 
-                    for parentId in config[key]['parents']]
+                name=config[key]['name'], database=self.database,
+                searchTagsCloud=cloudTags,
+                searchTagsEnergy=energyTags,
+                alpha=alpha, beta=beta, scaling=scaling,
+                lengthMedian=lengthMedian
             )
         else:
             raise KeyError("Unknown data_view type")

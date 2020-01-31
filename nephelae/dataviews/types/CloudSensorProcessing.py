@@ -19,13 +19,13 @@ class CloudSensorProcessing(DatabaseView):
 
     parameterNames = ['lengthMedian', 'alpha', 'beta', 'scaling']
 
-    def __init__(self, database, searchTagsCloud, searchTagsEnergy,
+    def __init__(self, name, database, searchTagsCloud, searchTagsEnergy,
                  alpha=1.0, beta=0.0, scaling=1.0, lengthMedian=3):
         """
         searchTags : list(str, ...)
             tags to search data in the database.
         """
-        super().__init__()
+        super().__init__(name, database, searchTagsCloud)
 
         self.alpha        = alpha
         self.beta         = beta
