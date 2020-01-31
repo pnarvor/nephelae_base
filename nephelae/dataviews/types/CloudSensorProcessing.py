@@ -40,7 +40,7 @@ class CloudSensorProcessing(DatabaseView):
         # subscribing to database
         self.database.add_sensor_observer(self)
 
-        self.currentMedianCache = []
+        self.medianCache = []
         self.lastVoltage        = None
 
 
@@ -55,23 +55,31 @@ class CloudSensorProcessing(DatabaseView):
         
         with self.lock:
             self.lengthMedian = int(self.lengthMedian)
-            # cloud   = TimedData.from_database(self.database, self.searchTagsCloud, keys)
+
+
             cloudSamples = copy.deepcopy([e.data for e in
                 self.database[self.searchTagsCloud](sortCriteria=lambda x: x.position.t)[keys]])
+            if len(cloudSamples) < 1:
+                return []
             cloud =  TimedData(np.array([s.position.t for s in cloudSamples]),
-                               np.array([s.data[0]  for s in cloudSample]))
-            voltage = np.deepcopy(TimedData.from_database(self.database, 
-                                                          self.searchTagsEnergy, keys))
-            voltage.data = voltage.data[:,1]
+                               np.array([s.data[0]  for s in cloudSamples]))
+
+            # Getting battery voltage samples
+            energySamples = copy.deepcopy([e.data for e in
+                self.database[self.searchTagsEnergy](sortCriteria=lambda x: x.position.t)[keys]])
+            if len(energySamples) < 1:
+                return []
+            voltage =  TimedData(np.array([s.position.t for s in energySamples]),
+                                 np.array([s.data[1]    for s in energySamples]))
             voltage.sync_on(cloud)
             
             medianFiltered = medfilt(cloud.data, self.lengthMedian)
             if len(medianFiltered) < self.lengthMedian:
-                self.currentMedianCache = medianFiltered.tolist()
+                self.medianCache = medianFiltered.tolist()
             else:
-                self.currentMedianCache = medianFiltered[-self.lengthMedian]
+                self.medianCache = medianFiltered[-self.lengthMedian:].tolist()
 
-            output = (medianFiltered - self.alpha*voltage.data - self.beta) / self.scale
+            output = (medianFiltered - self.alpha*voltage.data - self.beta) / self.scaling
             for value, sample in zip(output, cloudSamples):
                 sample.data[0] = value
             return cloudSamples
@@ -88,10 +96,11 @@ class CloudSensorProcessing(DatabaseView):
                     return None
                 self.lengthMedian = int(self.lengthMedian)
                 sample = copy.deepcopy(sample)
-                self.currentMedianCache.append(sample.data[0])
-                if len(self.currentMedianCache) > self.lengthMedian:
-                    self.currentMedianCache = self.currentMedianCache[-self.lengthMedian:]
-                sample.data[0] = (median(self.currentMedianCache) - self.alpha*self.lastVoltage - self.beta) / self.scale
+                self.medianCache.append(sample.data[0])
+                if len(self.medianCache) > self.lengthMedian:
+                    self.medianCache = self.medianCache[-self.lengthMedian:]
+                sample.data[0] = (median(self.medianCache) - self.alpha*self.lastVoltage - self.beta) / self.scaling
+            return sample
 
         if all([tag in sampleTags for tag in self.searchTagsEnergy]):
             # Got an energy sample saving the value
@@ -99,7 +108,6 @@ class CloudSensorProcessing(DatabaseView):
                 self.lastVoltage = sample.data[1]
         else:
             return None
-
 
         
 
