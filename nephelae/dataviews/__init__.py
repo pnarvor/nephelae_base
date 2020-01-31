@@ -8,7 +8,7 @@ from . import types
 
 from .DataViewGraph import DataViewGraph
 
-from .DataViewsManager import DataViewManager
+from .DataViewManager import DataViewManager
 
 
 

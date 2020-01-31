@@ -10,6 +10,7 @@ from .TimeView            import TimeView
 from .Function            import Function
 from .Scaling             import Scaling
 from .HumidityCalibration import HumidityCalibration
+from .CloudSensorProcessing import CloudSensorProcessing
 
 
 
