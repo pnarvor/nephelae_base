@@ -68,18 +68,18 @@ class DataViewManager:
         
         # Load current view.
         if config[key]['type'] == 'DataView':
-            self.dataviews[key] = types.DataView(
+            self.dataviews[key] = types.DataView(config[key]['name'],
                 parents=[self.dataviews[parentId]
                          for parentId in config[key]['parents']])
         elif config[key]['type'] == 'DatabaseView':
-            self.dataviews[key] = types.DatabaseView(self.database,
-                                               config[key]['tags'])
+            self.dataviews[key] = types.DatabaseView(config[key]['name'], 
+                    self.database, config[key]['tags'])
         elif config[key]['type'] == 'TimeView':
-            self.dataviews[key] = types.TimeView(
+            self.dataviews[key] = types.TimeView(config[key]['name'],
                 parents=[self.dataviews[parentId]
                          for parentId in config[key]['parents']])
         elif config[key]['type'] == 'Function':
-            self.dataviews[key] = types.Function(
+            self.dataviews[key] = types.Function(config[key]['name'],
                 parents=[self.dataviews[parentId]
                          for parentId in config[key]['parents']])
         elif config[key]['type'] == 'Scaling':
@@ -91,7 +91,7 @@ class DataViewManager:
                 offset = config[key]['offset']
             else:
                 offset = 0.0
-            self.dataviews[key] = types.Scaling(
+            self.dataviews[key] = types.Scaling(config[key]['name'],
                 gain=float(gain), offset=float(offset),
                 parents=[self.dataviews[parentId]
                          for parentId in config[key]['parents']])
@@ -105,7 +105,7 @@ class DataViewManager:
             except KeyError as e:
                 print('Data missing for the creation of HumidityCalibration')
                 raise e
-            self.dataviews[key] = types.HumidityCalibration(
+            self.dataviews[key] = types.HumidityCalibration(config[key]['name'],
                 lt=float(lt),
                 gain_1=float(gain_1), offset_1=float(offset_1),
                 gain_2=float(gain_2), offset_2=float(offset_2),
@@ -119,7 +119,6 @@ class DataViewManager:
     def update_dataview_graph(self):
         if len(self.dataviews) > 0:
             self.viewGraph = DataViewGraph(self.dataviews)
-
 
 
 

@@ -11,9 +11,9 @@ class Scaling(Function):
 
     parameterNames = ['gain', 'offset']
 
-    def __init__(self, gain=1.0, offset=0.0, parents=[]):
+    def __init__(self, name, gain=1.0, offset=0.0, parents=[]):
 
-        super().__init__(parents)
+        super().__init__(name, parents)
         self.gain   = gain
         self.offset = offset
 

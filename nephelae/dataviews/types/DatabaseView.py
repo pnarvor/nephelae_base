@@ -19,7 +19,7 @@ class DatabaseView(DataView):
     Output interface is a regular DataView.
     """
 
-    def __init__(self, database, searchTags):
+    def __init__(self, name, database, searchTags):
         """
         Parameters:
 
@@ -30,7 +30,7 @@ class DatabaseView(DataView):
         searchTags : list(str, ...)
             tags to search data in the database.
         """
-        super().__init__()
+        super().__init__(name)
 
         self.database   = database
         self.searchTags = searchTags

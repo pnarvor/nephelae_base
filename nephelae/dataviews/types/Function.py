@@ -11,8 +11,8 @@ class Function(DataView):
 
     """
 
-    def __init__(self, parents=[]):
-        super().__init__(parents)
+    def __init__(self, name, parents=[]):
+        super().__init__(name, parents)
 
     
     def process_notified_sample(self, sample):

@@ -11,9 +11,10 @@ class HumidityCalibration(Function):
 
     parameterNames = ['gain_1', 'offset_1', 'gain_2', 'offset_2', 'lt']
 
-    def __init__(self, lt=0.0, gain_1=1.0, offset_1=0.0, gain_2=1.0, offset_2=0.0, parents=[]):
+    def __init__(self, name, lt=0.0, gain_1=1.0, offset_1=0.0, gain_2=1.0,
+            offset_2=0.0, parents=[]):
 
-        super().__init__(parents)
+        super().__init__(name, parents)
         self.lt = lt
         self.gain_1   = gain_1
         self.offset_1 = offset_1

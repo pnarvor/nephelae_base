@@ -19,7 +19,7 @@ class DataView(ObserverSubject):
 
     parameterNames = []
 
-    def __init__(self, parents=[]):
+    def __init__(self, name, parents=[]):
 
         """
         parameters:
@@ -32,6 +32,7 @@ class DataView(ObserverSubject):
         super().__init__('add_sample')
         
         self.parents = []
+        self.name = name
         for parent in parents:
             self.add_parent(parent)
         self.parametersLock = threading.Lock()

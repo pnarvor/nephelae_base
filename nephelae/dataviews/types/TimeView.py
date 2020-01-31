@@ -9,8 +9,8 @@ class TimeView(DataView):
     end of the data structure). Also sort data with respect to time.
     """
 
-    def __init__(self, parents=[]):
-        super().__init__(parents)
+    def __init__(self, name, parents=[]):
+        super().__init__(name, parents)
 
         self.currentTime = None
 
