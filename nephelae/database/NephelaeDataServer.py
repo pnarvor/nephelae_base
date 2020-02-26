@@ -1,6 +1,7 @@
 import threading
 import time
 import pickle
+import os
 
 from nephelae.types import NavigationRef
 from nephelae.types import Position
@@ -127,6 +128,22 @@ class NephelaeDataServer(SpatializedDatabase):
             print("Exception happenned during database load."
                   "File is probably corrupted or is of an older version.")
             raise e
+
+
+    def save_ascii(self, path, force=False):
+        from progressbar import progressbar
+        if not force and os.path.exists(path):
+            raise ValueError("Path \"" + path + "\" already exists. "
+                             "Please delete the file, pick another path "
+                             "or force overwritting with force=True")
+        print("Saving ascii data base to ", path, ' ...', flush=True)
+        with open(path, 'w') as f:
+            f.write(self.navFrame.one_line_str() + '\n')
+            # data = [e.data for e in self['ALL'](sortCriteria=lambda x: x.position.t)[:]]
+            data = [e.data.data for e in self.taggedData['ALL'].tSorted]
+            for idx, datum in zip(progressbar(range(len(data))), data):
+                f.write(datum.one_line_str() + '\n')
+
 
 
 class DatabasePlayer(NephelaeDataServer):

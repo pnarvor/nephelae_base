@@ -543,3 +543,7 @@ class SpatializedDatabase:
             self.orderedTags = [tag.data for tag in tags]
         self.lastTagOrdering = self.lastTagOrdering + 1
 
+
+    def duration(self):
+        return self.taggedData['ALL'].tSorted[-1].index - \
+               self.taggedData['ALL'].tSorted[0].index
