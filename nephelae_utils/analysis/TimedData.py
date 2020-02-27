@@ -11,7 +11,7 @@ class TimedData:
     plotting to synchronization of data.
     """
 
-    def from_database(database, tags, keys, name=None,
+    def from_database(database, tags, keys=(slice(None),), name=None,
                       dataFetchFunc=lambda e: e.data.data):
         entries = database[tags](sortCriteria=lambda x: x.position.t)[keys]
         if name is None:
@@ -50,6 +50,8 @@ class TimedData:
             if self.position is not None:
                 self.position = self.position[(s, slice(None),)]
             return self
+        elif isinstance(key, (list, tuple)):
+            self.crop(slice(key[0], key[-1]))
         else:
             raise ValueError("Invalid key type for croping (must be a slice)")
         
@@ -88,12 +90,42 @@ class TimedData:
         if label is None:
             label = self.name
         axes.plot(self.time, self.data, style, label=label)
+        axes.grid()
+        axes.set_xlabel("Time (s)")
+
+
+    def plot_east(self, axes, label=None, style='-'):
+        if label is None:
+            label = self.name + '_east'
+        axes.plot(self.time, self.position[:,0], style, label=label)
+        axes.grid()
+        axes.set_xlabel("Time (s)")
+
+
+    def plot_north(self, axes, label=None, style='-'):
+        if label is None:
+            label = self.name + '_north'
+        axes.plot(self.time, self.position[:,1], style, label=label)
+        axes.grid()
+        axes.set_xlabel("Time (s)")
 
 
     def plot_alt(self, axes, label=None, style='-'):
         if label is None:
             label = self.name + '_alt'
         axes.plot(self.time, self.position[:,2], style, label=label)
+        axes.grid()
+        axes.set_xlabel("Time (s)")
+
+
+    def plot_position(self, axes, label=None, style='-'):
+        if label is None:
+            label = self.name + '_pos'
+        axes.plot(self.position[:,0], self.position[:,1], style, label=label)
+        axes.grid()
+        axes.set_xlabel("East (m)")
+        axes.set_ylabel("North (m)")
+        
 
 
     def plot_instant(self, axes, flipTimes):
