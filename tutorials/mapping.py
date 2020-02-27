@@ -23,15 +23,17 @@ keys = (slice(209,2755),)
 # such wind and cloud sensor calibration from other tutorials.
 wind    = [-8.91, -0.71]
 # wind    = [0.0, 0.0]
-alpha   = 245.5
-beta    = 8853.0
-scaling = 5.0e6 # Not estimated but related to kernel variance. Some work to do here.
+
+aircrafts = {
+    '7'  : {'alpha' : 245.5, 'beta' : 8853.0, 'scaling' : 5.0e6},
+    # '10' : {'alpha' : 338.1, 'beta' : 8450.6, 'scaling' : 5.0e6}
+}
 
 # These were always set by hand. Play with it !
 lengthScales  = [120.0, 80.0, 80.0, 60.0]
 variance      = 1.0e-8
 noiseVariance = 1.0e-9
-mapGenerator  = setup_map_generator(database, lengthScales, variance, noiseVariance, wind, alpha, beta, scaling)
+mapGenerator  = setup_map_generator(database, aircrafts, lengthScales, variance, noiseVariance, wind)
 
 # Then find a good position to generate the map. An easy way to do this is to
 # look at the cloud sensor data, find when it detected cloud and select a
@@ -70,4 +72,5 @@ display_scaled_array(mapUncertainty0, axes[1], resample=4)
 
 # set block to True if display window disappear as soon as they are displayed
 plt.show(block=False)
+
 

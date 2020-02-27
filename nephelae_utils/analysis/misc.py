@@ -104,7 +104,7 @@ def keys_from_position(position, width, height=None):
             position[3])
 
 
-def display_scaled_array(array, axes=None, rng=None, resample=None):
+def display_scaled_array(array, axes=None, resample=None, rng=None):
     if axes is None:
         fig, axes = plt.subplots(1,1)
 
@@ -116,5 +116,11 @@ def display_scaled_array(array, axes=None, rng=None, resample=None):
 
     bounds = array.bounds
     extent=[bounds[0].min, bounds[0].max, bounds[1].min, bounds[1].max]
-    axes.imshow(data, origin='lower', extent=extent, aspect='equal')
+
+    options={}
+    if rng is not None:
+        options['vmin'] = rng[0]
+        options['vmax'] = rng[-1]
+    
+    axes.imshow(data, origin='lower', extent=extent, aspect='equal', **options)
 

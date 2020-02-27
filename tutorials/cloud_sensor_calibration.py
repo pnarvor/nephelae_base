@@ -15,15 +15,16 @@ databasePath = '/home/pnarvor/work/nephelae/data/barbados/post_processing/cams_l
 database = NephelaeDataServer.load(databasePath)
 
 # We will work on aircraft 7 for this example
-aircraft = '7'
-keys = (slice(209,2755),)
+aircraft = '10'
+# keys = (slice(None),)
+keys = (slice(461,2755),)
 cloud0  = TimedData.from_database(database, ['cloud_channel_0', aircraft], keys, name="Cloud 0", dataFetchFunc=lambda x: x.data.data[0])
 voltage = TimedData.from_database(database,          ['energy', aircraft], keys, name="Voltage", dataFetchFunc=lambda x: x.data.data[1])
 
 # Selecting a suitable section on which to estimate the fitting parameters
 # (aircraft in level flight and no clouds). Plot the cloud data to select the
 # section
-timeInterval = [1100.0, 1900.0]
+timeInterval = [1263.0, 1768.0]
 # Estimating the fitting parameters
 alpha, beta  = voltage_fit_parameters_estimation(database, aircraft, 'cloud_channel_0', timeInterval)
 print("Alpha : ", alpha)
