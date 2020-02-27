@@ -26,6 +26,8 @@ voltage = TimedData.from_database(database,          ['energy', aircraft], keys,
 timeInterval = [1100.0, 1900.0]
 # Estimating the fitting parameters
 alpha, beta  = voltage_fit_parameters_estimation(database, aircraft, 'cloud_channel_0', timeInterval)
+print("Alpha : ", alpha)
+print("Beta  : ", beta)
 
 # Calculating voltage fitted on cloud sensor
 fittedVoltage = voltage.copy(newName="Fitted voltage")

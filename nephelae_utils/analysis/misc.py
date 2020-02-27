@@ -76,3 +76,38 @@ def voltage_fit_parameters_estimation(database, aircraft, cloud_channel, timeInt
     return alpha, beta
 
 
+def aircraft_position_at_time(database, aircraft, t):
+    """
+    Returns aircraft position at time t as a (t,x,y,z) numpy.array.
+    """
+
+    status   = database[aircraft, 'STATUS'](sortCriteria=lambda x: x.position.t)[:]
+    position = np.array([[e.position.t, e.position.x, e.position.y, e.position.z] for e in status])
+    idx = np.where(np.abs(position[:,0] - t) == np.min(np.abs(position[:,0] - t)))
+    
+    return position[idx,:].squeeze()
+
+
+def keys_from_position(position, width, height=None):
+    """
+    Generate a set of keys suitable to be used on a map generator to get a
+    horizontal rectangular slice of a (t,x,y,z) space centered on position.
+    (Returns a tuple (float, slice, slice, float).
+    """
+
+    if height is None:
+        height = width
+    return (position[0],
+            slice(position[1] - width/2,  position[1] + width/2),
+            slice(position[2] - height/2, position[2] + height/2),
+            position[3])
+
+
+def display_scaled_array(array, axes=None, rng=None):
+    if axes is None:
+        fig, axes = plt.subplots(1,1)
+    data   = array.data.squeeze().T
+    bounds = array.bounds
+    extent=[bounds[0].min, bounds[0].max, bounds[1].min, bounds[1].max]
+    axes.imshow(data, origin='lower', extent=extent, aspect='equal')
+
