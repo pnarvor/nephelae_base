@@ -240,6 +240,7 @@ class WindKernel(NephKernel):
 
         # Far from most efficient but efficiency requires C++ implementation 
         # (Or is it ? Yes. Yes it is. 40ns self time, cdist : 2ns, can be 6 times as fast)
+        # Take a look at a numba implementation, it could speed this up a lot)
         t0,t1 = np.meshgrid(X[:,0], Y[:,0], indexing='ij', copy=False)
         dt = t1 - t0
         distMat = (dt / self.lengthScales[0])**2
