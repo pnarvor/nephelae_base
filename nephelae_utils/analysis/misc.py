@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 
 from .TimedData import TimedData
 
@@ -103,10 +104,16 @@ def keys_from_position(position, width, height=None):
             position[3])
 
 
-def display_scaled_array(array, axes=None, rng=None):
+def display_scaled_array(array, axes=None, rng=None, resample=None):
     if axes is None:
         fig, axes = plt.subplots(1,1)
-    data   = array.data.squeeze().T
+
+    data = array.data.squeeze().T
+
+    if resample is not None:
+        newShape = (data.shape[0]*resample, data.shape[1]*resample)
+        data = np.array(Image.fromarray(data).resize(newShape, Image.BICUBIC))
+
     bounds = array.bounds
     extent=[bounds[0].min, bounds[0].max, bounds[1].min, bounds[1].max]
     axes.imshow(data, origin='lower', extent=extent, aspect='equal')

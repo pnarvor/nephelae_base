@@ -21,8 +21,6 @@ def setup_map_generator(database, lengthScales, variance, noiseVariance, wind, a
     params['shallowParameters'] = DeepcopyGuard(**shallowParams)
     kernel  = WindKernel(**params)
 
-    print(type(kernel.windMap))
-
     # Object in charge of fetch cloud sensor data and voltage data from the
     # database and giving to the gpr calibrated sensor data.
     cloudView = CloudSensorProcessing("Cloud data", database,
