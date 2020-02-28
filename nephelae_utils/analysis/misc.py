@@ -22,10 +22,10 @@ def estimate_wind(database, aircraft, timeInterval):
     """
     
     keys = (slice(timeInterval[0], timeInterval[-1]),)
-    course       = TimedData.from_database(database, ['10', 'STATUS'],   keys, 'course',       lambda x: x.data.course)
-    heading      = TimedData.from_database(database, ['10', 'STATUS'],   keys, 'heading',      lambda x: x.data.heading)
-    ground_speed = TimedData.from_database(database, ['10', 'STATUS'],   keys, 'ground_speed', lambda x: x.data.speed)
-    airspeed     = TimedData.from_database(database, ['10', 'airspeed'], keys, 'airspeed',     lambda x: x.data.data[0])
+    course       = TimedData.from_database(database, [aircraft, 'STATUS'],   keys, 'course',       lambda x: x.data.course)
+    heading      = TimedData.from_database(database, [aircraft, 'STATUS'],   keys, 'heading',      lambda x: x.data.heading)
+    ground_speed = TimedData.from_database(database, [aircraft, 'STATUS'],   keys, 'ground_speed', lambda x: x.data.speed)
+    airspeed     = TimedData.from_database(database, [aircraft, 'airspeed'], keys, 'airspeed',     lambda x: x.data.data[0])
     airspeed.sync_on(ground_speed)
     T = len(airspeed.data) # number of samples on which the estimation will be done
     
