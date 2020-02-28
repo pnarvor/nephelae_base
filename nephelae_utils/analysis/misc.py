@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 from .TimedData import TimedData
 
@@ -123,4 +124,5 @@ def display_scaled_array(array, axes=None, resample=None, rng=None):
         options['vmax'] = rng[-1]
     
     axes.imshow(data, origin='lower', extent=extent, aspect='equal', **options)
+    plt.show(block=False)
 
